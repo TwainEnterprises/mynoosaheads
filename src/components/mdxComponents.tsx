@@ -3,16 +3,22 @@
 // the design brief's editorial register. The .prose-mdx class in
 // globals.css owns most of the styling; this file just adds a few extras.
 
-import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
 import { Icons } from "@/components/ui";
 
+// `MDXComponents` is normally imported from `mdx/types` (the
+// `@types/mdx` package). That package isn't installed at the moment;
+// the type is small enough to redefine inline. If/when `@types/mdx`
+// lands, restore the original import.
+type MDXComponents = Record<string, React.ComponentType<Record<string, unknown>>>;
+type AnchorProps = { href?: unknown } & React.AnchorHTMLAttributes<HTMLAnchorElement>;
+
 export const mdxComponents: MDXComponents = {
-  h1: (props) => <h1 className="font-display text-display-md mt-10 mb-5 text-ink-900" {...props} />,
-  h2: (props) => <h2 className="font-display text-display-sm mt-10 mb-4 text-ink-900" {...props} />,
-  h3: (props) => <h3 className="font-display text-headline-lg mt-8 mb-3 text-ink-900" {...props} />,
-  p: (props) => <p className="my-5 leading-relaxed text-ink-800" {...props} />,
-  a: ({ href, ...rest }) => {
+  h1: (props) => <h1 className="font-display text-display-md mt-10 mb-5 text-ink-900" {...(props as React.HTMLAttributes<HTMLHeadingElement>)} />,
+  h2: (props) => <h2 className="font-display text-display-sm mt-10 mb-4 text-ink-900" {...(props as React.HTMLAttributes<HTMLHeadingElement>)} />,
+  h3: (props) => <h3 className="font-display text-headline-lg mt-8 mb-3 text-ink-900" {...(props as React.HTMLAttributes<HTMLHeadingElement>)} />,
+  p: (props) => <p className="my-5 leading-relaxed text-ink-800" {...(props as React.HTMLAttributes<HTMLParagraphElement>)} />,
+  a: ({ href, ...rest }: AnchorProps) => {
     const isInternal =
       typeof href === "string" &&
       (href.startsWith("/") || href.startsWith("#"));

@@ -2,6 +2,27 @@ import type { Config } from "tailwindcss";
 import typography from "@tailwindcss/typography";
 
 /**
+ * v5 (MSN-2959-V5-POLISH #1) — typography intent documented.
+ *
+ * Per Albert's v5 runbook §3.1: Fraunces + Inter + Caveat is a
+ * **premium-tier free pairing** and a *better fit for the editorial
+ * register* than visitnoosa's paid Cocogoose + Muli. All three fonts
+ * are SIL OFL 1.1 and self-hosted via next/font with display: "swap".
+ *
+ *   Fraunces (display serif) — variable font with optical-size axis,
+ *     "ss01"/"salt" stylistic sets for italic display, used for H1–H6.
+ *   Inter    (body sans)    — workhorse sans for body + nav + UI.
+ *   Caveat   (accent script) — handwritten flourish, used sparingly.
+ *
+ * Visitnoosa uses paid Cocogoose + Muli ($30–300 one-off per desktop
+ * licence per typodermic / Vernon Adams). v2's stack costs A$0, is
+ * legally free for commercial use, and reads as more editorial.
+ *
+ * Future contributors: do NOT add Cocogoose, Muli, or any other paid
+ * font here. The pairing is deliberate.
+ */
+
+/**
  * MSN-2959 (r2) — Design system tokens.
  *
  * Three-tier architecture:

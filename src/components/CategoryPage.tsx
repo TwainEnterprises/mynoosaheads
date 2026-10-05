@@ -4,17 +4,14 @@
  * editorial body, sources footer — but injects unique copy, sources,
  * and disclosure pills.
  *
- * Sprint 1.5 (MSN-2958 / TSK-2958-02): now also renders the category
- * hero photo (full-bleed, ~60vh) and inline images distributed
- * through the body. Both come from `src/data/photos.ts` which maps
- * Albert's verified Wikimedia inventory to each category slug.
- *
- * MSN-2959 / TSK-2959-FIX-3: the live-data strip section was removed
- * site-wide. The coast-time live tiles belong on /surf-and-weather
- * only; the category pages describe their category with editorial
- * body + sources. The homepage keeps its own distinct live-data strip
- * ("What the coast is doing right now"); /surf-and-weather is the
- * canonical live-data destination.
+ * v5 (MSN-2959-V5-POLISH) updates:
+ *   - §3.3 #14: Category hero now takes an `overlayEyebrow` and
+ *     `overlayTitle` prop; the editorial H1 sits on the photo
+ *     (HeroPhoto with overlayStrong gradient). The body H1 below the
+ *     photo remains for screen-reader accessibility.
+ *   - §3.5 #19: Per-page cross-link chips added at the bottom of
+ *     the body (after body sections, before the disclosure band).
+ *   - §3.13 #29: `overlayTitle` defaults to the page's main `title`.
  *
  * Server-rendered.
  */
@@ -31,7 +28,8 @@ import {
   Button,
   Icons,
 } from "@/components/ui";
-import { CATEGORY_PHOTOS, type WikimediaPhoto } from "@/data/photos";
+import { CATEGORY_PHOTOS, type UnsplashPhoto } from "@/data/photos";
+import { RELATED_LINKS } from "@/data/site";
 
 export type CategoryPageProps = {
   eyebrow: string;
@@ -41,6 +39,12 @@ export type CategoryPageProps = {
   /** Category slug — drives which photos render. Optional; if absent,
    * no photos are rendered (legacy mode). */
   slug?: string;
+  /** v5 (#14): eyebrow rendered ABOVE the H1 on the photo. Falls
+   * back to `eyebrow` (the body's eyebrow) when omitted. */
+  overlayEyebrow?: string;
+  /** v5 (#14): H1 rendered ON the photo (overlaid). Falls back to
+   * `title` (the body's H1) when omitted. */
+  overlayTitle?: ReactNode;
   primarySources: { label: string; href: string }[];
   bodySections: {
     heading: string;
@@ -54,6 +58,9 @@ export type CategoryPageProps = {
     variant?: "rainforest" | "ocean";
   };
   relatedLinks?: { label: string; href: string; description: string }[];
+  /** v5 (#19): override the default cross-link chips (which come
+   * from RELATED_LINKS[slug]). Pass `null` to suppress. */
+  crossLinks?: { label: string; href: string; description: string }[] | null;
 };
 
 const calloutClass: Record<NonNullable<CategoryPageProps["callout"]>["variant"] & string, string> = {
@@ -67,25 +74,44 @@ export async function CategoryPage({
   subtitle,
   flourish,
   slug,
+  overlayEyebrow,
+  overlayTitle,
   primarySources,
   bodySections,
   disclosure,
   callout,
   relatedLinks,
+  crossLinks,
 }: CategoryPageProps) {
   const photos = slug ? CATEGORY_PHOTOS[slug] : undefined;
 
-  const creditLine = (p: WikimediaPhoto) => `Photo: ${p.author} / Wikimedia Commons · ${p.licence}`;
+  const creditLine = (p: UnsplashPhoto) => `Photo: ${p.author} / Unsplash · ${p.licence}`;
+
+  // v5 (#19): default cross-link chips come from RELATED_LINKS[slug].
+  // RELATED_LINKS is `as const` so each entry is readonly; cast through
+  // unknown to drop the readonly flag without losing the per-key
+  // shape narrowing.
+  const defaultCrossLinks =
+    slug && slug in RELATED_LINKS
+      ? ((RELATED_LINKS as unknown) as Record<
+          string,
+          { label: string; href: string; description: string }[]
+        >)[slug]
+      : undefined;
+  const crossChips = crossLinks === null ? null : (crossLinks ?? defaultCrossLinks);
 
   return (
     <div className="bg-paper-50">
-      {/* Sprint 1.5: full-bleed hero photo above the editorial hero,
-       * with the eyebrow+title+subtitle overlaid. */}
+      {/* v5 (#13, #14): full-bleed hero photo with editorial H1 + eyebrow
+       * overlay. The body H1 below remains for accessibility — the
+       * photo overlay is decorative. */}
       {photos?.hero ? (
         <HeroPhoto
           src={photos.hero.url}
           alt={photos.hero.caption}
           credit={creditLine(photos.hero)}
+          eyebrow={overlayEyebrow ?? (typeof eyebrow === "string" ? eyebrow : undefined)}
+          overlayTitle={overlayTitle ?? title}
           caption={photos.hero.caption}
         />
       ) : null}
@@ -95,16 +121,6 @@ export async function CategoryPage({
         subtitle={subtitle}
         flourish={flourish}
       />
-
-      {/* MSN-2959 / TSK-2959-FIX-3: live-data strip section removed site-wide.
-       * The coast-time live tiles (surf, wind, tide, UV, sun-moon, alerts)
-       * belong on the dedicated /surf-and-weather page, not duplicated
-       * across 6+ category pages. Chairman directive 2026-08-27 20:05 BST.
-       * Per Albert's spec §4.1: delete the entire section; do not just
-       * relabel the eyebrow. The /surf-and-weather page remains the
-       * canonical live-data destination; the homepage keeps its own
-       * live-data strip ("What the coast is doing right now") which is
-       * a distinct surface. */}
 
       {/* ─── Editorial body ─── */}
       <section
@@ -136,10 +152,6 @@ export async function CategoryPage({
                     </ul>
                   ) : null}
                 </div>
-                {/* Sprint 1.5: inline image after this section. Distribute
-                 * 4 inline images across the body sections cyclically.
-                 * If a category has 4 sections we get one per section;
-                 * if 8 sections we still get one per section (mod 4). */}
                 {photos?.inline?.[i % photos.inline.length] ? (
                   <CaptionedPhoto
                     src={photos.inline[i % photos.inline.length].url}
@@ -164,6 +176,38 @@ export async function CategoryPage({
                 <p className="eyebrow">Disclosure</p>
                 <div className="mt-2 text-body-sm text-ink-800">{disclosure}</div>
               </aside>
+            ) : null}
+
+            {/* v5 (#19): per-page cross-link chips. Horizontal strip
+             * at the bottom of the body for in-content discoverability. */}
+            {crossChips && crossChips.length > 0 ? (
+              <section
+                aria-labelledby="cross-links-h"
+                className="border-t border-paper-200 pt-6"
+              >
+                <h3
+                  id="cross-links-h"
+                  className="text-eyebrow text-ocean-900"
+                >
+                  Keep reading
+                </h3>
+                <ul className="mt-3 flex flex-wrap gap-2">
+                  {crossChips.map((c) => (
+                    <li key={c.href}>
+                      <Link
+                        href={c.href}
+                        className="chip-ocean hover:bg-ocean-100 transition"
+                      >
+                        {c.label} <Icons.ChevronRight size={12} className="inline-block ml-1" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-3 text-caption text-ink-600 max-w-2xl">
+                  Each chip links to the most relevant adjacent page. The
+                  deeper context lives in the destination.
+                </p>
+              </section>
             ) : null}
           </div>
 

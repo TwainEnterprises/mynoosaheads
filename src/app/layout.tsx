@@ -68,11 +68,23 @@ export const metadata: Metadata = {
     title: `${SITE.brand} — ${SITE.tagline}`,
     description:
       "An independent, sourced, slow-guide field manual for Noosa Heads.",
+    // v5 (MSN-2959-V5-POLISH #30) — site-default og:image. Required for
+    // social previews + image-pack ranking. Per-page og:image overrides
+    // may be added later. Per Albert's v5 runbook §3.13 #30.
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: `${SITE.brand} — ${SITE.tagline}`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: `${SITE.brand} — ${SITE.tagline}`,
     description: "An independent, sourced, slow-guide field manual for Noosa Heads.",
+    images: ["/og-image.jpg"],
   },
   robots: {
     index: true,

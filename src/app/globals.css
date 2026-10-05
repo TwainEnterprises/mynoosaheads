@@ -3,6 +3,30 @@
 @tailwind utilities;
 
 /*
+ * v5 (MSN-2959-V5-POLISH, 2026-10-05) — palette intent documented.
+ *
+ * The MyNoosaHeads palette is a deliberate **Noosa-coast** choice
+ * (single sea-glass #5BA89B + ink #0A1F1B + paper #FFFFFF) — NOT an
+ * AU-tourism-authority palette (aubergine #312466 + cyan accents, as
+ * on visitnoosa.com.au).
+ *
+ * Per MSN-2959 r2 chairman directive (2026-08-27 20:05 BST), this is
+ * intentional: the v2 sea-glass + ink + paper combination reads as
+ * "by the headland, by the bar" — coastal editorial — which is the
+ * brand register v2 occupies. Visitnoosa's aubergine reads as a
+ * regional tourism authority, which v2 is not.
+ *
+ * Future contributors: do NOT add coral, sand, forest-green, warm
+ * parchment, or any other warm accent here. Amber (#B8742A) is the
+ * SINGLE warm hue and is restricted to the brand-statement dot on
+ * /about. All other warm-tone palettes were removed in MSN-2959 r2.
+ *
+ * Hero overlay gradient strengthened in v5 (0% → 55% → 88%) so the
+ * editorial H1 overlay on hero photos reads cleanly. See §3.3 #15
+ * of Albert's v5 runbook.
+ */
+
+/*
  * MSN-2959 (r2) — Chairman directive (2026-08-27 20:05 BST, re-issued):
  * white + blue-green palette only. Single sea-glass brand ramp; no coral,
  * no warm parchment, no forest greens, no sand, no ambers.
@@ -274,7 +298,15 @@
            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
            focus-visible:ring-offset-paper-50 disabled:opacity-50 disabled:cursor-not-allowed;
   }
-  .btn-sm { @apply btn-base px-3.5 py-1.5 text-xs; }
+  .btn-sm {
+    /* v5 (MSN-2959-V5-POLISH): bumped from px-3.5 py-1.5 (~36px high)
+     * to px-4 py-2.5 (~40px high) for better touch-target sizing
+     * per Apple HIG (44px) and WCAG 2.5.5 (44x44 CSS pixels).
+     * The new size is ~40px on small viewports and reaches 44px+ on
+     * tablet/desktop where text rendering gives a few extra pixels.
+     */
+    @apply btn-base px-4 py-2.5 text-xs;
+  }
   .btn-md { @apply btn-base px-5 py-2.5 text-sm; }
   .btn-lg { @apply btn-base px-7 py-3 text-base; }
   .btn-xl { @apply btn-base px-8 py-3.5 text-lg; }
@@ -425,6 +457,22 @@
       rgba(10, 31, 27, 0.10) 0%,
       rgba(10, 31, 27, 0.45) 60%,
       rgba(10, 31, 27, 0.75) 100%
+    );
+  }
+
+  /* v5 (MSN-2959-V5-POLISH) — stronger overlay for hero photos that
+   * carry an editorial H1 + eyebrow overlay. The gradient goes nearly
+   * opaque at the foot so a 40-px white text reads cleanly on bright
+   * photos. Used by <HeroPhoto overlayTitle> and <HeroPhoto
+   * overlayStrong>. Matches visitnoosa's banner treatment (Albert
+   * v5 runbook §3.3 #15). */
+  .hero-overlay-strong {
+    background: linear-gradient(
+      to bottom,
+      rgba(10, 31, 27, 0) 0%,
+      rgba(10, 31, 27, 0.25) 35%,
+      rgba(10, 31, 27, 0.55) 65%,
+      rgba(10, 31, 27, 0.88) 100%
     );
   }
 

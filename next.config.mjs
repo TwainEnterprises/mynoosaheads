@@ -16,6 +16,18 @@ const nextConfig = {
     // is now in play, so the remotePatterns allowlist is required for
     // every external host we pull from.
     remotePatterns: [
+      // v5 (MSN-2959-V5-POLISH) — Unsplash added as a fallback remote
+      // pattern. v5 ships Unsplash photos from public/photos/ at the
+      // site origin (downloaded once via the v5 build prep), but the
+      // remotePatterns allowlist is kept so a future hot-link fallback
+      // (e.g. /image-credits back-link) works without a config edit.
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        port: "",
+        pathname: "/**",
+      },
+      // Legacy v2 pattern kept for any third-party reference.
       {
         protocol: "https",
         hostname: "upload.wikimedia.org",

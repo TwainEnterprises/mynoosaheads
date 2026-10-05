@@ -1,45 +1,82 @@
 # My Noosa Heads
 
 > Plan your Noosa trip well.
+> **By the headland, by the bar.**
+> Built slowly, sourced always, never fabricated.
 
 A tourism-positive, sourced guide to Noosa Heads (Queensland, Australia).
 
-[![Live](https://img.shields.io/badge/Live-noosa--site--v2.vercel.app-success?style=flat-square)](https://noosa-site-v2.vercel.app/)
-[![Vercel](https://img.shields.io/badge/Deploy-Vercel-black?style=flat-square&logo=vercel)](https://vercel.com/myreplicantlives-5263s-projects/noosa-site-v2)
 [![Next.js](https://img.shields.io/badge/Next.js-14.2.15-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![Sprint](https://img.shields.io/badge/Sprint-1.4%20%2F%205-blue?style=flat-square)](./RUNBOOK.md)
-[![ESLint](https://img.shields.io/badge/ESLint-0%20warnings%20%2F%200%20errors-brightgreen?style=flat-square)](./RUNBOOK.md)
-[![Cron](https://img.shields.io/badge/Cron-5%20jobs%20live-brightgreen?style=flat-square)](./RUNBOOK.md)
+[![Sprint](https://img.shields.io/badge/Sprint-5%20(v5%20POLISH)-blue?style=flat-square)](#v5-change-log)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6.2-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind](https://img.shields.io/badge/Tailwind-3.4.13-blue?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
 
-**Status:** Sprint 1.4 of 5 — operational baseline shipped (CI/CD + Sentry + cron + ESLint clean). Next: Victor QA gate (TSK-2957-05).
+**Status:** **v5 (MSN-2959-V5-POLISH)** — surgical visual polish + new content surfaces, shipped 2026-10-05. v5 supersedes v2 (`noosa-site-v2.vercel.app`) on Vercel preview first; production promotion awaits Tim's authority.
 
-This is the new foundation. The previous v2 build is retained in the
-post-MSN-2881 rollback snapshot for reference; this repository is the
-canonical build going forward.
+---
 
-## What is here (Sprint 1.4)
+## What is here (v5)
 
 - Next.js 14 (App Router) + TypeScript strict + Tailwind CSS 3
-- **14 public routes** live: `/`, 8 categories, 5 editorial/legal pages
-- **Live data** — Open-Meteo Marine + Forecast + NOAA solar + Conway moon
-- **Design system** — Fraunces / Inter / Caveat, 7 colour ramps × 11 shades
-- **Accessibility** — skip link, focus rings, ARIA landmarks, axe-core 0 violations
-- **ESLint** — 0 warnings / 0 errors
-- **Sitemap** — `/sitemap.xml` auto-generated from `src/app/sitemap.ts`
-- **Robots** — `/robots.txt` allows /, disallows `/api/`, `/styleguide`, `/_next/`
-- **Sentry** — `@sentry/nextjs` 8.55 wired (client/server/edge); activation gated on `SENTRY_DSN` env var
-- **Sentry test endpoint** — `/api/sentry-example-error` throws a verifiable error
-- **5 OpenClaw cron jobs** — health-check / broken-link / sitemap / affiliate-link / content-backup (see [RUNBOOK](./RUNBOOK.md))
-- **Vercel auto-deploy** — `main` → production; PRs get preview URLs
-- **Operational runbook** — see [RUNBOOK.md](./RUNBOOK.md)
+- **22 public routes** live: `/`, 8 categories + 9 accommodation sub-pages + /plan + /surf-and-weather/breaks + 4 editorial/legal pages
+- **Live data** — Open-Meteo Marine + Forecast + NOAA solar + Conway moon (6s timeout, 30-min revalidate)
+- **Photography** — Curated Unsplash inventory served from `/public/photos/` at the site origin (31 unique photos across heroes + inlines). Per-page attribution + centralised `/image-credits` page.
+- **8 bespoke SVG area hero illustrations** — `src/components/illustrations/AreaHeroes.tsx` (4:3 viewBox, 1.5px stroke, sea-glass palette).
+- **Editorial H1 + eyebrow overlay on hero photos** — `HeroPhoto` now takes optional `eyebrow` + `overlayTitle` + uses a strengthened `.hero-overlay-strong` gradient (0→55→88%) for clean white-on-photo readability.
+- **Accessibility** — skip link, focus rings, ARIA landmarks, prefers-reduced-motion respected, 44px+ touch targets (`btn-sm` bumped from px-3.5 py-1.5 → px-4 py-2.5).
+- **Canonical URL bug fixed** — `SITE.productionUrl` centralised to env-var-driven constant; `sitemap.ts` + `robots.ts` read from the same source.
+- **og:image site default** — `/public/og-image.jpg` (1200×630) referenced from `layout.tsx` metadata.
+- **5-column footer** — sitemap · live sources · editorial · legal · local partners, plus the 91-word ACCC Sch 2 compliance band.
+- **Sitemap** — `/sitemap.xml` auto-generated from `src/app/sitemap.ts`; includes the 9 accommodation sub-pages + /plan + /surf-and-weather/breaks + /image-credits.
+- **Robots** — `/robots.txt` allows /, disallows `/api/`, `/styleguide`, `/_next/`.
 
-## What is NOT here yet
+## v5 change log (MSN-2959-V5-POLISH, 2026-10-05)
 
-- Sentry org/DSN — **needs Tim's Sentry account** (see [RUNBOOK §3](./RUNBOOK.md#3-view-sentry-errors))
-- Better Stack uptime monitor — **needs Tim's Better Stack account** (see [RUNBOOK §4](./RUNBOOK.md#4-view-better-stack-uptime))
-- Lighthouse CI — deferred (Vercel Speed Insights covers the basics for free)
-- Per-PR preview deploys already work via Vercel Git integration (no extra wiring needed)
-- Custom domain DNS flip from GoDaddy to Vercel — **blocked on Tim providing GoDaddy creds**
+### P0 (must-do for "as beautiful as visitnoosa.com.au")
+
+| # | Change | Files | Status |
+|---|---|---|---|
+| 2 | Homepage hero swap (Wikimedia → Unsplash curated) | `src/data/photos.ts`, `src/app/page.tsx`, `public/photos/unsplash-1473773508845-188df298d2d1.jpg` | ✅ |
+| 3 | About-page brand image swap | `src/data/photos.ts`, `src/app/about/page.tsx` (uses new ABOUT_BRAND_IMAGE), `public/photos/unsplash-1540337706094-da10342c93d8.jpg` | ✅ |
+| 4–10 | 7 category hero + inline photo swaps (28 Unsplash photos) | `src/data/photos.ts`, 8 category pages use new `CATEGORY_PHOTOS`, `public/photos/unsplash-*.jpg` | ✅ |
+| 12 | `/image-credits` page (auto-rendered from photos.ts) | `src/app/image-credits/page.tsx` (NEW) | ✅ |
+| 13 | Homepage hero H1 + eyebrow overlay | `src/components/ui/HeroPhoto.tsx`, `src/app/page.tsx` | ✅ |
+| 14 | Category hero H1 + eyebrow overlay | `src/components/ui/HeroPhoto.tsx`, `src/components/CategoryPage.tsx`, all 8 category pages | ✅ |
+| 15 | Strengthen hero-overlay gradient (`.hero-overlay-strong` 0→55→88%) | `src/app/globals.css` | ✅ |
+| 29 | Canonical URL bug fix (centralised env-var-driven productionUrl) | `src/data/site.ts`, `src/app/sitemap.ts`, `src/app/robots.ts` | ✅ |
+| 30 | og:image site default (1200×630) | `src/app/layout.tsx`, `public/og-image.jpg` (NEW) | ✅ |
+
+### P1 (should-do for v5 launch)
+
+| # | Change | Files | Status |
+|---|---|---|---|
+| 11 | 8 bespoke SVG area hero illustrations | `src/components/illustrations/AreaHeroes.tsx` (NEW), `src/app/page.tsx` | ✅ |
+| 18 | "Plan your trip" hub section on homepage (3 cards: new / returning / deadline) | `src/app/page.tsx` | ✅ |
+| 19 | Per-page cross-link chips | `src/components/CategoryPage.tsx` (default from `RELATED_LINKS[slug]`), `src/data/site.ts` | ✅ |
+| 20 | `/plan` page (trip-planning hub) | `src/app/plan/page.tsx` (NEW) | ✅ |
+| 21 | 9 accommodation sub-pages (Tim's locked answer #4) | `src/app/accommodation/[slug]/page.tsx` (NEW), `src/data/site.ts` (`ACCOMMODATION_SUBPAGES`), `src/app/sitemap.ts` | ✅ |
+| 22 | Surf breaks sub-page | `src/app/surf-and-weather/breaks/page.tsx` (NEW) | ✅ |
+| 23 | Tighten CTAs to action verbs | `src/app/page.tsx`, `src/data/site.ts` (NAV descriptions), `src/components/ui/Button.tsx` (unchanged) | ✅ |
+| 24 | Editorial section eyebrows | `src/app/page.tsx`, `src/app/accommodation/page.tsx` | ✅ |
+| 25 | Card titles for the 8 area cards | `src/app/page.tsx` (editorialPitch map per slug) | ✅ |
+| 28 | Bump `btn-sm` to 44px touch target | `src/app/globals.css` | ✅ |
+
+### P2 (nice-to-have)
+
+| # | Change | Files | Status |
+|---|---|---|---|
+| 1 | Document typography intent in `tailwind.config.ts` | `tailwind.config.ts` | ✅ |
+| 17 | Document palette intent in `globals.css` | `src/app/globals.css` | ✅ |
+| 26 | Footer unchanged (already gold-standard) | — | ✅ |
+| 27 | Verify Vercel Cron infrastructure (deferred to v5.1 per Albert's runbook §6 Q7) | — | ⚠️ deferred |
+
+## What is NOT here yet (v5.1 follow-up)
+
+- **AU commercial lawyer sign-off** (Albert v5 §6 Q8) — required for monetisation switch-on; v5 ships the disclosure posture but cannot activate paid links without Tim's authority.
+- **Vercel Cron jobs** (Albert v5 §6 Q7) — sitemap + IndexNow submit, broken-link check. The 30-min ISR revalidation handles data freshness; cron for sitemap is a v5.1 task.
+- **`hello@mynoosaheads.com` publication** (Albert v5 §6 Q9) — the contact form currently uses `mailto:` to an unpublished address; v5.1 publishes the address and wires the form to it.
+- **Per-page og:image overrides** — v5 ships a site-default og:image; per-page overrides (one per category hero) are a v5.1 polish.
+- **Surf breaks sub-page imagery** — currently text + cards only; adding per-break photos is a v5.1 task.
 
 ## Stack
 
@@ -48,143 +85,191 @@ canonical build going forward.
 | Framework | Next.js 14.2.15 (App Router) |
 | Language | TypeScript 5.6.2 (strict mode) |
 | Styling | Tailwind CSS 3.4.13 + `@tailwindcss/typography` |
-| MDX | `next-mdx-remote` 5.0.0 (server components) + `gray-matter` + `reading-time` |
-| Hosting | Vercel Hobby (free tier) — upgrade to Pro A$30/mo only when traffic warrants |
-| GitHub | (to be linked — see "Deploy" section below) |
-| Custom domain | `mynoosaheads.com` (currently parked at GoDaddy) |
+| MDX | `next-mdx-remote` 6.0.0 (server components) + `gray-matter` + `reading-time` |
+| Hosting | Vercel Hobby (free tier) |
+| Photography | 31 curated Unsplash photos (Unsplash License, free for commercial use) served from `public/photos/` |
+| Live data | Open-Meteo Marine + Forecast, NOAA solar, Conway moon, BOM Tewantin, QPWS, QLD Traffic (all free, no key) |
 
-## Folder structure
+## Folder structure (v5)
 
 ```
 mynoosaheads/
-├── app/                    # Next.js App Router (NOTE: this project uses src/app/)
-├── content/                # MDX content files
+├── app/                        # (placeholder; project uses src/app/)
+├── content/                    # MDX content files
 │   └── posts/
-│       └── hello-noosa.mdx # sample post (Sprint 1.1 demo)
-├── lib/                    # cross-cutting utilities
-│   └── posts.ts            # MDX loader (gray-matter + reading-time)
-├── public/                 # static assets (favicon, robots.txt)
+│       └── hello-noosa.mdx
+├── lib/                        # cross-cutting utilities
+│   ├── posts.ts                # MDX loader
+│   └── live-data.ts            # Open-Meteo + NOAA + QPWS + QLD Traffic
+├── public/
+│   ├── favicon.svg             # (legacy; root layout uses /favicon.svg)
+│   ├── og-image.jpg            # v5 site-default og:image (1200×630)
+│   └── photos/                 # v5 Unsplash inventory (31 JPEGs)
+│       └── unsplash-{id}.jpg
 ├── src/
-│   ├── app/                # Next.js App Router pages
-│   │   ├── hello-noosa/
-│   │   │   └── page.tsx    # MDX route
-│   │   ├── globals.css     # Tailwind base + 7-token palette
-│   │   ├── layout.tsx      # root layout
-│   │   ├── not-found.tsx   # 404
-│   │   └── page.tsx        # "Hello, Noosa" landing
-│   ├── components/         # React components
-│   │   ├── mdxComponents.tsx
+│   ├── app/
+│   │   ├── accommodation/
+│   │   │   ├── page.tsx        # parent + 9-sub-page links
+│   │   │   └── [slug]/
+│   │   │       └── page.tsx    # 9 sub-pages (Tim's #4 — not Albert's #4)
+│   │   ├── boats-and-watercraft/
+│   │   ├── contact/
+│   │   ├── fishing-reports/
+│   │   ├── image-credits/      # v5: auto-rendered from photos.ts
+│   │   ├── noosa-national-park/
+│   │   ├── plan/               # v5: trip-planning hub (#20)
+│   │   ├── privacy/
+│   │   ├── robots.ts           # v5: reads SITE.productionUrl (#29)
+│   │   ├── sitemap.ts          # v5: +9 sub-pages + /plan + /breaks + /image-credits
+│   │   ├── surf-and-weather/
+│   │   │   ├── page.tsx
+│   │   │   └── breaks/         # v5: surf-breaks sub-page (#22)
+│   │   ├── terms/
+│   │   ├── things-to-do/
+│   │   ├── travel-and-transport/
+│   │   ├── webcams/
+│   │   ├── about/
+│   │   ├── page.tsx            # v5: hero overlay + plan-your-trip hub + 8 SVG cards
+│   │   ├── layout.tsx          # v5: og:image site default (#30)
+│   │   └── globals.css         # v5: palette intent + hero-overlay-strong + btn-sm 44px
+│   ├── components/
+│   │   ├── CategoryPage.tsx    # v5: hero overlay + cross-link chips
+│   │   ├── SiteHeader.tsx
 │   │   ├── SiteFooter.tsx
-│   │   └── SiteHeader.tsx
+│   │   ├── mdxComponents.tsx
+│   │   ├── illustrations/
+│   │   │   └── AreaHeroes.tsx  # v5: 8 bespoke SVG heroes (#11)
+│   │   └── ui/
+│   │       ├── Button.tsx
+│   │       ├── Card.tsx
+│   │       ├── CaptionedPhoto.tsx
+│   │       ├── Footer.tsx
+│   │       ├── Form.tsx
+│   │       ├── Hero.tsx
+│   │       ├── HeroPhoto.tsx   # v5: eyebrow + overlayTitle props (#13, #14)
+│   │       ├── Icon.tsx
+│   │       ├── LiveDataWidget.tsx
+│   │       ├── Logo.tsx
+│   │       ├── NavBar.tsx
+│   │       ├── AffiliateBadge.tsx
+│   │       └── index.ts
 │   └── data/
-│       └── site.ts         # SITE + SPRINT constants
-├── next.config.mjs
-├── package.json
+│       ├── photos.ts           # v5: 31 curated Unsplash photos (Wikimedia removed)
+│       └── site.ts             # v5: productionUrl env-var + RELATED_LINKS + ACCOMMODATION_SUBPAGES
+├── instrumentation.ts
+├── next.config.mjs             # v5: +images.unsplash.com remotePatterns
+├── package.json                # next 14.2.15 / tailwind 3.4.13 / next-mdx-remote 6.0.0
 ├── postcss.config.js
-├── tailwind.config.ts      # 7-token palette + typography plugin
-├── tsconfig.json           # strict mode + path aliases
-└── README.md
+├── tailwind.config.ts          # v5: typography intent documented (#1)
+└── tsconfig.json
 ```
 
 ## Local dev
 
 ```bash
-npm install
-npm run dev              # http://localhost:3010
+pnpm install
+pnpm dev                        # http://localhost:3010
 ```
 
-The dev server runs on **port 3010** by default (per the Sprint 1.1 brief;
-the previous v2 used 3011).
+The dev server runs on **port 3010** by default.
 
 ## Production build
 
 ```bash
-npm run build
-npm run start            # serves the production build on port 3010
+pnpm run build
+pnpm run start                  # serves the production build on port 3010
 ```
 
 ## Deploy
 
-### Vercel (current production)
-
-- Project: `noosa-site-v2` (id `prj_2muUnurKCimGdolqUvS2mDjZmQPY`)
-- Workspace: `myreplicantlives-5263`
-- Production URL: **https://noosa-site-v2.vercel.app** (200 OK)
-- Custom domain: `mynoosaheads.com` (parked at GoDaddy — DNS flip is TSK-2957-03)
+### Vercel (current production / preview)
 
 ```bash
-vercel link --project noosa-site-v2     # one-time
-vercel deploy --prod --yes              # deploy the current branch
-```
+# One-time link
+vercel link
 
-### GitHub auto-deploy (live as of Sprint 1.4)
+# Preview deploy (v5) — what Tim is waiting for
+vercel deploy --yes             # preview URL, NOT --prod
 
-- Repo: `https://github.com/myreplicantlives-collab/mynoosaheads`
-- Production branch: `main` — every merge auto-deploys (~30–60s).
-- PR previews: every PR gets a unique preview URL via Vercel.
-- Verified: Sprint 1.4 PR #1 → squash-merged → production deployment `b47b6ac` (TSK-2957-04).
-
-To trigger a manual production deploy:
-
-```bash
+# Production promotion — under Tim's authority only
 vercel deploy --prod --yes
 ```
 
-To roll back to a prior known-good build: see [RUNBOOK §2](./RUNBOOK.md#2-roll-back-a-deploy).
+### Canonical URL configuration
 
-## Design tokens
+The v5 build reads the production URL from `NEXT_PUBLIC_SITE_URL` env var
+(defaults to `https://mynoosaheads.vercel.app`). For production on the
+`mynoosaheads.com` hostname, set:
 
-The coastal palette is defined in `src/app/globals.css` as CSS custom
-properties and exposed via Tailwind utilities (`bg-ocean`, `text-text`,
-`bg-surface`, etc.). The brief asks for 7 tokens; all are present:
+```bash
+# In Vercel project settings, set:
+NEXT_PUBLIC_SITE_URL=https://mynoosaheads.com
+```
 
-| # | Token | Hex | Role |
-|---|---|---|---|
-| 1 | `--color-bg` | `#FBF7F0` | Page background (warm parchment) |
-| 2 | `--color-surface` | `#F5EFE3` | Card / panel surface |
-| 3 | `--color-text` | `#251F17` | Primary text |
-| 4 | `--color-text-muted` | `#54483A` | Secondary text |
-| 5 | `--color-ocean` | `#1D5A6F` | Primary brand (ocean blue) |
-| 6 | `--color-rainforest` | `#3A5240` | Secondary brand (rainforest) |
-| 7 | `--color-coral` | `#D26A4C` | Accent (sunset coral) |
+Without this, the sitemap, robots.txt, and og:image canonical point at the
+`mynoosaheads.vercel.app` hostname.
 
-TSK-2957-02 will extend these into full scales (50–900).
+## Known issues
 
-## Operational baseline
+1. **Unsplash photo IDs not visually inspected.** All 31 Unsplash photos were
+   batch-HEAD-checked for 200 OK and downloaded via the Unsplash CDN; specific
+   photographer attribution per photo is "Unsplash contributor" pending a
+   review cycle to map each photo to its actual photographer. The Unsplash
+   License permits commercial use without attribution, so licensing is safe;
+   the photographer name accuracy is a v5.1 polish task.
+2. **No Vercel Cron jobs.** Sitemap + IndexNow submit, broken-link check, and
+   affiliate-link check are not wired in v5. Albert's runbook §6 Q7 flagged
+   this as a v5.1 follow-up.
+3. **`/image-credits` lists 31 photos.** Per the data file (NOT per rendered
+   page — `photos.inline` for the 8 categories plus `HOMEPAGE_HERO` and
+   `ABOUT_BRAND_IMAGE`). If the page count drops below 31, some inline
+   entries are intentional duplicates or unused.
+4. **The "Plan your trip" homepage hub reuses the 8-area card-grid layout.**
+   For v5.1, this hub can be elevated into a dedicated `/plan` page (which
+   also exists in v5 as the trip-planning hub with school holidays + a11y
+   + dog rules + emergencies + budget).
 
-See [RUNBOOK.md](./RUNBOOK.md) for:
+## How to run locally
 
-- Health check, rollback, Sentry, Better Stack, cron logs
-- Manual triggers for each cron job
-- Escalation matrix (Sally vs Tim)
-- Cron schedule reference
+```bash
+git clone (private repo, see Tim)
+cd mynoosaheads
+pnpm install
+pnpm dev
+```
 
-**Cron jobs (live):**
+Visit:
+- `http://localhost:3010` — homepage
+- `http://localhost:3010/surf-and-weather` — surf report
+- `http://localhost:3010/accommodation` — accommodation parent
+- `http://localhost:3010/accommodation/hastings-street` — one of 9 sub-pages
+- `http://localhost:3010/plan` — trip-planning hub
+- `http://localhost:3010/image-credits` — photo attribution register
 
-| Cron | Schedule | Purpose |
-|---|---|---|
-| health_check | every 15 min | HEAD on production URL |
-| broken_link_check | daily 09:30 BST | linkinator crawl of all 14 routes |
-| sitemap_regen | Mon 03:00 BST | verify /sitemap.xml + IndexNow submit |
-| affiliate_check | 1st of month 04:00 BST | Booking/Stayz/Expedia/Airbnb validity |
-| db_backup | daily 02:00 BST | tarball + git-commit content/ tree |
+## Compliance posture (v5 — unchanged from v2)
 
-All alerts route to Tim via Telegram (chat ID 7620112671).
+- **ACCC Schedule 2** — disclosure rendered on every monetised page (surf,
+  accommodation, things-to-do, fishing, boats, travel, plan). Footer carries
+  the 91-word compliance band with `id="affiliate-disclosure"`.
+- **Privacy Act 1988 (Cth)** — privacy policy at `/privacy`; APPs described in
+  plain English; NDB scheme mentioned; Spam Act 2003 (Cth) statement present
+  in footer.
+- **Spam Act 2003** — no newsletter, no email capture, no analytics, no
+  third-party cookies. Contact form uses `mailto:` only.
+- **ABN** — `00 000 000 000 (placeholder pending entity registration)` in
+  footer.
+- **Operator/publisher identity** — unstated. No personal names in any
+  user-facing string. Brand = MyNoosaHeads only.
 
-## Build plan reference
+## Editorial references
 
-MSN-2956 build plan (DOCX):
-https://docs.google.com/document/d/1uhgrrsZjayHMPiJGB7_NHsq3N__SV-lD/edit
+- Albert's v5 runbook — `/Users/twain/.openclaw/agents/albert/agent/output/mynoosaheads-v5-runbook-2026-10-05.md`
+- Albert's visitnoosa evidence — `/Users/twain/.openclaw/agents/albert/agent/evidence/mynoosaheads-v5-2026-10-05/`
+- Victor's v4 QA — `/Users/twain/.openclaw/agents/victor/agent/output/mynoosaheads-v4-qa-2026-10-05.md`
+- v2 RUNBOOK — `./RUNBOOK.md`
 
-## Honest boundaries
+---
 
-- Sprint 1.1 ships **no real content** — that lands in Sprint 1.3.
-- The production URL is intentionally minimal: a "Hello, Noosa" landing.
-- The previous v2 build is preserved in the post-rollback snapshot for
-  reference; the new v3 (this build) replaces it.
-- The custom domain DNS is still parked at GoDaddy. The Vercel build is
-  production-ready at `https://noosa-site-v2.vercel.app`; the
-  `mynoosaheads.com` flip is gated on Tim providing GoDaddy DNS
-  credentials (Sally routes the question).# Sprint 1.4 — operational baseline shipped 2026-08-27
 # Sprint 1.3 — content migration shipped 2026-08-27
 # Sprint 1.1 — auto-deploy verified 2026-08-27T11:06:39Z
+# v5 (MSN-2959-V5-POLISH) — surgical visual polish shipped 2026-10-05

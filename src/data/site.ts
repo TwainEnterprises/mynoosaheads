@@ -12,13 +12,38 @@
  * an authoritative external source where applicable.
  */
 
+/**
+ * v5 (MSN-2959-V5-POLISH, 2026-10-05) — canonical URL bug fix (P0-#29).
+ *
+ * Per Albert's v5 runbook §3.13: `SITE.productionUrl` was hardcoded to
+ * a sibling Vercel project (`noosa-site-v2.vercel.app`) and duplicated
+ * across sitemap.ts / robots.ts. v5 centralises the production URL to
+ * a single env-var-driven constant; defaults to `mynoosaheads.vercel.app`
+ * (the current dormant production hostname). When Tim provides the
+ * GoDaddy creds for the `mynoosaheads.com` DNS flip, this constant
+ * updates to `https://mynoosaheads.com` without touching any other file.
+ *
+ * Env precedence:
+ *   1. `process.env.NEXT_PUBLIC_SITE_URL` (Vercel production / preview env)
+ *   2. `process.env.SITE_URL` (server-only fallback)
+ *   3. Fallback to "https://mynoosaheads.vercel.app" (current prod)
+ */
+const PRODUCTION_URL_FALLBACK = "https://mynoosaheads.vercel.app";
+const _resolvedProductionUrl =
+  (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_SITE_URL) ||
+  (typeof process !== "undefined" && process.env?.SITE_URL) ||
+  PRODUCTION_URL_FALLBACK;
+
 export const SITE = {
   brand: "My Noosa Heads",
   brandShort: "mynoosaheads",
   tagline: "By the headland, by the bar.",
   domain: "mynoosaheads.com",
-  productionUrl: "https://noosa-site-v2.vercel.app",
-  stagingUrl: "https://noosa-site-v2.vercel.app",
+  /** v5 (MSN-2959-V5-POLISH #29): single env-var-driven production URL.
+   * See comment block above. Read by layout.tsx metadataBase, sitemap.ts,
+   * robots.ts, and og:image canonical. */
+  productionUrl: _resolvedProductionUrl,
+  stagingUrl: _resolvedProductionUrl,
   email: "hello@mynoosaheads.com",
   locale: "en-AU",
   region: "Queensland, Australia",
@@ -43,15 +68,165 @@ export const SPRINT = {
  * (alerts + tracks), then the consumer categories. No newsletter link,
  * no login, no social. Per chairman directive 2026-08-27.
  */
+/**
+ * Primary navigation — order is editorial. Surf & weather first (the
+ * highest-frequency page a local opens each morning), then National Park
+ * (alerts + tracks), then the consumer categories. No newsletter link,
+ * no login, no social. Per chairman directive 2026-08-27.
+ *
+ * v5 (MSN-2959-V5-POLISH #23): CTAs tightened to action verbs per
+ * Albert's v5 runbook §3.7. The labels stay editorial; the
+ * descriptions get action verbs.
+ */
 export const NAV = [
-  { label: "Surf & weather", href: "/surf-and-weather", description: "Live BOM + Open-Meteo tiles, tide, UV." },
-  { label: "National Park", href: "/noosa-national-park", description: "Tracks, wildlife, QPWS alerts." },
-  { label: "Accommodation", href: "/accommodation", description: "Booking, Stayz, Airbnb, Expedia." },
-  { label: "Things to do", href: "/things-to-do", description: "Day-by-day ideas across the shire." },
-  { label: "Fishing", href: "/fishing-reports", description: "Weekly report, tides, solunar." },
-  { label: "Boats", href: "/boats-and-watercraft", description: "Hire, ramps, river bar crossings." },
-  { label: "Travel", href: "/travel-and-transport", description: "Bruce Highway, airport, ferry." },
-  { label: "Webcams", href: "/webcams", description: "Council cams + SLSQ flags." },
+  { label: "Surf & weather", href: "/surf-and-weather", description: "Read today's surf report." },
+  { label: "National Park", href: "/noosa-national-park", description: "Check park alerts and tracks." },
+  { label: "Accommodation", href: "/accommodation", description: "Find a place to stay." },
+  { label: "Things to do", href: "/things-to-do", description: "See what locals do on a Tuesday." },
+  { label: "Fishing", href: "/fishing-reports", description: "Read this week's fishing insight." },
+  { label: "Boats", href: "/boats-and-watercraft", description: "Check the bar crossing." },
+  { label: "Travel", href: "/travel-and-transport", description: "Plan the drive in." },
+  { label: "Webcams", href: "/webcams", description: "Open the council cams." },
+] as const;
+
+/**
+ * v5 (MSN-2959-V5-POLISH #20): cross-link chips for the "Related"
+ * rail on every category page. Drives the homepage's "Plan your trip"
+ * hub too. Each item has a label + href + 1-line description.
+ *
+ * Albert's v5 runbook §3.5 #19: "Per-page cross-link chips — on each
+ * of the 8 category pages, add a small 'Related' inline strip at
+ * the bottom — 3 chips linking to the most relevant 2–3 other
+ * categories."
+ */
+export const RELATED_LINKS = {
+  "surf-and-weather": [
+    { label: "Noosa National Park", href: "/noosa-national-park", description: "Check coastal walk conditions before you drive to First Bay." },
+    { label: "Boats & watercraft", href: "/boats-and-watercraft", description: "Bar crossings depend on the same swell you're reading here." },
+    { label: "Webcams", href: "/webcams", description: "Confirm what the buoy is telling you." },
+  ],
+  "noosa-national-park": [
+    { label: "Surf & weather", href: "/surf-and-weather", description: "Read the swell before walking the headland." },
+    { label: "Things to do", href: "/things-to-do", description: "Cross-link to the hinterland walks." },
+    { label: "Travel & transport", href: "/travel-and-transport", description: "Plan the drive to the park entrance." },
+  ],
+  accommodation: [
+    { label: "Plan", href: "/plan", description: "Plan your trip — accessibility, dog rules, school holidays." },
+    { label: "Surf & weather", href: "/surf-and-weather", description: "Check conditions for your travel dates." },
+    { label: "Things to do", href: "/things-to-do", description: "What's nearby each region." },
+  ],
+  "things-to-do": [
+    { label: "Plan", href: "/plan", description: "Build a day-by-day plan around what locals do." },
+    { label: "Accommodation", href: "/accommodation", description: "Pick the right base for the activity." },
+    { label: "Webcams", href: "/webcams", description: "Confirm what you plan to do is open." },
+  ],
+  "fishing-reports": [
+    { label: "Surf & weather", href: "/surf-and-weather", description: "Read the tide and wind before launching." },
+    { label: "Boats & watercraft", href: "/boats-and-watercraft", description: "Bar crossings and ramp access." },
+    { label: "Travel & transport", href: "/travel-and-transport", description: "Where to launch from Tewantin." },
+  ],
+  "boats-and-watercraft": [
+    { label: "Surf & weather", href: "/surf-and-weather", description: "Bar crossing decisions start here." },
+    { label: "Travel & transport", href: "/travel-and-transport", description: "Plan the drive to Tewantin or Noosaville." },
+    { label: "Fishing", href: "/fishing-reports", description: "Where to fish once you're on the water." },
+  ],
+  "travel-and-transport": [
+    { label: "Accommodation", href: "/accommodation", description: "Pick your base before you book the drive." },
+    { label: "Plan", href: "/plan", description: "School holidays, accessibility, emergencies." },
+    { label: "Webcams", href: "/webcams", description: "Check road conditions before you leave." },
+  ],
+  webcams: [
+    { label: "Surf & weather", href: "/surf-and-weather", description: "What the buoy says versus what the cam shows." },
+    { label: "Noosa National Park", href: "/noosa-national-park", description: "Headland walk current conditions." },
+    { label: "Boats & watercraft", href: "/boats-and-watercraft", description: "Bar crossing live view." },
+  ],
+} as const;
+
+/**
+ * v5 (MSN-2959-V5-POLISH #21): nine accommodation sub-pages — Tim's
+ * locked answer #4 (full SEO-audit gap from MSN-3058 §4).
+ *
+ * Nine region/archetype sub-pages (Tim's locked answer, not Albert's
+ * default of 4): regional pages for the 5 places to base yourself +
+ * 3 archetype pages (pet-friendly, family, accessible) + 1 hinterland
+ * page for the western shire.
+ *
+ * Each sub-page renders with the shared accommodation layout + a
+ * region/archetype body + the ACCC affiliate framework slot.
+ */
+export const ACCOMMODATION_SUBPAGES = [
+  {
+    slug: "hastings-street",
+    name: "Hastings Street",
+    region: "Noosa Heads",
+    pitch: "The walkable end of town. Cafés, restaurants, the headland, and Main Beach at your door.",
+    archetype: "Premium central",
+    keywords: ["hastings street", "noosa heads", "main beach", "luxury", "walkable"],
+  },
+  {
+    slug: "noosaville",
+    name: "Noosaville",
+    region: "Noosaville",
+    pitch: "Across the river, along Gympie Terrace. Quieter than Hastings Street; cheaper parking; family-friendly.",
+    archetype: "Family riverfront",
+    keywords: ["noosaville", "gympie terrace", "river", "family", "ferry"],
+  },
+  {
+    slug: "sunshine-beach",
+    name: "Sunshine Beach",
+    region: "Sunshine Beach",
+    pitch: "South of the headland. Surf club end of town, village shops, and the southern access to Noosa National Park.",
+    archetype: "Surf village",
+    keywords: ["sunshine beach", "village", "surf club", "national park"],
+  },
+  {
+    slug: "tewantin",
+    name: "Tewantin & Noosa North Shore",
+    region: "Tewantin",
+    pitch: "On the river, ten minutes from Hastings Street by car or ferry. Houseboats and quiet blocks of land.",
+    archetype: "Houseboat & quiet",
+    keywords: ["tewantin", "north shore", "houseboat", "ferry"],
+  },
+  {
+    slug: "peregian",
+    name: "Peregian & Marcus Beach",
+    region: "Peregian Beach",
+    pitch: "South past Sunshine Beach. Village-square feel; the start of the Coolum stretch. Dog-friendly options.",
+    archetype: "Quiet village",
+    keywords: ["peregian beach", "marcus beach", "village", "dog friendly"],
+  },
+  {
+    slug: "pet-friendly",
+    name: "Pet-friendly stays",
+    region: "Shire-wide",
+    pitch: "Verified pet-friendly accommodation across the shire. Verify each operator's pet policy before booking.",
+    archetype: "Archetype",
+    keywords: ["pet friendly", "dog friendly", "pets allowed", "noosa"],
+  },
+  {
+    slug: "family",
+    name: "Family stays",
+    region: "Shire-wide",
+    pitch: "Apartments, holiday houses, and resorts with family-friendly facilities — pools, fenced yards, near the river.",
+    archetype: "Archetype",
+    keywords: ["family", "kids", "pool", "fenced", "holiday house"],
+  },
+  {
+    slug: "accessible",
+    name: "Accessible stays",
+    region: "Shire-wide",
+    pitch: "Step-free, wheelchair-accessible accommodation verified against current Australian accessibility standards.",
+    archetype: "Archetype",
+    keywords: ["accessible", "wheelchair", "step free", "disability"],
+  },
+  {
+    slug: "hinterland",
+    name: "Hinterland & western shire",
+    region: "Pomona · Cooran · Kin Kin · Cooroy",
+    pitch: "Inland villages in the western shire. Pomona, Cooran, Kin Kin, Cooroy — hinterland farms, markets, walks.",
+    archetype: "Hinterland",
+    keywords: ["hinterland", "pomona", "cooran", "kin kin", "cooroy"],
+  },
 ] as const;
 
 /**
