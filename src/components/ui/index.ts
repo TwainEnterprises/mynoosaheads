@@ -47,6 +47,15 @@ export type { LogoProps, LogoMark } from "./Logo";
 export { NavBar } from "./NavBar";
 export type { NavBarProps, NavItem } from "./NavBar";
 
+export { MegaMenu } from "./MegaMenu";
+export type { MegaMenuProps } from "./MegaMenu";
+
+export { ContentCard } from "./ContentCard";
+export type { ContentCardProps, ContentCardAspect } from "./ContentCard";
+
+export { Carousel, CarouselSlide } from "./Carousel";
+export type { CarouselProps, CarouselSlideProps } from "./Carousel";
+
 export { Footer } from "./Footer";
 export type { FooterProps, FooterColumn } from "./Footer";
 

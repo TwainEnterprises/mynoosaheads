@@ -240,6 +240,12 @@ const config: Config = {
           "var(--text-accent-md)",
           { lineHeight: "1.25", letterSpacing: "0.005em", fontWeight: "500" },
         ],
+        // v6 §4.1 — caption-script role (Caveat, body-sm size,
+        // weight 500) for bylines and personal labels.
+        "caption-script": [
+          "var(--text-caption-script)",
+          { lineHeight: "1.3", letterSpacing: "0", fontWeight: "500" },
+        ],
       },
       borderRadius: {
         sm: "4px",
@@ -276,6 +282,15 @@ const config: Config = {
       },
       transitionDuration: {
         DEFAULT: "180ms",
+        // v6 §4.3 — three motion durations
+        snappy: "120ms",
+        base: "200ms",
+        slow: "400ms",
+      },
+      transitionTimingFunction: {
+        // v6 §4.3 — three easings
+        "ease-out-brand": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "ease-spring": "cubic-bezier(0.34, 1.56, 0.64, 1)",
       },
       keyframes: {
         "fade-in": {

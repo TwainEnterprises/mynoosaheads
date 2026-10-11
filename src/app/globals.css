@@ -567,3 +567,223 @@
   font-weight: 500;
   line-height: 1;
 }
+
+/* ================================================================
+ * v6 (MSN-2960-V6, 2026-10-11) — design system polish
+ *
+ * Per Albert's v6 spec §4.1–§4.6. Additive only; v5 tokens and
+ * component classes keep working. The three primary additions are:
+ *   1. Semantic palette aliases (so component code reads intent)
+ *   2. Motion durations / easings / hover utility classes
+ *   3. Caption-script role for bylines + reveal-on-scroll
+ * ================================================================ */
+
+@layer base {
+  /* v6 §4.1: engage Fraunces' optical-size axis for H1/H2.
+   * Tightens contrast at display sizes; gives the editorial feel
+   * visitnoosa's Cocogoose gets by default. */
+  h1, h2 {
+    font-variation-settings: "opsz" 144, "SOFT" 30;
+  }
+
+  /* v6 §4.1: tighter letter-spacing on H3-H6 (-0.005em) for
+   * a more compressed look on smaller headings. */
+  h3 { letter-spacing: -0.017em; }
+  h4 { letter-spacing: -0.017em; }
+  h5 { letter-spacing: -0.015em; }
+  h6 { letter-spacing: -0.013em; }
+
+  /* v6 §4.1: eyebrow tracking 0.16em → 0.18em for slightly airier
+   * uppercase labels. */
+  .eyebrow {
+    letter-spacing: 0.18em;
+  }
+}
+
+:root {
+  /* v6 §4.2: semantic palette aliases — so component code reads
+   * intent ("text-primary", "surface-raised") rather than hex. The
+   * v5 utility classes (text-ink-900, bg-paper-50) keep working. */
+
+  /* Text colours */
+  --text-primary:   var(--ink-900);
+  --text-secondary: var(--ink-700);
+  --text-muted:     var(--ink-600);
+  --text-on-brand:  var(--ink-900);     /* for use on bg-eucalyptus-500 per v5 contrast fix */
+  --text-inverse:   var(--paper-50);
+
+  /* Surface colours */
+  --surface-base:      var(--paper-50);
+  --surface-raised:    var(--paper-100);
+  --surface-sunken:    var(--paper-200);
+  --surface-elevated:  #FFFFFF;          /* card default; explicit so it's greppable */
+  --surface-overlay-strong: rgba(10, 31, 27, 0.88);
+
+  /* Brand accents (semantic) */
+  --accent-brand:        var(--eucalyptus-500);   /* #5BA89B */
+  --accent-brand-hover:  var(--eucalyptus-600);
+  --accent-brand-soft:   var(--eucalyptus-50);
+  --accent-amber:        var(--accent-amber);     /* unchanged; restricted use */
+
+  /* v6 §3.3: mega-menu + content-rail tokens */
+  --panel-bg:        rgba(255, 255, 255, 0.98);
+  --panel-border:    var(--paper-200);
+  --panel-shadow:    0 14px 30px rgba(10, 31, 27, 0.10), 0 4px 8px rgba(10, 31, 27, 0.05);
+  --hover-bg:        var(--paper-100);
+  --hover-bg-brand:  var(--eucalyptus-50);
+  --hover-fg-brand:  var(--eucalyptus-800);
+
+  /* v6 §4.3: rail tokens */
+  --rail-gap:        1.5rem;
+  --rail-padding:    1.25rem;
+
+  /* v6 §4.1: caption-script role (Caveat, body-sm size, weight 500) */
+  --text-caption-script: clamp(0.875rem, 0.825rem + 0.2vw, 0.9375rem);
+  --text-caption-script-weight: 500;
+
+  /* v6 §4.3: motion durations + easings */
+  --motion-snappy: 120ms;
+  --motion-base:   200ms;
+  --motion-slow:   400ms;
+  --ease-out:      cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-in-out:   cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@layer components {
+  /* v6 §4.1: Caveat byline / personal label utility. */
+  .accent-caption {
+    font-family: var(--font-accent);
+    font-size: var(--text-caption-script);
+    font-weight: var(--text-caption-script-weight);
+    line-height: 1.3;
+    color: var(--ocean-700);
+  }
+}
+
+@layer utilities {
+  /* v6 §4.3 — hover effects (snappy 120ms / base 200ms). */
+  .hover-lift {
+    transition: transform var(--motion-base) var(--ease-out),
+                box-shadow var(--motion-base) var(--ease-out);
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(10, 31, 27, 0.07), 0 2px 4px rgba(10, 31, 27, 0.05);
+  }
+  .hover-glow {
+    transition: box-shadow var(--motion-base) var(--ease-out);
+  }
+  .hover-glow:hover {
+    box-shadow: 0 0 0 3px rgba(91, 168, 155, 0.30);
+  }
+  .hover-scale-img {
+    overflow: hidden;
+  }
+  .hover-scale-img > img,
+  .hover-scale-img > picture > img {
+    transition: transform var(--motion-slow) var(--ease-out);
+  }
+  .group:hover .hover-scale-img > img,
+  .group:hover .hover-scale-img > picture > img,
+  .hover-scale-img:hover > img {
+    transform: scale(1.05);
+  }
+  .hover-underline {
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 4px;
+    transition: text-decoration-color var(--motion-base) var(--ease-out);
+  }
+  .hover-underline:hover {
+    text-decoration-color: var(--ocean-600);
+  }
+
+  /* v6 §4.3 — scroll-triggered reveal (client component applies
+   * the `is-revealed` class on intersect; base hides the element). */
+  .reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity var(--motion-slow) var(--ease-out),
+                transform var(--motion-slow) var(--ease-out);
+  }
+  .reveal-on-scroll.is-revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* v6 §4.5 — image treatment helpers for content cards. */
+  .content-image {
+    @apply aspect-[3/2] w-full overflow-hidden rounded-t-xl bg-paper-100;
+  }
+  .content-image > img,
+  .content-image > picture > img {
+    @apply h-full w-full object-cover;
+  }
+  .content-image-16x9 {
+    @apply aspect-video w-full overflow-hidden rounded-t-xl bg-paper-100;
+  }
+  .content-image-16x9 > img,
+  .content-image-16x9 > picture > img {
+    @apply h-full w-full object-cover;
+  }
+  .content-image-1x1 {
+    @apply aspect-square w-full overflow-hidden rounded-t-xl bg-paper-100;
+  }
+  .content-image-1x1 > img,
+  .content-image-1x1 > picture > img {
+    @apply h-full w-full object-cover;
+  }
+
+  /* v6 §3.3 — mega-menu panel surface. */
+  .mega-panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    box-shadow: var(--panel-shadow);
+    border-radius: 14px;
+  }
+
+  /* v6 §4.4 — horizontal scroll-snap rail. */
+  .scroll-snap-rail {
+    @apply flex gap-6 overflow-x-auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: var(--rail-padding);
+    padding-left: var(--rail-padding);
+    padding-right: var(--rail-padding);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .scroll-snap-rail > * {
+    scroll-snap-align: start;
+    flex: 0 0 auto;
+  }
+  /* Hide scrollbar in WebKit for a cleaner look; functional scroll
+   * remains via drag / touch / keyboard. */
+  .scroll-snap-rail::-webkit-scrollbar {
+    height: 6px;
+  }
+  .scroll-snap-rail::-webkit-scrollbar-thumb {
+    background: var(--paper-300);
+    border-radius: 3px;
+  }
+}
+
+/* v6 §4.3 — blanket prefers-reduced-motion: respect user pref.
+ * The v5 rule already kills transitions; v6 extends to keep
+ * reveal-on-scroll elements visible (no hidden-by-default). */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-on-scroll {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .hover-scale-img > img,
+  .hover-scale-img > picture > img {
+    transition: none !important;
+  }
+  .hover-scale-img:hover > img,
+  .group:hover .hover-scale-img > img {
+    transform: none !important;
+  }
+}

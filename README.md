@@ -7,28 +7,85 @@
 A tourism-positive, sourced guide to Noosa Heads (Queensland, Australia).
 
 [![Next.js](https://img.shields.io/badge/Next.js-14.2.15-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![Sprint](https://img.shields.io/badge/Sprint-5%20(v5%20POLISH)-blue?style=flat-square)](#v5-change-log)
+[![Sprint](https://img.shields.io/badge/Sprint-6%20(v6%20MEGA%20MENU%20%2B%20HOMEPAGE)-blue?style=flat-square)](#v6-change-log)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6.2-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind](https://img.shields.io/badge/Tailwind-3.4.13-blue?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
 
-**Status:** **v5 (MSN-2959-V5-POLISH)** — surgical visual polish + new content surfaces, shipped 2026-10-05. v5 supersedes v2 (`noosa-site-v2.vercel.app`) on Vercel preview first; production promotion awaits Tim's authority.
+**Status:** **v6 (MSN-2960-V6-MEGA-MENU-HOMEPAGE)** — mega menu + homepage restructure + design-system polish, shipped 2026-10-11. v6 builds on v5 (`a428224`); v5 production at `mynoosaheads.vercel.app` remains untouched until Tim's authority to promote.
 
 ---
 
-## What is here (v5)
+## What is here (v6 + v5 carry)
 
 - Next.js 14 (App Router) + TypeScript strict + Tailwind CSS 3
-- **22 public routes** live: `/`, 8 categories + 9 accommodation sub-pages + /plan + /surf-and-weather/breaks + 4 editorial/legal pages
-- **Live data** — Open-Meteo Marine + Forecast + NOAA solar + Conway moon (6s timeout, 30-min revalidate)
-- **Photography** — Curated Unsplash inventory served from `/public/photos/` at the site origin (31 unique photos across heroes + inlines). Per-page attribution + centralised `/image-credits` page.
-- **8 bespoke SVG area hero illustrations** — `src/components/illustrations/AreaHeroes.tsx` (4:3 viewBox, 1.5px stroke, sea-glass palette).
-- **Editorial H1 + eyebrow overlay on hero photos** — `HeroPhoto` now takes optional `eyebrow` + `overlayTitle` + uses a strengthened `.hero-overlay-strong` gradient (0→55→88%) for clean white-on-photo readability.
-- **Accessibility** — skip link, focus rings, ARIA landmarks, prefers-reduced-motion respected, 44px+ touch targets (`btn-sm` bumped from px-3.5 py-1.5 → px-4 py-2.5).
-- **Canonical URL bug fixed** — `SITE.productionUrl` centralised to env-var-driven constant; `sitemap.ts` + `robots.ts` read from the same source.
-- **og:image site default** — `/public/og-image.jpg` (1200×630) referenced from `layout.tsx` metadata.
-- **5-column footer** — sitemap · live sources · editorial · legal · local partners, plus the 91-word ACCC Sch 2 compliance band.
-- **Sitemap** — `/sitemap.xml` auto-generated from `src/app/sitemap.ts`; includes the 9 accommodation sub-pages + /plan + /surf-and-weather/breaks + /image-credits.
-- **Robots** — `/robots.txt` allows /, disallows `/api/`, `/styleguide`, `/_next/`.
+- **26 public routes** live (v5's 22 + no new routes in v6 P0; mega-menu panels render the existing routes).
+- **v6 mega menu** — `src/components/ui/MegaMenu.tsx`. 6 top-level categories (Destinations · Stay · See & Do · Plan · What's On · Book Now) with ~55 sub-links. Hover (200ms delay) or keyboard focus reveals an image-rich panel. Mobile (<md) collapses to a hamburger sheet. ARIA: `aria-haspopup`, `aria-expanded`, `aria-controls`, panel `role="region"`. Click-outside / Escape closes.
+- **v6 homepage** — 7 P0 sections + v5 carry (live data, plan hub, disclosure, footer). S1 hero · S3 featured areas (6 photo cards replacing 8 SVGs) · S4 things-to-do carousel (8 scroll-snap cards) · S5 where-to-stay grid (6 cross-section cards) · S9 webcams strip (4 tiles) · S10 getting here (5 transport modes + hero photo). Section IDs per Albert's v6 spec §2.1.
+- **ContentCard** — `src/components/ui/ContentCard.tsx`. Shared card primitive for S3, S4, S5, S9. Aspect-locked, hover-lift, image-scale 1.0→1.05, link-underline reveal, figcaption credit on hover.
+- **Carousel** — `src/components/ui/Carousel.tsx`. Pure CSS scroll-snap rail; `role="region" aria-roledescription="carousel"`. No JS dependency.
+- **Design system polish** — `src/app/globals.css` v6 block: semantic palette aliases (`--text-primary`, `--surface-base`, `--accent-brand`), motion tokens (`--motion-snappy/base/slow`, `--ease-out`, `--ease-spring`), hover utilities (`.hover-lift`, `.hover-scale-img`, `.hover-underline`, `.hover-glow`), reveal-on-scroll, mega-panel surface, scroll-snap rail, caption-script role. Fraunces `opsz 144` engaged on H1/H2. H3–H6 letter-spacing tightened.
+- **Icon set expansion** — `src/components/ui/Icon.tsx`. v5 had 21 icons; v6 adds 17 (Car, Plane, Bus, Anchor, Map, Bed, House, Building, Wifi, Key, CalendarEvent, Phone, Wheelchair, Pets, Family, Mountain, Question). Total: 38 icons.
+- **Photography inventory** — 49 curated Unsplash photos served from `/public/photos/` (v5: 31 + v6 net-new: 18). Per-page attribution + centralised `/image-credits` page. All Unsplash License.
+- **Live data** — Open-Meteo Marine + Forecast + NOAA solar + Conway moon + BOM Tewantin + QPWS + QLD Traffic (6s timeout, 30-min revalidate). v5 carry.
+- **8 bespoke SVG area hero illustrations** — `src/components/illustrations/AreaHeroes.tsx`. v5 carry; demoted from S3 featured areas grid to mega-menu panel use.
+- **Compliance footer** — 5 columns + 91-word ACCC Sch 2 compliance band. v6 update: column 1 (Sitemap) uses the new mega-menu IA.
+- **Accessibility** — skip link, focus rings, ARIA landmarks, prefers-reduced-motion respected (extended v6 to cover reveal-on-scroll + image-scale), 44px+ touch targets. v5 carry.
+- **Canonical URL** — env-var-driven; `SITE.productionUrl` centralised. v5 carry.
+- **og:image** — `/public/og-image.jpg` (1200×630) referenced from `layout.tsx`. v5 carry.
+- **Anonymised brand** — 0 matches of personal names in user-facing strings (verified via `grep -rE "\b(Tim|Whidburn|Twain|myreplicantlives)\b" src`).
+
+## v6 change log (MSN-2960-V6-MEGA-MENU-HOMEPAGE, 2026-10-11)
+
+### P0 (must-ship in 3–5 day window)
+
+| # | Change | Files | Status |
+|---|---|---|---|
+| P0-1 | Mega menu (6 categories, ~55 sub-links, image-rich panels) | `src/components/ui/MegaMenu.tsx` (NEW), `src/data/site.ts` (`MEGA_NAV`, `MegaNavCategory`), `src/components/SiteHeader.tsx`, `src/components/ui/index.ts` | ✅ |
+| P0-2 | Hero refined (S1) — incremental polish on v5 hero | `src/app/page.tsx` | ✅ |
+| P0-3 | Featured areas grid (S3) — 6 photo cards, photo-swap, drop to 3-col | `src/app/page.tsx`, `src/data/site.ts` (`FEATURED_AREAS`), `src/data/photos.ts` (`HOMEPAGE_SECTIONS.featuredAreas`), `src/components/ui/ContentCard.tsx` (NEW) | ✅ |
+| P0-4 | Things to do carousel (S4) — 8 cards, scroll-snap | `src/app/page.tsx`, `src/data/site.ts` (`THINGS_TO_DO`), `src/data/photos.ts` (`HOMEPAGE_SECTIONS.thingsToDo`), `src/components/ui/Carousel.tsx` (NEW) | ✅ |
+| P0-5 | Where to stay grid (S5) — 6 cross-section cards | `src/app/page.tsx`, `src/data/site.ts` (`WHERE_TO_STAY`), `src/data/photos.ts` (`HOMEPAGE_SECTIONS.whereToStay`) | ✅ |
+| P0-6 | Webcams strip (S9) — 4 tiles | `src/app/page.tsx`, `src/data/site.ts` (`WEBCAMS`) | ✅ |
+| P0-7 | Getting here section (S10) — 5 transport modes | `src/app/page.tsx`, `src/data/site.ts` (`GETTING_HERE`), `src/data/photos.ts` (`HOMEPAGE_SECTIONS.gettingHere`) | ✅ |
+| P0-8 | Footer update (S16) — column 1 reflects new mega-menu IA | `src/data/site.ts` (`FOOTER_DISCLOSURE.columns[0]`) | ✅ |
+| P0-9 | Design system polish — typography scale + palette aliases + motion principles | `src/app/globals.css` (v6 block appended), `tailwind.config.ts` (motion tokens, caption-script role) | ✅ |
+| P0-10 | Micro-interaction library — card lift + image scale + link underline + button press | `src/app/globals.css` (utility classes), `src/components/ui/ContentCard.tsx` (wired in) | ✅ |
+
+**P0 subtotal:** 10 items, all ✅ shipped.
+
+### P1 (deferred to follow-on sprint per spec)
+
+| # | Change | Status |
+|---|---|---|
+| P1-1 | Live conditions strip (S2) — carry + scroll-snap polish + icon adoption | ⏸ carried from v5; P1 polish deferred |
+| P1-2 | Plan your trip hub (S6) — refresh copy + scene illustration per card | ⏸ carried from v5; P1 polish deferred |
+| P1-3 | Eat & drink strip (S7) — 4-6 tiles | ⏸ P1 |
+| P1-4 | Noosa right now rail (S8) | ⏸ P1 |
+| P1-5 | What's on this week rail (S13) | ⏸ P1 |
+| P1-6 | FAQ accordion (S15) — 6-8 questions | ⏸ P1 |
+| P1-7 | Full 30+ icon set (48 icons) — v6 ships 38, 10 more in v6.1 | ⏸ partial; v6 ships 17 new icons |
+| P1-8 | Image lightbox component | ⏸ P1 |
+| P1-9 | Tabs component (filters for S5/S7) | ⏸ P1 |
+
+### P2 (deferred to post-launch per spec)
+
+| # | Change | Status |
+|---|---|---|
+| P2-1 | Editorial stories rail (S11) — 2-3 MDX posts | ⏸ P2 |
+| P2-2 | Noosa in numbers stats strip (S12) | ⏸ P2 |
+| P2-3 | Newsletter inline CTA stub (S14) | ⏸ P2 |
+| P2-4 | 12+ scene illustrations | ⏸ P2 |
+| P2-5 | Carousel nav arrows + dots indicator | ⏸ P2 |
+| P2-6 | Toast / notification component | ⏸ P2 |
+
+## What is NOT here yet (v6.1 follow-up)
+
+- **Mega-menu search** (Albert v6 §9 Q2) — search icon visible, but clicking shows "Search is coming soon" empty state. v6.1 wires to a static /search route.
+- **AU commercial lawyer sign-off** (Albert v5 §6 Q8) — still required for monetisation switch-on; v6 ships the disclosure posture.
+- **`hello@mynoosaheads.com` publication** (Albert v5 §6 Q9) — contact form still uses `mailto:`; v6.1 publishes the address.
+- **Per-page og:image overrides** — v6 ships a site-default; per-category overrides are a v6.1 polish.
+- **Surf breaks sub-page imagery** — v5 was text + cards; v6.1 adds per-break photos.
+- **P0 known limitations** — mega-menu does not yet trap focus inside the open panel (non-modal by design, but P1 follow-on adds `focus-trap-react`). No arrow-key navigation between sub-links (Tab works). No sub-link image preview; only the category-level image.
 
 ## v5 change log (MSN-2959-V5-POLISH, 2026-10-05)
 

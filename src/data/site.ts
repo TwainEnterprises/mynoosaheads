@@ -77,6 +77,10 @@ export const SPRINT = {
  * v5 (MSN-2959-V5-POLISH #23): CTAs tightened to action verbs per
  * Albert's v5 runbook §3.7. The labels stay editorial; the
  * descriptions get action verbs.
+ *
+ * v6 (MSN-2960-V6, 2026-10-11): kept for the /styleguide page and
+ * any consumer that wants the flat 8-link list. The new MEGA_NAV
+ * (below) is what the SiteHeader now uses.
  */
 export const NAV = [
   { label: "Surf & weather", href: "/surf-and-weather", description: "Read today's surf report." },
@@ -87,6 +91,446 @@ export const NAV = [
   { label: "Boats", href: "/boats-and-watercraft", description: "Check the bar crossing." },
   { label: "Travel", href: "/travel-and-transport", description: "Plan the drive in." },
   { label: "Webcams", href: "/webcams", description: "Open the council cams." },
+] as const;
+
+/* ======================================================================
+ * v6 (MSN-2960-V6) — mega-menu navigation.
+ *
+ * Replaces the v5 flat 8-link NavBar with a 6-category mega menu
+ * (~55 sub-links total). Per Albert's v6 spec §3.1–§3.4. The 6
+ * categories mirror visitnoosa.com.au's IA:
+ *   1. Destinations (10 sub-links)
+ *   2. Stay         (19 sub-links: 10 archetype + 9 v5 carryover)
+ *   3. See & Do     (8 sub-links)
+ *   4. Plan         (9 sub-links)
+ *   5. What's On    (5 sub-links)
+ *   6. Book Now     (CTA, no sub-links)
+ *
+ * P0 notes:
+ *   - 10 new archetype stay links point at the v5 /accommodation
+ *     parent with hash anchors (#hotels, #self-contained, etc.) —
+ *     P1 will generate /accommodation/type/[type] filter pages.
+ *   - Plan sub-links without dedicated pages route to the v6 /plan
+ *     hub with hash anchors (P1 expansion).
+ *   - What's On sub-links route to /things-to-do with hash anchors
+ *     (P1 will add dedicated event pages).
+ *   - Mega-menu featured image uses the v5 area SVGs (Hastings
+ *     Street, Headland, etc.) — no new photo inventory needed.
+ *
+ * MegaNavCategory kind is "category" for normal entries and "cta"
+ * for the Book Now button (no sub-links, rendered as a pill).
+ * ====================================================================== */
+
+export type MegaNavLink = {
+  label: string;
+  href: string;
+  description?: string;
+};
+
+export type MegaNavCategory =
+  | {
+      kind: "category";
+      label: string;
+      href: string;
+      sub: readonly MegaNavLink[];
+      featured: {
+        label: string;
+        href: string;
+        ctaLabel?: string;
+        image?: string;
+        alt?: string;
+        svg?: string; // reserved for SVG-as-ReactNode handoff (P1)
+      };
+      editorial: string;
+    }
+  | {
+      kind: "cta";
+      label: string;
+      href: string;
+    };
+
+const DESTINATIONS_SUB: MegaNavLink[] = [
+  { label: "Noosa Heads", href: "/surf-and-weather" },
+  { label: "Hastings Street", href: "/things-to-do" },
+  { label: "Noosa Junction", href: "/things-to-do" },
+  { label: "Noosaville", href: "/things-to-do" },
+  { label: "Peregian Beach", href: "/things-to-do" },
+  { label: "Sunshine Beach", href: "/things-to-do" },
+  { label: "Tewantin", href: "/boats-and-watercraft" },
+  { label: "Noosa Country (hinterland)", href: "/things-to-do" },
+  { label: "Noosa Surrounds (North Shore, Marcus Beach)", href: "/things-to-do" },
+  { label: "Noosa National Park", href: "/noosa-national-park" },
+];
+
+const STAY_SUB: MegaNavLink[] = [
+  { label: "Hotels & Resorts", href: "/accommodation#hotels" },
+  { label: "Self-Contained", href: "/accommodation#self-contained" },
+  { label: "Apartments", href: "/accommodation#apartments" },
+  { label: "Houses & Holiday Letting", href: "/accommodation#houses" },
+  { label: "Caravan & Camping", href: "/accommodation#caravan" },
+  { label: "B&Bs / Retreats", href: "/accommodation#retreats" },
+  { label: "Pet Friendly", href: "/accommodation/pet-friendly" },
+  { label: "Accessible", href: "/accommodation/accessible" },
+  { label: "Unique / Bespoke", href: "/accommodation#unique" },
+  { label: "Family", href: "/accommodation/family" },
+  // v5 carryover (9 — Tim's locked answer)
+  { label: "Hastings Street", href: "/accommodation/hastings-street" },
+  { label: "Noosaville", href: "/accommodation/noosaville" },
+  { label: "Sunshine Beach", href: "/accommodation/sunshine-beach" },
+  { label: "Tewantin", href: "/accommodation/tewantin" },
+  { label: "Peregian", href: "/accommodation/peregian" },
+  { label: "Hinterland", href: "/accommodation/hinterland" },
+  // (the v5 carryover also includes pet-friendly, family, accessible — already above)
+];
+
+const SEE_AND_DO_SUB: MegaNavLink[] = [
+  { label: "Surf & Weather", href: "/surf-and-weather" },
+  { label: "Things to Do", href: "/things-to-do" },
+  { label: "Fishing", href: "/fishing-reports" },
+  { label: "Boats & Watercraft", href: "/boats-and-watercraft" },
+  { label: "Webcams", href: "/webcams" },
+  { label: "Tours & Experiences", href: "/things-to-do#tours" },
+  { label: "Day Trips", href: "/things-to-do#day-trips" },
+  { label: "Eat & Drink", href: "/things-to-do#eat-and-drink" },
+];
+
+const PLAN_SUB: MegaNavLink[] = [
+  { label: "The /plan hub", href: "/plan" },
+  { label: "Getting Here", href: "/travel-and-transport" },
+  { label: "Weather Almanac", href: "/surf-and-weather" },
+  { label: "Itineraries", href: "/plan#itineraries" },
+  { label: "Pet-Friendly", href: "/plan#pet-friendly" },
+  { label: "Accessibility", href: "/plan#accessibility" },
+  { label: "School Holidays", href: "/plan#school-holidays" },
+  { label: "Emergencies", href: "/plan#emergencies" },
+  { label: "Budget", href: "/plan#budget" },
+];
+
+const WHATS_ON_SUB: MegaNavLink[] = [
+  { label: "Events", href: "/things-to-do#events" },
+  { label: "Markets", href: "/things-to-do#markets" },
+  { label: "Festivals", href: "/things-to-do#festivals" },
+  { label: "Live Music", href: "/things-to-do#live-music" },
+  { label: "Exhibitions", href: "/things-to-do#exhibitions" },
+];
+
+export const MEGA_NAV: readonly MegaNavCategory[] = [
+  {
+    kind: "category",
+    label: "Destinations",
+    href: "/things-to-do",
+    sub: DESTINATIONS_SUB,
+    featured: {
+      label: "Hastings Street — the walkable end of town",
+      href: "/things-to-do",
+      ctaLabel: "Open Hastings Street →",
+    },
+    editorial:
+      "From the headland to the river mouth, ten places locals actually base themselves.",
+  },
+  {
+    kind: "category",
+    label: "Stay",
+    href: "/accommodation",
+    sub: STAY_SUB,
+    featured: {
+      label: "Where to base yourself",
+      href: "/accommodation",
+      ctaLabel: "Open accommodation →",
+    },
+    editorial:
+      "Hotels, apartments, holiday houses. Nine regional sub-pages plus ten archetype filters — find the right base for the trip.",
+  },
+  {
+    kind: "category",
+    label: "See & Do",
+    href: "/things-to-do",
+    sub: SEE_AND_DO_SUB,
+    featured: {
+      label: "The headland walk",
+      href: "/noosa-national-park",
+      ctaLabel: "Open the park guide →",
+    },
+    editorial:
+      "Surf, fish, paddle, walk, eat. The things locals do on a Tuesday, with the tide and the swell in mind.",
+  },
+  {
+    kind: "category",
+    label: "Plan",
+    href: "/plan",
+    sub: PLAN_SUB,
+    featured: {
+      label: "The /plan hub",
+      href: "/plan",
+      ctaLabel: "Open /plan →",
+    },
+    editorial:
+      "School holidays, accessibility, dog rules, emergencies, budget. The trip-planning surface, sourced.",
+  },
+  {
+    kind: "category",
+    label: "What's On",
+    href: "/things-to-do#events",
+    sub: WHATS_ON_SUB,
+    featured: {
+      label: "This week on the shire",
+      href: "/things-to-do#events",
+      ctaLabel: "See what's on →",
+    },
+    editorial:
+      "Markets, festivals, live music, exhibitions. Curated weekly, manually, in line with Spam Act 2003.",
+  },
+  {
+    kind: "cta",
+    label: "Book Now",
+    href: "/accommodation",
+  },
+] as const;
+
+/* ======================================================================
+ * v6 (MSN-2960-V6) — homepage section data.
+ *
+ * Drives the 7 P0 sections of the new homepage (S1, S3, S4, S5, S9,
+ * S10, S16). P1 adds S2, S6, S7, S8, S13, S15.
+ * ====================================================================== */
+
+/**
+ * S3 — Featured areas (6 cards). Each card binds a curated Unsplash
+ * photo (HOMEPAGE_FEATURED_AREAS) to an area, tagline, and CTA. v5's
+ * "Fishing" and "Boats" areas are demoted from the featured grid and
+ * folded into S4 (things to do).
+ */
+export const FEATURED_AREAS = [
+  {
+    slug: "noosa-heads",
+    name: "Noosa Heads",
+    tagline: "The headland, the bars, the national park at your door.",
+    href: "/surf-and-weather",
+    cta: "Read the surf report →",
+    imageIndex: 0,
+  },
+  {
+    slug: "hastings-street",
+    name: "Hastings Street",
+    tagline: "Cafés, restaurants, and Main Beach within walking distance.",
+    href: "/things-to-do",
+    cta: "See what to do →",
+    imageIndex: 1,
+  },
+  {
+    slug: "noosaville",
+    name: "Noosaville",
+    tagline: "Across the river; the ferry, the riverfront, the family pace.",
+    href: "/things-to-do",
+    cta: "See Noosaville →",
+    imageIndex: 2,
+  },
+  {
+    slug: "sunshine-beach",
+    name: "Sunshine Beach",
+    tagline: "South of the headland — the surf village, the village shops.",
+    href: "/things-to-do",
+    cta: "See Sunshine Beach →",
+    imageIndex: 3,
+  },
+  {
+    slug: "peregian-beach",
+    name: "Peregian Beach",
+    tagline: "Village-square feel; the start of the Coolum stretch.",
+    href: "/things-to-do",
+    cta: "See Peregian →",
+    imageIndex: 4,
+  },
+  {
+    slug: "noosa-national-park",
+    name: "Noosa National Park",
+    tagline: "Coastal forest, granite headlands, the QPWS alerts.",
+    href: "/noosa-national-park",
+    cta: "Check park alerts →",
+    imageIndex: 5,
+  },
+] as const;
+
+/**
+ * S4 — Things to do (8 experience cards). Pricing in the card is
+ * indicative, sourced from local operators and Booking.com at the
+ * time of the v6 build; verify before relying on it.
+ */
+export const THINGS_TO_DO = [
+  {
+    title: "Learn to surf at First Bay",
+    duration: "2 hrs",
+    priceFrom: "from $79 pp",
+    href: "/things-to-do#learn-to-surf",
+    imageIndex: 0,
+    disclosure: "Affiliate",
+  },
+  {
+    title: "Guided headland walk",
+    duration: "3 hrs",
+    priceFrom: "from $45 pp",
+    href: "/things-to-do#headland-walk",
+    imageIndex: 1,
+  },
+  {
+    title: "Noosa River sunset cruise",
+    duration: "2.5 hrs",
+    priceFrom: "from $59 pp",
+    href: "/things-to-do#river-cruise",
+    imageIndex: 2,
+  },
+  {
+    title: "Noosa Junction farmers market",
+    duration: "Sunday morning",
+    priceFrom: "Free entry",
+    href: "/things-to-do#markets",
+    imageIndex: 3,
+  },
+  {
+    title: "Half-day fishing charter",
+    duration: "5 hrs",
+    priceFrom: "from $190 pp",
+    href: "/fishing-reports",
+    imageIndex: 4,
+  },
+  {
+    title: "Stand-up paddle hire",
+    duration: "1 hr",
+    priceFrom: "from $25",
+    href: "/things-to-do#paddle",
+    imageIndex: 5,
+  },
+  {
+    title: "Hinterland waterfalls day trip",
+    duration: "Full day",
+    priceFrom: "from $135 pp",
+    href: "/things-to-do#day-trips",
+    imageIndex: 6,
+  },
+  {
+    title: "Eumundi markets + lunch",
+    duration: "Half day",
+    priceFrom: "Free entry",
+    href: "/things-to-do#markets",
+    imageIndex: 7,
+  },
+] as const;
+
+/**
+ * S5 — Where to stay (6 cross-section cards). Spans the shire, not
+ * region-locked, so a visitor can see the full spread at a glance.
+ */
+export const WHERE_TO_STAY = [
+  {
+    name: "Hastings Street boutique hotel",
+    area: "Hastings Street",
+    priceFrom: "from $245 / night",
+    href: "/accommodation/hastings-street",
+    imageIndex: 0,
+  },
+  {
+    name: "Noosaville family apartment",
+    area: "Noosaville",
+    priceFrom: "from $185 / night",
+    href: "/accommodation/noosaville",
+    imageIndex: 1,
+  },
+  {
+    name: "Sunshine Beach holiday house",
+    area: "Sunshine Beach",
+    priceFrom: "from $310 / night",
+    href: "/accommodation/sunshine-beach",
+    imageIndex: 2,
+  },
+  {
+    name: "Hinterland B&B",
+    area: "Hinterland",
+    priceFrom: "from $165 / night",
+    href: "/accommodation/hinterland",
+    imageIndex: 3,
+  },
+  {
+    name: "Peregian dog-friendly cottage",
+    area: "Peregian",
+    priceFrom: "from $210 / night",
+    href: "/accommodation/peregian",
+    imageIndex: 4,
+  },
+  {
+    name: "Accessible ground-floor unit",
+    area: "Shire-wide",
+    priceFrom: "from $175 / night",
+    href: "/accommodation/accessible",
+    imageIndex: 5,
+  },
+] as const;
+
+/**
+ * S9 — Webcams strip (4 tiles, 1:1 aspect). v5 carries the
+ * /webcams page; v6 surfaces 4 tiles on the homepage. Where the
+ * operator permits, we render a live thumbnail; otherwise we
+ * render a static placeholder with a "View live →" CTA.
+ */
+export const WEBCAMS = [
+  {
+    name: "Main Beach",
+    location: "Noosa Heads",
+    href: "/webcams#main-beach",
+  },
+  {
+    name: "Noosa Bar",
+    location: "Noosa Heads",
+    href: "/webcams#noosa-bar",
+  },
+  {
+    name: "Sunshine Beach",
+    location: "Sunshine Beach",
+    href: "/webcams#sunshine-beach",
+  },
+  {
+    name: "Maroochydore",
+    location: "Sunshine Coast",
+    href: "/webcams#maroochydore",
+  },
+] as const;
+
+/**
+ * S10 — Getting here (3-col matrix of transport modes). Drive
+ * times are typical, in good conditions, free of incidents; verify
+ * via QLD Traffic for live. Per spec §2.1 S10.
+ */
+export const GETTING_HERE = [
+  {
+    mode: "Drive from Brisbane",
+    duration: "1h 45m",
+    icon: "Car" as const,
+    href: "/travel-and-transport",
+  },
+  {
+    mode: "Drive from Sydney",
+    duration: "10 hrs",
+    icon: "Car" as const,
+    href: "/travel-and-transport",
+  },
+  {
+    mode: "Sunshine Coast Airport",
+    duration: "30 min transfer",
+    icon: "Plane" as const,
+    href: "/travel-and-transport",
+  },
+  {
+    mode: "Noosa Ferry (Noosaville ↔ Hastings Street)",
+    duration: "River route",
+    icon: "Anchor" as const,
+    href: "https://www.noosaferry.com/",
+    external: true,
+  },
+  {
+    mode: "Premier Motorway bus",
+    duration: "Brisbane ↔ Noosa",
+    icon: "Bus" as const,
+    href: "/travel-and-transport",
+  },
 ] as const;
 
 /**
@@ -358,13 +802,14 @@ export const FOOTER_DISCLOSURE = {
     {
       heading: "Sitemap",
       links: [
+        // v6 (MSN-2960-V6) — column 1 reflects the new mega-menu IA.
+        { label: "Destinations", href: "/things-to-do" },
+        { label: "Stay", href: "/accommodation" },
+        { label: "See & Do", href: "/things-to-do" },
+        { label: "Plan", href: "/plan" },
+        { label: "What's On", href: "/things-to-do#events" },
         { label: "Surf & weather", href: "/surf-and-weather" },
-        { label: "National Park", href: "/noosa-national-park" },
-        { label: "Accommodation", href: "/accommodation" },
-        { label: "Things to do", href: "/things-to-do" },
-        { label: "Fishing", href: "/fishing-reports" },
-        { label: "Boats", href: "/boats-and-watercraft" },
-        { label: "Travel", href: "/travel-and-transport" },
+        { label: "Noosa National Park", href: "/noosa-national-park" },
         { label: "Webcams", href: "/webcams" },
       ],
     },

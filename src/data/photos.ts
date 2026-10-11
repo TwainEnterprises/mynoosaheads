@@ -313,6 +313,183 @@ export const CATEGORY_PHOTOS: Record<string, CategoryPhotos> = {
 
 export const HOMEPAGE_HERO: UnsplashPhoto = HERO.homepage;
 
+/* ======================================================================
+ * v6 (MSN-2960-V6, 2026-10-11) — homepage section photos.
+ *
+ * Per Albert's v6 spec §2.3: v5 ships 31 curated Unsplash photos; v6
+ * adds 18 net-new (A$0, photographer verification deferred to v6.1 per
+ * the v5 README §Known issues #1). The new photos serve:
+ *   - HOMEPAGE_FEATURED_AREAS — S3 (6 cards, photo-swap from v5 SVGs)
+ *   - HOMEPAGE_THINGS_TO_DO  — S4 (8 experience cards, NEW)
+ *   - HOMEPAGE_WHERE_TO_STAY — S5 (6 cross-section cards, NEW)
+ *   - HOMEPAGE_GETTING_HERE  — S10 (1 hero, reuses v5 travel hero)
+ *
+ * Mega-menu panel images: per §3.4, the mega-menu column-3 image uses
+ * the v5 area SVGs (src/components/illustrations/AreaHeroes.tsx) — no
+ * additional photos needed for the panel.
+ *
+ * v5 inventory reuse: where a v5 photo already role-matches a v6
+ * section (e.g. the v5 accommodation hero fits the "Hastings Street
+ * boutique hotel" stay card), we reuse it to keep the inventory
+ * lean. New photos are downloaded once and serve from
+ * /public/photos/ at the site origin.
+ * ====================================================================== */
+
+/* ----------------------------------------------------------------------
+ * S3 — Featured areas (6 photo cards replacing the v5 8-area SVGs).
+ * -------------------------------------------------------------------- */
+
+const FEATURED_AREAS = [
+  // Noosa Heads — coastal headland (v5 homepage hero)
+  unsplash(
+    "1473773508845-188df298d2d1",
+    "Noosa Heads — the coastal headland that gives the shire its name.",
+  ),
+  // Hastings Street — palms (v5 inline)
+  unsplash(
+    "1473625247510-8ceb1760943f",
+    "Hastings Street palms — the precinct's defining streetscape.",
+  ),
+  // Noosaville — coastal township (v5 inline)
+  unsplash(
+    "1540541338287-41700207dee6",
+    "Noosaville — across the river, along Gympie Terrace.",
+  ),
+  // Sunshine Beach — headland reflection (v5 inline)
+  unsplash(
+    "1493514789931-586cb221d7a7",
+    "Sunshine Beach — the surf village south of the headland.",
+  ),
+  // Peregian Beach — NEW v6 photo
+  unsplash(
+    "1517524008697-84bbe3c3fd98",
+    "Peregian Beach — the village square south past Sunshine Beach.",
+  ),
+  // Noosa National Park — v5 hero
+  unsplash(
+    "1488646953014-85cb44e25828",
+    "Noosa National Park — the headland walk and coastal forest.",
+  ),
+] as const;
+
+/* ----------------------------------------------------------------------
+ * S4 — Things to do (8 experience cards).
+ * -------------------------------------------------------------------- */
+
+const THINGS_TO_DO = [
+  // Learn to surf at First Bay — NEW
+  unsplash(
+    "1530549387789-4c1017266635",
+    "Learn to surf at First Bay — the longboard point break locals use.",
+  ),
+  // National Park guided walk — v5 inline (forest interior)
+  unsplash(
+    "1437846972679-9e6e537be46e",
+    "Guided headland walk — the eastern access to the coastal forest.",
+  ),
+  // Noosa River sunset cruise — NEW
+  unsplash(
+    "1505765050516-f72dcac9c60e",
+    "Noosa River sunset cruise — the calm-water golden hour.",
+  ),
+  // Farmers market (Noosa Junction Sun) — NEW
+  unsplash(
+    "1542838132-92c53300491e",
+    "Noosa Junction farmers market — Sunday morning on the laneway.",
+  ),
+  // Fishing charter half-day — v5 inline (on the river)
+  unsplash(
+    "1505228395891-9a51e7e86bf6",
+    "Half-day fishing charter — Tewantin to the river mouth.",
+  ),
+  // Stand-up paddle hire — NEW
+  unsplash(
+    "1518609878373-06d740f60d8b",
+    "Stand-up paddle hire — the river at Noosaville.",
+  ),
+  // Hinterland waterfalls day trip — NEW
+  unsplash(
+    "1500382017468-9049fed747ef",
+    "Hinterland waterfalls day trip — Pomona, Cooran, Kin Kin.",
+  ),
+  // Eumundi markets + lunch — NEW
+  unsplash(
+    "1488459716781-31db52582fe9",
+    "Eumundi markets + lunch — Wednesday and Saturday morning.",
+  ),
+] as const;
+
+/* ----------------------------------------------------------------------
+ * S5 — Where to stay (6 cross-section cards).
+ * -------------------------------------------------------------------- */
+
+const WHERE_TO_STAY = [
+  // Hastings Street boutique hotel — v5 accommodation hero
+  unsplash(
+    "1500530855697-b586d89ba3ee",
+    "Hastings Street boutique hotel — the walkable end of town.",
+  ),
+  // Noosaville family apartment — NEW
+  unsplash(
+    "1566073771259-6a8506099945",
+    "Noosaville family apartment — riverfront, ferry at the door.",
+  ),
+  // Sunshine Beach holiday house — NEW
+  unsplash(
+    "1564013799919-ab600027ffc6",
+    "Sunshine Beach holiday house — the surf village, family-sized.",
+  ),
+  // Hinterland B&B — NEW
+  unsplash(
+    "1551882547-ff40c63fe5fa",
+    "Hinterland B&B — inland villages, slow mornings.",
+  ),
+  // Peregian dog-friendly cottage — NEW
+  unsplash(
+    "1505691938895-1758d7feb511",
+    "Peregian dog-friendly cottage — village-square, fenced yard.",
+  ),
+  // Accessible ground-floor unit — NEW
+  unsplash(
+    "1505693416388-ac5ce068fe85",
+    "Accessible ground-floor unit — step-free, open-plan living.",
+  ),
+] as const;
+
+/* ----------------------------------------------------------------------
+ * S10 — Getting here (1 hero photo, reuses v5 travel hero).
+ * -------------------------------------------------------------------- */
+
+const GETTING_HERE = unsplash(
+  "1426604966848-d7adac402bff",
+  "The road in — Bruce Highway approach to the shire.",
+);
+
+export const HOMEPAGE_FEATURED_AREAS = FEATURED_AREAS;
+export const HOMEPAGE_THINGS_TO_DO = THINGS_TO_DO;
+export const HOMEPAGE_WHERE_TO_STAY = WHERE_TO_STAY;
+export const HOMEPAGE_GETTING_HERE = GETTING_HERE;
+
+/**
+ * v6 (MSN-2960-V6) — homepage section photo type + single-import
+ * surface. Defined after the individual consts because it references
+ * them. Lets the homepage page.tsx import one object and pick the
+ * relevant array.
+ */
+export type HomepageSectionPhotos = {
+  featuredAreas: readonly UnsplashPhoto[];
+  thingsToDo: readonly UnsplashPhoto[];
+  whereToStay: readonly UnsplashPhoto[];
+  gettingHere: UnsplashPhoto;
+};
+
+export const HOMEPAGE_SECTIONS: HomepageSectionPhotos = {
+  featuredAreas: FEATURED_AREAS,
+  thingsToDo: THINGS_TO_DO,
+  whereToStay: WHERE_TO_STAY,
+  gettingHere: GETTING_HERE,
+};
+
 /* ----------------------------------------------------------------------
  * /about brand-statement masthead image — quieter, more editorial
  * (granite headland + coastal scrub rather than the swimming beach).
