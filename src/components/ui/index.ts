@@ -64,3 +64,16 @@ export type { IconProps, IconName } from "./Icon";
 
 export { AffiliateBadge } from "./AffiliateBadge";
 export type { AffiliateBadgeProps } from "./AffiliateBadge";
+
+// v6.1 (MSN-2961-V6.1) — micro-interaction library
+export { Accordion } from "./Accordion";
+export type { AccordionItem, AccordionProps } from "./Accordion";
+
+export { LightboxRoot, LightboxTrigger } from "./Lightbox";
+export type { LightboxItem, LightboxRootProps, LightboxTriggerProps } from "./Lightbox";
+
+export { Tabs } from "./Tabs";
+export type { TabItem, TabsProps } from "./Tabs";
+
+export { SearchOverlay } from "./SearchOverlay";
+export type { SearchOverlayProps } from "./SearchOverlay";

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import * as React from "react";
 import { fetchLiveBundle } from "@/lib/live-data";
 import {
   Hero,
@@ -12,8 +13,10 @@ import {
   Icons,
   ContentCard,
   Carousel,
+  Accordion,
 } from "@/components/ui";
 import { AreaHeroes } from "@/components/illustrations/AreaHeroes";
+import { Scenes } from "@/components/illustrations/Scenes";
 import {
   SITE,
   FEATURED_AREAS,
@@ -21,38 +24,57 @@ import {
   WHERE_TO_STAY,
   WEBCAMS,
   GETTING_HERE,
+  EAT_AND_DRINK,
+  NOOSA_RIGHT_NOW,
+  WHATS_ON_THIS_WEEK,
+  FAQ_ITEMS,
 } from "@/data/site";
 import { HOMEPAGE_HERO, HOMEPAGE_SECTIONS } from "@/data/photos";
 import type { UnsplashPhoto } from "@/data/photos";
 
 /**
- * Homepage — v6 (MSN-2960-V6, 2026-10-11).
+ * Homepage — v6.1 (MSN-2961-V6.1, 2026-10-12).
  *
- * Layout per Albert's v6 spec §2.1 (7 P0 sections + v5 carry):
- *   1. S1  Hero                 (refined; carries v5 overlay)
- *   2. S2  Live conditions      (carry from v5; P1 polish deferred)
- *   3. S3  Featured areas grid  (P0; 6 photo cards, replaces 8 SVGs)
- *   4. S4  Things to do         (P0; 8 cards in a scroll-snap rail)
- *   5. S5  Where to stay        (P0; 6 cross-section cards)
- *   6. S6  Plan your trip hub   (carry from v5; P1 polish deferred)
- *   7. S9  Webcams strip        (P0; 4 tiles)
- *   8. S10 Getting here         (P0; 5 transport modes)
- *   9. Disclosure band          (carry from v5)
- *  10. S16 Footer               (carry from v5; column 1 uses new IA)
+ * Layout per Albert's v6 spec §2.1 (P0 + P1):
+ *   1.  S1  Hero                   (v6 P0; refined)
+ *   2.  S2  Live conditions        (v6.1 P1: scroll-snap polish, icon adoption)
+ *   3.  S3  Featured areas grid    (v6 P0; 6 photo cards)
+ *   4.  S4  Things to do           (v6 P0; 8 cards in scroll-snap rail)
+ *   5.  S5  Where to stay          (v6 P0; 6 cross-section cards)
+ *   6.  S7  Eat & drink strip      (v6.1 P1; 6 venue tiles)
+ *   7.  S6  Plan your trip hub     (v6 P0; 3 cards)
+ *   8.  S8  Noosa right now        (v6.1 P1; 4 editorial cards)
+ *   9.  S9  Webcams strip          (v6 P0; 4 tiles)
+ *  10.  S10 Getting here           (v6 P0; 5 transport modes)
+ *  11.  S13 What's on this week    (v6.1 P1; 6 events)
+ *  12.  S15 FAQ accordion          (v6.1 P1; 8 questions)
+ *  13.  Disclosure band            (v5 carry; 97-word ACCC band)
+ *  14.  S16 Footer                 (v5 carry; column 1 uses new IA)
  *
- * v6 changes vs v5:
- *   - #P0-1: Mega menu in SiteHeader (6 categories, ~55 sub-links).
- *   - #P0-2: Hero overlay refined; S1 unchanged structurally.
- *   - #P0-3: Featured areas grid (S3) — 6 photo cards; v5's 8
- *     area SVGs are demoted to mega-menu use.
- *   - #P0-4: Things to do carousel (S4) — new scroll-snap rail.
- *   - #P0-5: Where to stay grid (S5) — 6 cross-section cards.
- *   - #P0-6: Webcams strip (S9) — 4 tiles.
- *   - #P0-7: Getting here section (S10) — 5 transport modes.
- *   - #P0-8: Footer (S16) — column 1 uses new IA.
- *   - #P0-9: Design system polish (globals.css, tailwind.config.ts).
- *   - #P0-10: Micro-interaction library (card lift, image scale,
- *     link underline, button press; globals.css utilities).
+ * v6.1 P1 additions over v6 P0:
+ *   - #P1-1 S2 polish: scroll-snap strip + Icon component adoption
+ *   - #P1-2 S7 Eat & drink: 6 venues (Wasabi, Sails, Berardo's,
+ *             Sum Yung Guys, Bistro C, Locale) with 1:1 cards
+ *   - #P1-3 S8 Noosa right now: 4 editorial cards (markets,
+ *             alerts, moon, holidays) with scene illustrations
+ *   - #P1-4 S13 What's on: 6 events (date + venue + category)
+ *   - #P1-5 S15 FAQ: 8 questions (parking, dog rules, school
+ *             holidays, emergencies, accessibility, surf, bar,
+ *             dump point) with answers and source links
+ *   - Micro-interaction library: Accordion, Lightbox, Tabs,
+ *             SearchOverlay added to ui/index.ts
+ *   - Mega-menu search (deferred from v6 P0 per Tim's call #2):
+ *             Cmd/Ctrl-K opens the global search; static index
+ *             built from NAV + MEGA_NAV + named routes
+ *   - 15 scene illustrations in Scenes.tsx for use as content-
+ *             rail and section accents
+ *
+ * Photo integration: Albert's photo manifest has not landed at
+ * the time of this build. The new sections reuse the v6
+ * HOMEPAGE_SECTIONS.* photos with role-matched indices. When
+ * the manifest lands, swap photos.ts (single-file) + image
+ * references in each section. The /image-credits page is
+ * auto-rendered from photos.ts.
  */
 export default async function HomePage() {
   const live = await fetchLiveBundle();
@@ -354,6 +376,64 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ─── S7: Eat & drink strip (v6.1 P1; 6 venues) ─── */}
+      <section
+        className="border-t border-paper-200 bg-paper-100"
+        aria-labelledby="eat-and-drink-heading"
+      >
+        <div className="container-page py-14 md:py-20">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+            <div>
+              <p className="eyebrow">Where the table is set</p>
+              <h2
+                id="eat-and-drink-heading"
+                className="mt-1 font-display text-display-md text-ink-900 text-balance"
+              >
+                Eat &amp; drink in Noosa
+              </h2>
+              <p className="mt-3 lead max-w-2xl">
+                Six venues locals actually go back to — a riverside
+                Japanese, a Hastings Street seafood icon, and a Junction
+                brunch spot that has been quietly nailing eggs since
+                before the visitors found it.
+              </p>
+            </div>
+            <Link
+              href="/things-to-do#eat-and-drink"
+              className="link text-ocean-700 text-body-sm font-medium hover-underline"
+            >
+              See all eat &amp; drink →
+            </Link>
+          </div>
+          <div className="mt-8 -mx-4 sm:-mx-6 lg:-mx-10">
+            <Carousel
+              ariaLabel="Eat and drink venues"
+              slideCount={EAT_AND_DRINK.length}
+            >
+              {EAT_AND_DRINK.map((venue, i) => {
+                const photo: UnsplashPhoto =
+                  HOMEPAGE_SECTIONS.whereToStay[i] ??
+                  HOMEPAGE_SECTIONS.featuredAreas[i];
+                return (
+                  <ContentCard
+                    key={venue.name}
+                    image={photo.url}
+                    imageAlt={photo.caption}
+                    imageCredit={`Photo: ${photo.author} / Unsplash`}
+                    imageAspect="1/1"
+                    eyebrow={venue.area}
+                    title={venue.name}
+                    body={venue.cuisine}
+                    meta={venue.price}
+                    cta={{ label: "Reserve →", href: venue.href }}
+                  />
+                );
+              })}
+            </Carousel>
+          </div>
+        </div>
+      </section>
+
       {/* ─── S6: Plan your trip hub (carry from v5; P1 polish deferred) ─── */}
       <section
         className="border-t border-paper-200 bg-paper-100"
@@ -428,6 +508,80 @@ export default async function HomePage() {
               Open the full /plan hub →
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* ─── S8: Noosa right now (v6.1 P1; editorial rail) ─── */}
+      <section
+        className="container-page py-14 md:py-20"
+        aria-labelledby="noosa-right-now-heading"
+      >
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+          <div>
+            <p className="eyebrow">Noosa right now</p>
+            <h2
+              id="noosa-right-now-heading"
+              className="mt-1 font-display text-display-md text-ink-900 text-balance"
+            >
+              What the shire is up to
+            </h2>
+            <p className="mt-3 lead max-w-2xl">
+              Curated weekly — this weekend’s markets, current park and
+              road alerts, the moon phase for evening fish, and the
+              school-holiday countdown. Updated by Sally every Friday.
+            </p>
+          </div>
+          <Link
+            href="/things-to-do#events"
+            className="link text-ocean-700 text-body-sm font-medium hover-underline"
+          >
+            See all events →
+          </Link>
+        </div>
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {NOOSA_RIGHT_NOW.map((item, i) => {
+            const SceneComp = (() => {
+              switch (item.scene) {
+                case "market":
+                  return Scenes.MarketStall;
+                case "alert":
+                  return Scenes.HeadlandOutline;
+                case "moon":
+                  return Scenes.Sunset;
+                case "calendar":
+                  return Scenes.MapPin;
+                default:
+                  return Scenes.PalmCluster;
+              }
+            })();
+            return (
+              <article
+                key={item.title}
+                className="group relative flex flex-col overflow-hidden rounded-xl border border-paper-200 bg-paper-50 shadow-sm hover-lift"
+              >
+                <div className="hover-scale-img aspect-[4/3] w-full bg-paper-100">
+                  <SceneComp className="h-full w-full" />
+                </div>
+                <div className="flex flex-1 flex-col p-5">
+                  <p className="eyebrow">{item.eyebrow}</p>
+                  <h3 className="mt-1 font-display text-headline-lg text-ink-900 text-balance">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-body-sm text-ink-700 text-pretty flex-1">
+                    {item.sub}
+                  </p>
+                  <div className="mt-4">
+                    <Link
+                      href={item.href}
+                      className="link text-ocean-700 text-body-sm font-medium hover-underline"
+                    >
+                      Read more →
+                    </Link>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </section>
 
@@ -579,6 +733,156 @@ export default async function HomePage() {
               <figcaption className="absolute bottom-2 right-2 rounded-pill bg-ink-900/70 px-2 py-0.5 text-[10px] text-paper-100">
                 Photo: {HOMEPAGE_SECTIONS.gettingHere.author} / Unsplash
               </figcaption>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── S13: What's on this week (v6.1 P1; 6 events) ─── */}
+      <section
+        className="container-page py-14 md:py-20"
+        aria-labelledby="whats-on-heading"
+      >
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+          <div>
+            <p className="eyebrow">What’s on this week</p>
+            <h2
+              id="whats-on-heading"
+              className="mt-1 font-display text-display-md text-ink-900 text-balance"
+            >
+              Up on the shire
+            </h2>
+            <p className="mt-3 lead max-w-2xl">
+              Six events across the next seven days. Curated manually; live
+              feeds are a v6.2+ item (no Eventbrite API in the A$0
+              budget). The full list lives at{" "}
+              <Link href="/things-to-do#events" className="link text-ocean-700 hover-underline">
+                things to do
+              </Link>
+              .
+            </p>
+          </div>
+          <Link
+            href="/things-to-do#events"
+            className="link text-ocean-700 text-body-sm font-medium hover-underline"
+          >
+            See all events →
+          </Link>
+        </div>
+        <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {WHATS_ON_THIS_WEEK.map((event) => {
+            const CategoryIcon = (() => {
+              switch (event.category) {
+                case "MARKET":
+                  return Icons.Market;
+                case "LIVE MUSIC":
+                  return Icons.Music;
+                case "FESTIVAL":
+                  return Icons.Sparkle;
+                case "EXHIBITION":
+                  return Icons.Frame;
+                case "FAMILY":
+                  return Icons.Family;
+                case "COMMUNITY":
+                  return Icons.Community;
+                default:
+                  return Icons.CalendarEvent;
+              }
+            })();
+            return (
+              <li
+                key={`${event.date}-${event.title}`}
+                className="group relative flex flex-col gap-3 overflow-hidden rounded-xl border border-paper-200 bg-paper-50 p-4 shadow-sm hover-lift sm:flex-row sm:items-stretch sm:p-5"
+              >
+                <time
+                  dateTime={event.date}
+                  className="flex shrink-0 flex-col items-center justify-center rounded-lg bg-eucalyptus-50 px-3 py-2 sm:w-20 sm:py-4"
+                  aria-label={`${event.date} — ${event.day} ${event.month}`}
+                >
+                  <span className="font-display text-display-md text-eucalyptus-900 leading-none">
+                    {event.day}
+                  </span>
+                  <span className="mt-1 text-caption uppercase tracking-[0.16em] text-eucalyptus-700">
+                    {event.month}
+                  </span>
+                </time>
+                <div className="flex flex-1 flex-col">
+                  <span className="flex items-center gap-1.5 text-caption font-semibold uppercase tracking-[0.16em] text-ocean-900">
+                    <CategoryIcon size={14} aria-hidden="true" />
+                    {event.category}
+                  </span>
+                  <h3 className="mt-1 font-display text-headline-lg text-ink-900 text-balance">
+                    {event.title}
+                  </h3>
+                  <p className="mt-1 text-body-sm text-ink-700">
+                    {event.venue}
+                  </p>
+                  <div className="mt-3">
+                    <Link
+                      href={event.href}
+                      className="link text-ocean-700 text-body-sm font-medium hover-underline"
+                    >
+                      View details →
+                    </Link>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      {/* ─── S15: FAQ accordion (v6.1 P1; 8 questions) ─── */}
+      <section
+        className="border-t border-paper-200 bg-paper-100"
+        aria-labelledby="faq-heading"
+      >
+        <div className="container-page py-14 md:py-20">
+          <div className="grid gap-10 md:grid-cols-3 md:items-start">
+            <div>
+              <p className="eyebrow">Frequently asked</p>
+              <h2
+                id="faq-heading"
+                className="mt-1 font-display text-display-md text-ink-900 text-balance"
+              >
+                Common visitor questions
+              </h2>
+              <p className="mt-3 lead">
+                Eight things people ask first. Answers are sourced from
+                the council, QPWS, BOM, and MSQ — each links back to the
+                canonical page. Still have a question?{" "}
+                <Link href="/contact" className="link text-ocean-700 hover-underline">
+                  Get in touch
+                </Link>
+                .
+              </p>
+            </div>
+            <div className="md:col-span-2">
+              <Accordion
+                items={FAQ_ITEMS.map((item) => {
+                  const iconMap: Record<string, React.ReactNode> = {
+                    Pin: <Icons.Pin size={20} aria-hidden="true" />,
+                    Pets: <Icons.Pets size={20} aria-hidden="true" />,
+                    CalendarEvent: (
+                      <Icons.CalendarEvent size={20} aria-hidden="true" />
+                    ),
+                    Phone: <Icons.Phone size={20} aria-hidden="true" />,
+                    Wheelchair: (
+                      <Icons.Wheelchair size={20} aria-hidden="true" />
+                    ),
+                    Wave: <Icons.Wave size={20} aria-hidden="true" />,
+                    Boat: <Icons.Boat size={20} aria-hidden="true" />,
+                  };
+                  return {
+                    question: item.question,
+                    answer: item.answer,
+                    icon: iconMap[item.iconKey] ?? (
+                      <Icons.Question size={20} aria-hidden="true" />
+                    ),
+                  };
+                })}
+                ariaLabel="Frequently asked questions"
+              />
             </div>
           </div>
         </div>

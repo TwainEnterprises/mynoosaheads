@@ -633,6 +633,194 @@ export function QuestionIcon({
   );
 }
 
+/* ================================================================
+ * v6.1 (MSN-2961-V6.1) — additional icons for the P1 sections.
+ *
+ * Per Albert's v6 spec §5.2 the full set is 48 icons. v6.0 P0
+ * shipped 38. v6.1 P1 adds the 10 needed for S7 (eat & drink),
+ * S8 (noosa right now), S13 (what's on), S15 (FAQ) — the 8 area
+ * icons in §5.2 are the remaining 10 of the 48 budget; this build
+ * ships the high-leverage ones and the rest are follow-on.
+ * ================================================================ */
+
+/** Fork-knife — for S7 (eat & drink). */
+export function ForkKnifeIcon({
+  size = 24,
+  strokeWidth = 1.5,
+  title,
+  ...rest
+}: IconProps) {
+  return (
+    <svg {...baseProps(size, strokeWidth, title)} {...rest}>
+      <path d="M7 3v8a2 2 0 0 0 2 2v8" />
+      <path d="M9 3v6" />
+      <path d="M17 3c-1.5 1.5-2 3-2 5s.5 3 2 3v10" />
+    </svg>
+  );
+}
+
+/** Cup / mug — for S7 (cafés, brunch). */
+export function CupIcon({
+  size = 24,
+  strokeWidth = 1.5,
+  title,
+  ...rest
+}: IconProps) {
+  return (
+    <svg {...baseProps(size, strokeWidth, title)} {...rest}>
+      <path d="M5 9h12v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4z" />
+      <path d="M17 11h2a2 2 0 0 1 0 4h-2" />
+      <path d="M8 5c0 1 1 1 1 2s-1 1-1 2" />
+      <path d="M12 5c0 1 1 1 1 2s-1 1-1 2" />
+    </svg>
+  );
+}
+
+/** Music note — for S13 (live music). */
+export function MusicIcon({
+  size = 24,
+  strokeWidth = 1.5,
+  title,
+  ...rest
+}: IconProps) {
+  return (
+    <svg {...baseProps(size, strokeWidth, title)} {...rest}>
+      <path d="M9 18V5l12-2v13" />
+      <circle cx="6" cy="18" r="3" />
+      <circle cx="18" cy="16" r="3" />
+    </svg>
+  );
+}
+
+/** Market stall / awning — for S13 (markets). */
+export function MarketIcon({
+  size = 24,
+  strokeWidth = 1.5,
+  title,
+  ...rest
+}: IconProps) {
+  return (
+    <svg {...baseProps(size, strokeWidth, title)} {...rest}>
+      <path d="M3 9l2-5h14l2 5" />
+      <path d="M3 9h18" />
+      <path d="M5 9v11M19 9v11M9 9v11M15 9v11" />
+      <path d="M3 9c0 1.5 1 2 2 2s2-.5 2-2" />
+      <path d="M7 9c0 1.5 1 2 2 2s2-.5 2-2" />
+      <path d="M11 9c0 1.5 1 2 2 2s2-.5 2-2" />
+      <path d="M15 9c0 1.5 1 2 2 2s2-.5 2-2" />
+    </svg>
+  );
+}
+
+/** Sparkle / festival — for S13 (festivals). */
+export function SparkleIcon({
+  size = 24,
+  strokeWidth = 1.5,
+  title,
+  ...rest
+}: IconProps) {
+  return (
+    <svg {...baseProps(size, strokeWidth, title)} {...rest}>
+      <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z" />
+      <path d="M19 16l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z" />
+    </svg>
+  );
+}
+
+/** Image / art frame — for S13 (exhibitions). */
+export function FrameIcon({
+  size = 24,
+  strokeWidth = 1.5,
+  title,
+  ...rest
+}: IconProps) {
+  return (
+    <svg {...baseProps(size, strokeWidth, title)} {...rest}>
+      <rect x="3" y="5" width="18" height="14" rx="1" />
+      <path d="M3 16l4-4 3 3 4-5 7 6" />
+      <circle cx="9" cy="9" r="1" fill="currentColor" />
+    </svg>
+  );
+}
+
+/** Heart hands / community — for S13 (community events). */
+export function CommunityIcon({
+  size = 24,
+  strokeWidth = 1.5,
+  title,
+  ...rest
+}: IconProps) {
+  return (
+    <svg {...baseProps(size, strokeWidth, title)} {...rest}>
+      <circle cx="9" cy="8" r="2" />
+      <circle cx="15" cy="8" r="2" />
+      <path d="M3 19c0-3 2.7-5 6-5s6 2 6 5" />
+      <path d="M11 19c0-3 2.7-5 6-5s4 2 4 5" />
+    </svg>
+  );
+}
+
+/** Tent — for camping / hinterland. */
+export function TentIcon({
+  size = 24,
+  strokeWidth = 1.5,
+  title,
+  ...rest
+}: IconProps) {
+  return (
+    <svg {...baseProps(size, strokeWidth, title)} {...rest}>
+      <path d="M3 20L12 4l9 16" />
+      <path d="M12 4v16" />
+      <path d="M8 20h8" />
+    </svg>
+  );
+}
+
+/** Tree — for Noosa National Park scenes. */
+export function TreeIcon({
+  size = 24,
+  strokeWidth = 1.5,
+  title,
+  ...rest
+}: IconProps) {
+  return (
+    <svg {...baseProps(size, strokeWidth, title)} {...rest}>
+      <path d="M12 3l-4 6h2l-3 4h3l-3 5h10l-3-5h3l-3-4h2z" />
+      <path d="M12 18v3" />
+    </svg>
+  );
+}
+
+/** Headland — for the noosa right now rail. */
+export function HeadlandIcon({
+  size = 24,
+  strokeWidth = 1.5,
+  title,
+  ...rest
+}: IconProps) {
+  return (
+    <svg {...baseProps(size, strokeWidth, title)} {...rest}>
+      <path d="M3 18c2-3 4-3 6 0s4 3 6 0 4-3 6 0" />
+      <path d="M6 14l3-5 4 3 3-4 3 5" />
+      <circle cx="17" cy="6" r="2" />
+    </svg>
+  );
+}
+
+/** Chevron-down — for the FAQ chevron alt + accordions. */
+export function ChevronDownIcon({
+  size = 24,
+  strokeWidth = 1.75,
+  title,
+  ...rest
+}: IconProps) {
+  return (
+    <svg {...baseProps(size, strokeWidth, title)} {...rest}>
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}
+
 /**
  * IconRegistry — single import surface for the style guide.
  * Keeps `import { Icons } from "@/components/ui/Icon"` working as a bag.
@@ -680,6 +868,18 @@ export const Icons = {
   Family: FamilyIcon,
   Mountain: MountainIcon,
   Question: QuestionIcon,
+  // v6.1 P1 additions
+  ForkKnife: ForkKnifeIcon,
+  Cup: CupIcon,
+  Music: MusicIcon,
+  Market: MarketIcon,
+  Sparkle: SparkleIcon,
+  Frame: FrameIcon,
+  Community: CommunityIcon,
+  Tent: TentIcon,
+  Tree: TreeIcon,
+  Headland: HeadlandIcon,
+  ChevronDown: ChevronDownIcon,
 } as const;
 
 export type IconName = keyof typeof Icons;

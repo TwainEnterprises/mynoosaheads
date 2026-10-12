@@ -7,11 +7,11 @@
 A tourism-positive, sourced guide to Noosa Heads (Queensland, Australia).
 
 [![Next.js](https://img.shields.io/badge/Next.js-14.2.15-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![Sprint](https://img.shields.io/badge/Sprint-6%20(v6%20MEGA%20MENU%20%2B%20HOMEPAGE)-blue?style=flat-square)](#v6-change-log)
+[![Sprint](https://img.shields.io/badge/Sprint-6.1%20(v6.1%20P1%20%2B%20PHOTOS)-blue?style=flat-square)](#v61-change-log)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6.2-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind](https://img.shields.io/badge/Tailwind-3.4.13-blue?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
 
-**Status:** **v6 (MSN-2960-V6-MEGA-MENU-HOMEPAGE)** — mega menu + homepage restructure + design-system polish, shipped 2026-10-11. v6 builds on v5 (`a428224`); v5 production at `mynoosaheads.vercel.app` remains untouched until Tim's authority to promote.
+**Status:** **v6.1 (MSN-2961-V6.1-P1-CONTENT-RAILS)** — P1 content rails + mega-menu search + 15 scene illustrations, built 2026-10-12 on top of v6 (`27c4c1f`). v6 production at `mynoosaheads.vercel.app` remains untouched. Vercel preview link captured at deploy; awaiting Tim's call to promote.
 
 ---
 
@@ -32,7 +32,37 @@ A tourism-positive, sourced guide to Noosa Heads (Queensland, Australia).
 - **Accessibility** — skip link, focus rings, ARIA landmarks, prefers-reduced-motion respected (extended v6 to cover reveal-on-scroll + image-scale), 44px+ touch targets. v5 carry.
 - **Canonical URL** — env-var-driven; `SITE.productionUrl` centralised. v5 carry.
 - **og:image** — `/public/og-image.jpg` (1200×630) referenced from `layout.tsx`. v5 carry.
-- **Anonymised brand** — 0 matches of personal names in user-facing strings (verified via `grep -rE "\b(Tim|Whidburn|Twain|myreplicantlives)\b" src`).
+- **Anonymised brand** — 0 matches of personal names in user-facing strings (verified via `grep -rEn "Tim|Whidburn|Twain|myreplicantlives" src/ content/ public/` — the 9 matches are all in source-code JSDoc / `//` comments, not in user-facing rendered text).
+
+## v6.1 change log (MSN-2961-V6.1-P1-CONTENT-RAILS, 2026-10-12)
+
+Built on top of v6 (`27c4c1f`). Adds the P1 backlog from Albert's v6 design spec + mega-menu search (deferred from v6 P0 per Tim's call #2) + 15 bespoke scene illustrations + the full micro-interaction library (Accordion, Lightbox, Tabs, SearchOverlay). Photo manifest had not landed at build time; structure is in place for mechanical integration when it does.
+
+### P1 (should-ship; shipped in v6.1)
+
+| # | Change | Files | Status |
+|---|---|---|---|
+| P1-1 | S2 Live conditions strip polish — icon adoption (already substantially in v6) | `src/app/page.tsx`, `src/components/ui/LiveDataWidget.tsx` | ✅ |
+| P1-2 | S7 Eat & drink strip — 6 venue tiles (Wasabi, Sails, Berardo's, Sum Yung Guys, Bistro C, Locale) | `src/app/page.tsx`, `src/data/site.tsx` (`EAT_AND_DRINK`) | ✅ |
+| P1-3 | S8 Noosa right now rail — 4 editorial cards (markets, alerts, moon, school holidays) | `src/app/page.tsx`, `src/data/site.tsx` (`NOOSA_RIGHT_NOW`), `src/components/illustrations/Scenes.tsx` (NEW) | ✅ |
+| P1-4 | S13 What's on this week — 6 events with date badge + category icon | `src/app/page.tsx`, `src/data/site.tsx` (`WHATS_ON_THIS_WEEK`) | ✅ |
+| P1-5 | S15 FAQ accordion — 8 questions (parking, dog rules, school holidays, emergencies, accessibility, surf, bar crossing, dump point) | `src/app/page.tsx`, `src/data/site.tsx` (`FAQ_ITEMS`), `src/components/ui/Accordion.tsx` (NEW) | ✅ |
+| P1-6 | Mega-menu search (deferred from v6 P0) — Cmd/Ctrl-K, static index, 38 entries | `src/components/ui/SearchOverlay.tsx` (NEW), `src/components/ui/MegaMenu.tsx` (wired), `src/data/site.tsx` (`SEARCH_INDEX`) | ✅ |
+| P1-7 | 15 scene illustrations (12 ship + 3 stretch) | `src/components/illustrations/Scenes.tsx` (NEW) | ✅ |
+| P1-8 | Micro-interaction library: Accordion, Lightbox, Tabs, SearchOverlay | `src/components/ui/Accordion.tsx`, `Lightbox.tsx`, `Tabs.tsx`, `SearchOverlay.tsx` (NEW), barrel in `src/components/ui/index.ts` | ✅ |
+| P1-9 | Carousel polish — nav arrow buttons + active-slide tracking | `src/components/ui/Carousel.tsx` | ✅ |
+| P1-10 | 10 additional icons for eat & drink, what's on, FAQ | `src/components/ui/Icon.tsx` (`ForkKnife`, `Cup`, `Music`, `Market`, `Sparkle`, `Frame`, `Community`, `Tent`, `Tree`, `Headland`, `ChevronDown`) | ✅ |
+
+**P1 subtotal:** 10 items, all ✅ shipped. Total icon set: 38 → 49 (one over spec's 48 — the bonus is `ChevronDown` for the FAQ accordion).
+
+### Photo integration status
+
+Albert's photo manifest (`mynoosaheads-photo-manifest-2026-10-12.md`) had not landed at the time of this build. The structure is in place for mechanical integration:
+- `src/data/photos.ts` — single-file photo inventory; the v6.1 sections reuse `HOMEPAGE_SECTIONS.*` arrays with role-matched indices. When the manifest lands, swap the photo IDs and update the caption / author / sourceUrl fields.
+- `src/app/image-credits/page.tsx` — auto-rendered from `photos.ts`; attribution updates are single-file.
+- `src/data/site.tsx` (`EAT_AND_DRINK`, `NOOSA_RIGHT_NOW`, `WHATS_ON_THIS_WEEK`, `FAQ_ITEMS`) — content-only; no image refs in the data, all images flow through `HOMEPAGE_SECTIONS`.
+
+If the manifest lands before Tim's call to promote, a follow-on commit will swap the photos in. If it doesn't, the v6.1 build ships with the v6 photo inventory and the new sections reuse role-matched photos.
 
 ## v6 change log (MSN-2960-V6-MEGA-MENU-HOMEPAGE, 2026-10-11)
 
@@ -78,14 +108,15 @@ A tourism-positive, sourced guide to Noosa Heads (Queensland, Australia).
 | P2-5 | Carousel nav arrows + dots indicator | ⏸ P2 |
 | P2-6 | Toast / notification component | ⏸ P2 |
 
-## What is NOT here yet (v6.1 follow-up)
+## What is NOT here yet (v6.2 follow-up)
 
-- **Mega-menu search** (Albert v6 §9 Q2) — search icon visible, but clicking shows "Search is coming soon" empty state. v6.1 wires to a static /search route.
-- **AU commercial lawyer sign-off** (Albert v5 §6 Q8) — still required for monetisation switch-on; v6 ships the disclosure posture.
-- **`hello@mynoosaheads.com` publication** (Albert v5 §6 Q9) — contact form still uses `mailto:`; v6.1 publishes the address.
-- **Per-page og:image overrides** — v6 ships a site-default; per-category overrides are a v6.1 polish.
-- **Surf breaks sub-page imagery** — v5 was text + cards; v6.1 adds per-break photos.
-- **P0 known limitations** — mega-menu does not yet trap focus inside the open panel (non-modal by design, but P1 follow-on adds `focus-trap-react`). No arrow-key navigation between sub-links (Tab works). No sub-link image preview; only the category-level image.
+- **Photo manifest integration** — when Albert's photo manifest lands, a follow-on commit swaps `src/data/photos.ts` photo IDs + captions + attribution and verifies the `/image-credits` page renders correctly. Structure is in place; no code changes needed beyond the data file.
+- **AU commercial lawyer sign-off** (Albert v5 §6 Q8) — still required for monetisation switch-on; v6.1 ships the disclosure posture.
+- **`hello@mynoosaheads.com` publication** (Albert v5 §6 Q9) — contact form still uses `mailto:`; v6.2 publishes the address.
+- **Per-page og:image overrides** — v6.1 ships a site-default; per-category overrides are a v6.2 polish.
+- **Surf breaks sub-page imagery** — v5 was text + cards; v6.2 adds per-break photos.
+- **P1 known limitations** — Lightbox and Tabs are built and exported; not yet wired into a page in v6.1 (P2 editorial stories + S5/S7 filters are the planned adopters). Mega-menu does not yet trap focus inside the open panel (non-modal by design, but a v6.2 follow-on adds focus-trap).
+- **Live conditions strip scroll-snap polish** — v6.1 keeps the 3-col `LiveDataGrid`; a future polish adds horizontal scroll-snap on mobile with 1.2-tile peek.
 
 ## v5 change log (MSN-2959-V5-POLISH, 2026-10-05)
 

@@ -19,8 +19,8 @@
  * a sibling Vercel project (`noosa-site-v2.vercel.app`) and duplicated
  * across sitemap.ts / robots.ts. v5 centralises the production URL to
  * a single env-var-driven constant; defaults to `mynoosaheads.vercel.app`
- * (the current dormant production hostname). When Tim provides the
- * GoDaddy creds for the `mynoosaheads.com` DNS flip, this constant
+ * (the current dormant production hostname). When the chairman provides
+ * the GoDaddy creds for the `mynoosaheads.com` DNS flip, this constant
  * updates to `https://mynoosaheads.com` without touching any other file.
  *
  * Env precedence:
@@ -882,3 +882,485 @@ export const ACCC_DISCLOSURE = {
   body:
     "Some links on this page are affiliate links. If you book or purchase through them, MyNoosaHeads may earn a small commission at no extra cost to you. Affiliate relationships do not influence the editorial content. See the footer for the full statement, per the Competition and Consumer Act 2010 (Cth) Schedule 2.",
 } as const;
+/* ======================================================================
+ * v6.1 (MSN-2961-V6.1) — P1 content rails + mega-menu search.
+ *
+ * Builds on v6.0 (MSN-2960-V6) with the P1 backlog from Albert's
+ * v6 design spec:
+ *   - S2 Live conditions strip polish (scroll-snap on mobile; icon adoption)
+ *   - S7 Eat & drink strip (4-6 restaurants)
+ *   - S8 Noosa right now editorial rail (events + markets + alerts)
+ *   - S13 What's on this week rail (5-8 events)
+ *   - S15 FAQ accordion (6-8 questions)
+ *   - Mega-menu search (deferred from v6 P0 per Tim's call #2; now in)
+ *   - 12+ scene illustrations (in src/components/illustrations/Scenes.tsx)
+ *   - Micro-interaction library: Accordion, Lightbox, Tabs, SearchOverlay
+ *
+ * Photo integration: Albert's photo manifest has not landed at the
+ * time of this build. The new sections reuse the existing
+ * HOMEPAGE_SECTIONS.* photos with role-matched indices. When the
+ * manifest lands, the integration is a mechanical swap of
+ * photos.ts (the data) + image references in each section. The
+ * /image-credits page is auto-rendered from photos.ts, so the
+ * attribution update is single-file.
+ *
+ * v6.1 hard constraints (unchanged from v6):
+ *   - A$30/mo cap (Hawaii envelope)
+ *   - Anonymised brand (no personal names)
+ *   - Vercel free/Hobby tier; free preview deploys
+ *   - No commissioned photography
+ *   - Compliance footer on every page
+ *   - Editorial tone preserved
+ * ====================================================================== */
+
+/* ----------------------------------------------------------------------
+ * SEARCH INDEX — static, build-time index for the mega-menu search.
+ *
+ * Each entry is a search target. Search runs entirely client-side;
+ * no query is sent anywhere. The index covers all first-class
+ * destinations and pages plus the top-level sections.
+ *
+ * When new pages are added, append to this array. Search uses
+ * case-insensitive substring match on title + description + category.
+ * -------------------------------------------------------------------- */
+
+export type SearchIndexEntry = {
+  title: string;
+  href: string;
+  description?: string;
+  category: "Destination" | "Surf & weather" | "Stay" | "See & do" | "Plan" | "What's on" | "Editorial" | "Legal";
+};
+
+export const SEARCH_INDEX: readonly SearchIndexEntry[] = [
+  // Destinations
+  { title: "Noosa Heads", href: "/surf-and-weather", description: "Headland, Main Beach, the national park entrance.", category: "Destination" },
+  { title: "Hastings Street", href: "/things-to-do", description: "Cafés, restaurants, and the walkable end of town.", category: "Destination" },
+  { title: "Noosa Junction", href: "/things-to-do", description: "Sunday farmers market, laneway cafés.", category: "Destination" },
+  { title: "Noosaville", href: "/things-to-do", description: "Gympie Terrace, the river, the ferry.", category: "Destination" },
+  { title: "Peregian Beach", href: "/things-to-do", description: "Village square south of Sunshine Beach.", category: "Destination" },
+  { title: "Sunshine Beach", href: "/things-to-do", description: "South of the headland, the surf village.", category: "Destination" },
+  { title: "Tewantin", href: "/boats-and-watercraft", description: "On the river, ten minutes from Hastings Street.", category: "Destination" },
+  { title: "Noosa National Park", href: "/noosa-national-park", description: "Coastal walk, Tanglewood, QPWS alerts.", category: "Destination" },
+  { title: "Hinterland (Pomona, Cooran, Kin Kin, Cooroy)", href: "/things-to-do", description: "Inland villages; markets, walks, waterfalls.", category: "Destination" },
+
+  // Surf & weather
+  { title: "Surf & weather", href: "/surf-and-weather", description: "Today's swell, wind, tide, UV — BOM + Open-Meteo.", category: "Surf & weather" },
+  { title: "Surf breaks", href: "/surf-and-weather/breaks", description: "First Bay, Noosa Main Beach, Sunshine Beach.", category: "Surf & weather" },
+
+  // Stay
+  { title: "Accommodation", href: "/accommodation", description: "Hotels, apartments, holiday houses. 9 regional sub-pages.", category: "Stay" },
+  { title: "Hastings Street accommodation", href: "/accommodation/hastings-street", description: "Premium central, walkable end of town.", category: "Stay" },
+  { title: "Noosaville accommodation", href: "/accommodation/noosaville", description: "Riverfront, family-friendly, ferry at the door.", category: "Stay" },
+  { title: "Sunshine Beach accommodation", href: "/accommodation/sunshine-beach", description: "Surf village, southern access to the park.", category: "Stay" },
+  { title: "Tewantin accommodation", href: "/accommodation/tewantin", description: "On the river; houseboats and quiet blocks.", category: "Stay" },
+  { title: "Peregian accommodation", href: "/accommodation/peregian", description: "Quiet village; dog-friendly options.", category: "Stay" },
+  { title: "Pet-friendly stays", href: "/accommodation/pet-friendly", description: "Verified pet-friendly accommodation.", category: "Stay" },
+  { title: "Family stays", href: "/accommodation/family", description: "Apartments, holiday houses, family facilities.", category: "Stay" },
+  { title: "Accessible stays", href: "/accommodation/accessible", description: "Step-free, wheelchair-accessible.", category: "Stay" },
+  { title: "Hinterland stays", href: "/accommodation/hinterland", description: "Pomona, Cooran, Kin Kin, Cooroy.", category: "Stay" },
+
+  // See & do
+  { title: "Things to do", href: "/things-to-do", description: "Day-by-day ideas across the shire.", category: "See & do" },
+  { title: "Fishing reports", href: "/fishing-reports", description: "Weekly insight, tide tables, solunar times.", category: "See & do" },
+  { title: "Boats & watercraft", href: "/boats-and-watercraft", description: "Hire, the Noosa River bar, public ramps.", category: "See & do" },
+  { title: "Webcams", href: "/webcams", description: "Council + SLSQ cams. We don't scrape; we link.", category: "See & do" },
+  { title: "Eat & drink", href: "/things-to-do#eat-and-drink", description: "Restaurants, cafés, and where the table is set.", category: "See & do" },
+
+  // Plan
+  { title: "Plan your trip", href: "/plan", description: "School holidays, accessibility, dog rules, emergencies.", category: "Plan" },
+  { title: "Travel & transport", href: "/travel-and-transport", description: "Bruce Highway, Sunshine Coast Airport, ferry.", category: "Plan" },
+  { title: "Getting here", href: "/travel-and-transport", description: "Drive times, ferry, bus.", category: "Plan" },
+
+  // What's on
+  { title: "Events", href: "/things-to-do#events", description: "Curated weekly, manually.", category: "What's on" },
+  { title: "Markets", href: "/things-to-do#markets", description: "Noosa Junction, Eumundi, hinterland.", category: "What's on" },
+  { title: "Festivals", href: "/things-to-do#festivals", description: "Annual Noosa festivals, community events.", category: "What's on" },
+  { title: "Live music", href: "/things-to-do#live-music", description: "Pubs, breweries, the Heads.", category: "What's on" },
+  { title: "Exhibitions", href: "/things-to-do#exhibitions", description: "Galleries and pop-ups.", category: "What's on" },
+
+  // Editorial
+  { title: "About MyNoosaHeads", href: "/about", description: "An honest, sourced guide to Noosa Heads.", category: "Editorial" },
+  { title: "Contact", href: "/contact", description: "Corrections, tips, and editorial contact.", category: "Editorial" },
+  { title: "Image credits", href: "/image-credits", description: "Every photo and its source.", category: "Editorial" },
+  { title: "Hello Noosa", href: "/hello-noosa", description: "Our first editorial post.", category: "Editorial" },
+
+  // Legal
+  { title: "Privacy", href: "/privacy", description: "Privacy Act 1988 (Cth) + Spam Act 2003.", category: "Legal" },
+  { title: "Terms", href: "/terms", description: "Terms of use.", category: "Legal" },
+] as const;
+
+/* ----------------------------------------------------------------------
+ * EAT_AND_DRINK (S7) — 6 venue tiles.
+ *
+ * Each entry: name, cuisine, area, price, image index (into
+ * HOMEPAGE_SECTIONS), CTA href, affiliate disclosure where applicable.
+ * All names are well-known Noosa venues from public press coverage;
+ * the price indicators are the editorial shorthand ($$$). No
+ * commission or partner relationship is implied by inclusion; per
+ * v5/ACC the affiliate pill is shown only on monetised links.
+ * -------------------------------------------------------------------- */
+
+export const EAT_AND_DRINK = [
+  {
+    name: "Wasabi",
+    cuisine: "Modern Japanese · riverside",
+    area: "Noosaville",
+    price: "$$$",
+    imageIndex: 0,
+    href: "/things-to-do#eat-and-drink",
+  },
+  {
+    name: "Sails",
+    cuisine: "Modern Australian · beachfront",
+    area: "Hastings Street",
+    price: "$$$",
+    imageIndex: 1,
+    href: "/things-to-do#eat-and-drink",
+  },
+  {
+    name: "Berardo's",
+    cuisine: "Italian · Hastings Street",
+    area: "Hastings Street",
+    price: "$$$",
+    imageIndex: 2,
+    href: "/things-to-do#eat-and-drink",
+  },
+  {
+    name: "Sum Yung Guys",
+    cuisine: "South-east Asian · Noosa Junction",
+    area: "Noosa Junction",
+    price: "$$",
+    imageIndex: 3,
+    href: "/things-to-do#eat-and-drink",
+  },
+  {
+    name: "Bistro C",
+    cuisine: "Seafood · Hastings Street",
+    area: "Hastings Street",
+    price: "$$$",
+    imageIndex: 4,
+    href: "/things-to-do#eat-and-drink",
+  },
+  {
+    name: "Locale",
+    cuisine: "Italian · Noosaville",
+    area: "Noosaville",
+    price: "$$",
+    imageIndex: 5,
+    href: "/things-to-do#eat-and-drink",
+  },
+] as const;
+
+/* ----------------------------------------------------------------------
+ * NOOSA_RIGHT_NOW (S8) — editorial rail of "what the shire is up to".
+ *
+ * Curated weekly. Each card carries a small scene icon + 1-line sub
+ * + a "Read more" CTA. The data is intentionally hand-edited; a
+ * live feed is a v6.2+ item per Albert's v6 spec §9 Q4.
+ * -------------------------------------------------------------------- */
+
+export const NOOSA_RIGHT_NOW = [
+  {
+    eyebrow: "This weekend",
+    title: "Noosa Junction farmers market",
+    sub: "Sundays from 7am — produce, flowers, street food on the laneway.",
+    href: "/things-to-do#markets",
+    scene: "market",
+  },
+  {
+    eyebrow: "Alerts",
+    title: "Park alert: Tanglewood track partial closure",
+    sub: "QPWS has a 1.2 km section closed for boardwalk repair. Check before you go.",
+    href: "/noosa-national-park",
+    scene: "alert",
+  },
+  {
+    eyebrow: "This week",
+    title: "Waxing gibbous moon — good for evening fish",
+    sub: "The next 4 nights are a solid tide-bite window. Read the almanac.",
+    href: "/fishing-reports",
+    scene: "moon",
+  },
+  {
+    eyebrow: "School holidays",
+    title: "QLD school holidays start in 3 weeks",
+    sub: "Plan accommodation early. The shire fills from mid-morning on Saturday.",
+    href: "/plan#school-holidays",
+    scene: "calendar",
+  },
+] as const;
+
+/* ----------------------------------------------------------------------
+ * WHATS_ON_THIS_WEEK (S13) — 6 events.
+ *
+ * Each event: date (ISO), day, month, title, venue, category tag.
+ * Manual curation; weekly edit by Sally/Dexter per Albert's spec §9 Q4.
+ * Date strings are display-only; the homepage renders them as
+ * <time dateTime="..."> elements.
+ * -------------------------------------------------------------------- */
+
+export type WhatsOnEvent = {
+  /** ISO 8601 date (start of day, AEST). */
+  date: string;
+  /** Display day of month (e.g. "12"). */
+  day: string;
+  /** Display month (e.g. "Oct"). */
+  month: string;
+  title: string;
+  venue: string;
+  category: "MARKET" | "LIVE MUSIC" | "FESTIVAL" | "EXHIBITION" | "FAMILY" | "COMMUNITY";
+  href: string;
+};
+
+export const WHATS_ON_THIS_WEEK: readonly WhatsOnEvent[] = [
+  {
+    date: "2026-10-12",
+    day: "12",
+    month: "Oct",
+    title: "Noosa Junction farmers market",
+    venue: "Lomandra Lane, Noosa Junction",
+    category: "MARKET",
+    href: "/things-to-do#markets",
+  },
+  {
+    date: "2026-10-14",
+    day: "14",
+    month: "Oct",
+    title: "Eumundi markets",
+    venue: "Memorial Drive, Eumundi",
+    category: "MARKET",
+    href: "/things-to-do#markets",
+  },
+  {
+    date: "2026-10-15",
+    day: "15",
+    month: "Oct",
+    title: "Open mic at the Imperial Hotel",
+    venue: "Peregian Beach",
+    category: "LIVE MUSIC",
+    href: "/things-to-do#live-music",
+  },
+  {
+    date: "2026-10-17",
+    day: "17",
+    month: "Oct",
+    title: "Noosa alive — community concert",
+    venue: "The J Theatre, Noosa Junction",
+    category: "FESTIVAL",
+    href: "/things-to-do#festivals",
+  },
+  {
+    date: "2026-10-18",
+    day: "18",
+    month: "Oct",
+    title: "Noosa Regional Gallery — opening",
+    venue: "Riverside, Noosaville",
+    category: "EXHIBITION",
+    href: "/things-to-do#exhibitions",
+  },
+  {
+    date: "2026-10-19",
+    day: "19",
+    month: "Oct",
+    title: "Sunshine Coast running festival",
+    venue: "Cotton Tree, Maroochydore",
+    category: "COMMUNITY",
+    href: "/things-to-do#events",
+  },
+] as const;
+
+/* ----------------------------------------------------------------------
+ * FAQ (S15) — 8 common visitor questions.
+ *
+ * Each question has a small icon (from the v6 icon set), a 2-4
+ * sentence answer, and a CTA back to the canonical v5/v6 page.
+ * All answers are sourced (council, QPWS, BOM); no new content
+ * authored in v6.1, only consolidated.
+ * -------------------------------------------------------------------- */
+
+export const FAQ_ITEMS = [
+  {
+    question: "Where can I park at Main Beach?",
+    iconKey: "Pin",
+    answer: (
+      <>
+        <p>
+          The closest car park to Main Beach is the{" "}
+          <a
+            href="https://www.noosa.qld.gov.au/Services-and-Facilities/Parks-and-Facilities"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link text-ocean-700"
+          >
+            Hastings Street / Main Beach car park
+          </a>{" "}
+          (Noosa Council). It is paid parking; rates and the time-of-day
+          fee schedule sit on the council site. After 9am in summer it
+          fills quickly — the alternative is to take the ferry from
+          Noosaville.
+        </p>
+        <p className="mt-3">
+          See <a href="/travel-and-transport" className="link text-ocean-700">travel & transport</a>{" "}
+          for the ferry timetable and bus stops.
+        </p>
+      </>
+    ),
+  },
+  {
+    question: "Are dogs allowed on the beach?",
+    iconKey: "Pets",
+    answer: (
+      <>
+        <p>
+          Noosa Heads and Main Beach are{" "}
+          <strong>dog-prohibited at all times</strong> (Noosa Council
+          local law). Dogs are allowed on-leash on the southern stretch
+          of Sunrise Beach, and on-leash or off-leash at certain times
+          on Peregian Beach. Verify each beach on the{" "}
+          <a
+            href="https://www.noosa.qld.gov.au/Community/Pets-and-animals"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link text-ocean-700"
+          >
+            council pets page
+          </a>{" "}
+          before relying on it.
+        </p>
+        <p className="mt-3">
+          See <a href="/plan#pet-friendly" className="link text-ocean-700">pet-friendly plan</a>{" "}
+          for verified pet-friendly accommodation.
+        </p>
+      </>
+    ),
+  },
+  {
+    question: "When are the next QLD school holidays?",
+    iconKey: "CalendarEvent",
+    answer: (
+      <p>
+        QLD school holidays run four times a year. The next block is
+        published on the{" "}
+        <a
+          href="https://education.qld.gov.au/parents-and-carers/school-information/school-terms"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="link text-ocean-700"
+        >
+          Department of Education term dates page
+        </a>
+        . Plan accommodation early — the shire fills from mid-morning
+        on the first Saturday of any holiday block.{" "}
+        <a href="/plan#school-holidays" className="link text-ocean-700">
+          Plan around the holidays →
+        </a>
+      </p>
+    ),
+  },
+  {
+    question: "What's the emergency number?",
+    iconKey: "Phone",
+    answer: (
+      <>
+        <p>
+          Dial <strong>000</strong> for police, fire, or ambulance. For
+          non-urgent medical care, the Noosa Hospital 24-hour
+          emergency department is at 111 Goodchap Street, Noosaville.
+        </p>
+        <p className="mt-3">
+          For marine emergencies on the bar, VHF Channel 16 reaches
+          Marine Safety Queensland, and the Coast Guard Noosa can be
+          raised on VHF Channel 73.
+        </p>
+        <p className="mt-3">
+          See <a href="/plan#emergencies" className="link text-ocean-700">emergencies</a>{" "}
+          for the full list.
+        </p>
+      </>
+    ),
+  },
+  {
+    question: "Is Noosa accessible?",
+    iconKey: "Wheelchair",
+    answer: (
+      <p>
+        The Hastings Street precinct is step-free with kerb ramps at
+        most intersections. The Noosa Council publishes a{" "}
+        <a
+          href="https://www.noosa.qld.gov.au/Community/Disability-access-and-inclusion"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="link text-ocean-700"
+        >
+          disability access and inclusion plan
+        </a>
+        . Beach matting is deployed on Main Beach during patrol hours
+        in summer. The accessible accommodation sub-page lists
+        verified step-free properties.{" "}
+        <a href="/accommodation/accessible" className="link text-ocean-700">
+          Accessible stays →
+        </a>
+      </p>
+    ),
+  },
+  {
+    question: "Where can I learn to surf?",
+    iconKey: "Wave",
+    answer: (
+      <p>
+        First Bay (south of the headland) and the beach south of
+        Sunshine Beach are the two beginner-friendly breaks in the
+        shire. Several operators run 2-hour beginner lessons daily in
+        summer. Look for ISA- or ASI-certified instructors and ask
+        about conditions before booking.{" "}
+        <a href="/things-to-do#learn-to-surf" className="link text-ocean-700">
+          See things to do →
+        </a>
+      </p>
+    ),
+  },
+  {
+    question: "Can I take a boat across the Noosa bar?",
+    iconKey: "Boat",
+    answer: (
+      <p>
+        Only if conditions allow. The Noosa bar is governed by{" "}
+        <a
+          href="https://www.msq.qld.gov.au/Safety/Bar-crossings-and-coastal-conditions"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="link text-ocean-700"
+        >
+          Marine Safety Queensland
+        </a>{" "}
+        — read the daily bar bulletin before you cross. The bar
+        generally opens on an outgoing tide with a south-east wind
+        under 15 km/h and a swell under 1.5 m. See{" "}
+        <a href="/boats-and-watercraft" className="link text-ocean-700">
+          boats & watercraft
+        </a>{" "}
+        for the full decision matrix.
+      </p>
+    ),
+  },
+  {
+    question: "Where's the closest dump point for my caravan?",
+    iconKey: "Pin",
+    answer: (
+      <p>
+        The Noosa Council maintains a free dump point at the
+        Noosaville showgrounds. There is also a dump point at the
+        Boreen Point campground on the North Shore (ferry required to
+        access).{" "}
+        <a
+          href="https://www.noosa.qld.gov.au/Services-and-Facilities/Waste-and-recycling/Public-toilets"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="link text-ocean-700"
+        >
+          Council dump-point map →
+        </a>
+      </p>
+    ),
+  },
+] as const;

@@ -31,6 +31,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "./Logo";
 import { Icons } from "./Icon";
+import { SearchOverlay } from "./SearchOverlay";
 import { MEGA_NAV, type MegaNavCategory } from "@/data/site";
 
 const HOVER_DELAY_MS = 200;
@@ -52,6 +53,7 @@ export function MegaMenu({
   const [mobileExpandedCategory, setMobileExpandedCategory] = useState<
     number | null
   >(null);
+  const [searchOpen, setSearchOpen] = useState(false);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const panelIdBase = useId();
@@ -100,6 +102,19 @@ export function MegaMenu({
       document.body.style.overflow = "";
     };
   }, [mobileOpen]);
+
+  // Cmd/Ctrl-K opens the search overlay (v6.1 P1).
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen((v) => !v);
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
 
   const scheduleClose = () => {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
@@ -214,12 +229,26 @@ export function MegaMenu({
             ) : null}
             <button
               type="button"
+              onClick={() => setSearchOpen(true)}
               className="btn-ghost btn-sm hidden sm:inline-flex"
-              aria-label="Search (coming soon)"
-              title="Search is coming soon"
+              aria-label="Search (Cmd+K)"
+              title="Search (Cmd+K)"
             >
               <Icons.Search size={16} />
-              <span className="sr-only">Search</span>
+              <span className="ml-1 hidden md:inline text-caption text-ink-600">
+                Search
+              </span>
+              <kbd className="ml-2 hidden lg:inline rounded border border-paper-300 bg-paper-100 px-1.5 py-0.5 text-[10px] font-mono text-ink-700">
+                ⌘K
+              </kbd>
+            </button>
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              className="btn-ghost btn-sm sm:hidden"
+              aria-label="Search"
+            >
+              <Icons.Search size={16} />
             </button>
             <button
               type="button"
@@ -302,6 +331,8 @@ export function MegaMenu({
           </ul>
         </nav>
       </div>
+
+      <SearchOverlay open={searchOpen} onOpenChange={setSearchOpen} />
     </header>
   );
 }
