@@ -11,6 +11,7 @@ import {
   Icons,
   AffiliateBadge,
 } from "@/components/ui";
+import { FALLBACK_SVGS } from "@/components/illustrations/V6P1Fallbacks";
 import { fetchLiveBundle } from "@/lib/live-data";
 import { CATEGORY_PHOTOS, HOMEPAGE_HERO } from "@/data/photos";
 import { ACCOMMODATION_SUBPAGES, SITE } from "@/data/site";
@@ -47,15 +48,23 @@ export default async function AccommodationPage() {
   const live = await fetchLiveBundle();
   const photos = CATEGORY_PHOTOS["accommodation"];
   const heroCredit = photos
-    ? `Photo: ${photos.hero.author} / Unsplash · ${photos.hero.licence}`
+    ? photos.hero.kind === "svg"
+      ? `Illustration: ${photos.hero.author} · ${photos.hero.licence}`
+      : `Photo: ${photos.hero.author} / Wikimedia Commons · ${photos.hero.licence}`
     : "";
+  const heroSrc = photos?.hero?.kind === "commons" ? photos.hero.url : "";
+  const heroAlt = photos?.hero?.kind === "commons" ? photos.hero.altText : (photos?.hero?.caption ?? "");
   return (
     <div className="bg-paper-50">
-      {/* v5 (#14): full-bleed hero with editorial H1 + eyebrow overlay. */}
+      {/* v5 (#14): full-bleed hero with editorial H1 + eyebrow overlay.
+       * v6.1.1 (MSN-2962): handles the LocationPhoto union — SVG kind
+       * gets an empty src (HeroPhoto skips the image render; the
+       * category pages handle the SVG hero via FALLBACK_SVGS in
+       * CategoryPage.tsx, not here). */}
       {photos?.hero ? (
         <HeroPhoto
-          src={photos.hero.url}
-          alt={photos.hero.caption}
+          src={heroSrc}
+          alt={heroAlt}
           credit={heroCredit}
           eyebrow="Accommodation · ACCC Sch 2"
           overlayTitle="Accommodation in Noosa."
@@ -124,28 +133,42 @@ export default async function AccommodationPage() {
             We don’t take inventory. We don’t list every property in the
             shire. The photo set below is the editorial cross-section we
             use as the basis for the booking-engine links further down —
-            all photographs from Unsplash contributors who shoot Noosa
-            specifically.
+            all photographs open-licence (Wikimedia Commons, State Library
+            of Queensland, or Flickr-CC), per the v6.1.1 photo
+            integration.
           </p>
           <div className="mt-10 grid gap-8 md:grid-cols-2">
             {photos.inline.slice(0, 4).map((p, i) => (
               <figure key={i}>
                 <div className="relative w-full overflow-hidden rounded-2xl border border-paper-200 bg-paper-100">
-                  <Image
-                    src={p.url}
-                    alt={p.caption}
-                    width={1280}
-                    height={720}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-auto"
-                    sizes="(min-width: 768px) 50vw, 100vw"
-                  />
+                  {p.kind === "svg" ? (
+                    <div className="aspect-[16/9] w-full" role="img" aria-label={p.altText}>
+                      {(() => {
+                        const SvgComp = FALLBACK_SVGS[p.svgKey];
+                        return <SvgComp className="h-full w-full" />;
+                      })()}
+                    </div>
+                  ) : (
+                    <Image
+                      src={p.url}
+                      alt={p.altText}
+                      width={p.width}
+                      height={p.height}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-auto"
+                      sizes="(min-width: 768px) 50vw, 100vw"
+                    />
+                  )}
                 </div>
                 <figcaption className="mt-3 text-caption text-ink-600">
                   <span className="font-medium text-ink-700">{p.caption}</span>
                   <br />
-                  <span className="text-ink-600">Photo: {p.author} / Unsplash · {p.licence}</span>
+                  <span className="text-ink-600">
+                    {p.kind === "svg"
+                      ? `Illustration: ${p.author} · ${p.licence}`
+                      : `Photo: ${p.author} / Wikimedia Commons · ${p.licence}`}
+                  </span>
                 </figcaption>
               </figure>
             ))}

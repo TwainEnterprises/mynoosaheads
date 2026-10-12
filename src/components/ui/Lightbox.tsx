@@ -31,6 +31,7 @@ import {
   type ReactNode,
   type MouseEvent,
 } from "react";
+import Image from "next/image";
 import { createPortal } from "react-dom";
 import { Icons } from "./Icon";
 
@@ -195,9 +196,12 @@ export function LightboxRoot({
           </button>
         </div>
         <div className="relative flex-1 overflow-auto bg-ink-900">
-          <img
+          <Image
             src={current.src}
             alt={current.alt}
+            width={1920}
+            height={1080}
+            sizes="(max-width: 1280px) 100vw, 1280px"
             className="mx-auto max-h-[80vh] w-full object-contain"
           />
         </div>

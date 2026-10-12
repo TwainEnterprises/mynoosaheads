@@ -27,8 +27,10 @@ import {
   CardHeader,
   Button,
   Icons,
+  LocationCaptionedPhoto,
 } from "@/components/ui";
-import { CATEGORY_PHOTOS, type UnsplashPhoto } from "@/data/photos";
+import { FALLBACK_SVGS } from "@/components/illustrations/V6P1Fallbacks";
+import { CATEGORY_PHOTOS, type LocationPhoto } from "@/data/photos";
 import { RELATED_LINKS } from "@/data/site";
 
 export type CategoryPageProps = {
@@ -85,7 +87,10 @@ export async function CategoryPage({
 }: CategoryPageProps) {
   const photos = slug ? CATEGORY_PHOTOS[slug] : undefined;
 
-  const creditLine = (p: UnsplashPhoto) => `Photo: ${p.author} / Unsplash · ${p.licence}`;
+  const creditLine = (p: LocationPhoto) =>
+    p.kind === "svg"
+      ? `Illustration: ${p.author} · ${p.licence}`
+      : `Photo: ${p.author} / Wikimedia Commons · ${p.licence}`;
 
   // v5 (#19): default cross-link chips come from RELATED_LINKS[slug].
   // RELATED_LINKS is `as const` so each entry is readonly; cast through
@@ -106,14 +111,32 @@ export async function CategoryPage({
        * overlay. The body H1 below remains for accessibility — the
        * photo overlay is decorative. */}
       {photos?.hero ? (
-        <HeroPhoto
-          src={photos.hero.url}
-          alt={photos.hero.caption}
-          credit={creditLine(photos.hero)}
-          eyebrow={overlayEyebrow ?? (typeof eyebrow === "string" ? eyebrow : undefined)}
-          overlayTitle={overlayTitle ?? title}
-          caption={photos.hero.caption}
-        />
+        photos.hero.kind === "svg" ? (
+          <figure className="relative w-full">
+            <div className="relative w-full overflow-hidden bg-eucalyptus-900 h-[55vh] md:h-[60vh]">
+              {(() => {
+                const SvgHero = FALLBACK_SVGS[photos.hero.kind === "svg" ? photos.hero.svgKey : "sunshine-beach"];
+                return (
+                  <div className="flex h-full w-full items-center justify-center bg-paper-100" role="img" aria-label={photos.hero.altText}>
+                    <SvgHero className="h-full w-full" />
+                  </div>
+                );
+              })()}
+            </div>
+            <figcaption className="absolute bottom-3 right-3 z-10 rounded-pill bg-ink-900/70 px-2 py-0.5 text-[10px] text-paper-100">
+              Illustration: {photos.hero.author}
+            </figcaption>
+          </figure>
+        ) : (
+          <HeroPhoto
+            src={photos.hero.url}
+            alt={photos.hero.altText}
+            credit={creditLine(photos.hero)}
+            eyebrow={overlayEyebrow ?? (typeof eyebrow === "string" ? eyebrow : undefined)}
+            overlayTitle={overlayTitle ?? title}
+            caption={photos.hero.caption}
+          />
+        )
       ) : null}
       <Hero
         eyebrow={eyebrow}
@@ -153,11 +176,8 @@ export async function CategoryPage({
                   ) : null}
                 </div>
                 {photos?.inline?.[i % photos.inline.length] ? (
-                  <CaptionedPhoto
-                    src={photos.inline[i % photos.inline.length].url}
-                    alt={photos.inline[i % photos.inline.length].caption}
-                    credit={creditLine(photos.inline[i % photos.inline.length])}
-                    caption={photos.inline[i % photos.inline.length].caption}
+                  <LocationCaptionedPhoto
+                    photo={photos.inline[i % photos.inline.length]}
                   />
                 ) : null}
               </section>

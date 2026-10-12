@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Hero, HeroPhoto, Card, CardBody, CardHeader } from "@/components/ui";
 import { ABOUT_BRAND_IMAGE } from "@/data/photos";
+import type { LocationPhoto } from "@/data/photos";
 
 export const metadata: Metadata = {
   title: "About",
@@ -17,16 +18,29 @@ export const metadata: Metadata = {
 };
 
 export default function AboutPage() {
+  const brandImage: LocationPhoto = ABOUT_BRAND_IMAGE;
+  const brandSrc = brandImage.kind === "commons" ? brandImage.url : "";
+  const brandAlt = brandImage.kind === "commons" ? brandImage.altText : brandImage.caption;
+  const brandCredit =
+    brandImage.kind === "commons"
+      ? `Photo: ${brandImage.author} / Wikimedia Commons · ${brandImage.licence}`
+      : `Illustration: ${brandImage.author} · ${brandImage.licence}`;
   return (
     <div className="bg-paper-50">
       {/* Sprint 1.5 (MSN-2958): full-bleed masthead photo. Quiet headland
        * view rather than the swimming beach — this is the editorial
-       * "figure" under which the brand statement sits. */}
+       * "figure" under which the brand statement sits.
+       *
+       * v6.1.1 (MSN-2962): handles the LocationPhoto union — Commons
+       * photos get a real src/alt; SVG fallbacks get an empty src
+       * (the HeroPhoto component renders a placeholder, not the SVG
+       * itself — the SVG fallback is intended for category pages, not
+       * the about brand statement). */}
       <HeroPhoto
-        src={ABOUT_BRAND_IMAGE.url}
-        alt={ABOUT_BRAND_IMAGE.caption}
-        caption={ABOUT_BRAND_IMAGE.caption}
-        credit={`Photo: ${ABOUT_BRAND_IMAGE.author} / Wikimedia Commons · ${ABOUT_BRAND_IMAGE.licence}`}
+        src={brandSrc}
+        alt={brandAlt}
+        caption={brandImage.caption}
+        credit={brandCredit}
       />
       {/* Sprint 1.5 (MSN-2958) — brand-statement masthead.
        * Tim's north-star quote as a `<Section>` at the top of /about,
@@ -77,10 +91,9 @@ export default function AboutPage() {
           <p className="mt-4 text-caption text-ink-600">
             Photo above:{" "}
             <span className="font-medium text-ink-700">
-              {ABOUT_BRAND_IMAGE.caption}
+              {brandImage.caption}
             </span>{" "}
-            — Photo: {ABOUT_BRAND_IMAGE.author} / Wikimedia Commons ·{" "}
-            {ABOUT_BRAND_IMAGE.licence}
+            — {brandCredit}
           </p>
         </div>
       </section>
@@ -157,6 +170,13 @@ export default function AboutPage() {
                     drop us a line
                   </Link>{" "}
                   if you spot one.
+                </p>
+                <p className="mt-3">
+                  Looking for the editorial preamble? See{" "}
+                  <Link href="/hello-noosa" className="link text-ocean-700">
+                    Hello, Noosa
+                  </Link>{" "}
+                  for the first-letter orientation to the shire.
                 </p>
               </div>
             </section>

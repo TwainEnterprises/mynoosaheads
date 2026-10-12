@@ -48,14 +48,19 @@ export type FooterProps = {
 
 const DEFAULT_COLUMNS: FooterColumn[] = [
   {
+    // v6.1.1 (MSN-2962): Footer column 1 updated to reflect the v6
+    // mega-menu IA (Destinations, Stay, See & Do, Plan, What's On,
+    // Book Now). Replaces the v5 8-link list per Victor's P2-5.
     heading: "Sitemap",
     links: [
+      { label: "Destinations", href: "/things-to-do" },
+      { label: "Stay", href: "/accommodation" },
+      { label: "See & Do", href: "/things-to-do" },
+      { label: "Plan", href: "/plan" },
+      { label: "What's On", href: "/things-to-do#events" },
       { label: "Surf & weather", href: "/surf-and-weather" },
       { label: "Noosa National Park", href: "/noosa-national-park" },
-      { label: "Where to stay", href: "/where-to-stay" },
-      { label: "Eat & drink", href: "/eat-and-drink" },
-      { label: "Things to do", href: "/things-to-do" },
-      { label: "Itineraries", href: "/itineraries" },
+      { label: "Webcams", href: "/webcams" },
     ],
   },
   {

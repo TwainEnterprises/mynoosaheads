@@ -27,12 +27,25 @@ const nextConfig = {
         port: "",
         pathname: "/**",
       },
-      // Legacy v2 pattern kept for any third-party reference.
+      // v6.1.1 (MSN-2962) — Wikimedia Commons hot-link patterns.
+      // `upload.wikimedia.org` is the canonical direct-image host; we
+      // hot-link via Special:FilePath which redirects to upload URLs.
+      // The next/image optimizer follows the redirect; the optimizer
+      // sees the redirect target's hostname and only allows it if that
+      // hostname is on the allowlist. We allow both:
+      //   - upload.wikimedia.org (direct image hot-links, legacy)
+      //   - commons.wikimedia.org (Special:FilePath redirect target)
       {
         protocol: "https",
         hostname: "upload.wikimedia.org",
         port: "",
         pathname: "/wikipedia/commons/**",
+      },
+      {
+        protocol: "https",
+        hostname: "commons.wikimedia.org",
+        port: "",
+        pathname: "/wiki/Special:FilePath/**",
       },
     ],
   },

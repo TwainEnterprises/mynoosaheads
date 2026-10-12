@@ -53,6 +53,13 @@ export type { MegaMenuProps } from "./MegaMenu";
 export { ContentCard } from "./ContentCard";
 export type { ContentCardProps, ContentCardAspect } from "./ContentCard";
 
+// v6.1.1 (MSN-2962) — location-aware photo renderer (Commons + SVG)
+export { LocationPhoto, DEFAULT_SIZES } from "./LocationPhoto";
+export type { LocationPhotoProps } from "./LocationPhoto";
+
+export { LocationCaptionedPhoto } from "./LocationCaptionedPhoto";
+export type { LocationCaptionedPhotoProps } from "./LocationCaptionedPhoto";
+
 export { Carousel, CarouselSlide } from "./Carousel";
 export type { CarouselProps, CarouselSlideProps } from "./Carousel";
 

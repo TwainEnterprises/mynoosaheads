@@ -1,5 +1,6 @@
 import Link from "next/link";
 import * as React from "react";
+import Image from "next/image";
 import { fetchLiveBundle } from "@/lib/live-data";
 import {
   Hero,
@@ -14,6 +15,7 @@ import {
   ContentCard,
   Carousel,
   Accordion,
+  LocationPhoto as LocationPhotoView,
 } from "@/components/ui";
 import { AreaHeroes } from "@/components/illustrations/AreaHeroes";
 import { Scenes } from "@/components/illustrations/Scenes";
@@ -30,62 +32,95 @@ import {
   FAQ_ITEMS,
 } from "@/data/site";
 import { HOMEPAGE_HERO, HOMEPAGE_SECTIONS } from "@/data/photos";
-import type { UnsplashPhoto } from "@/data/photos";
+import type { LocationPhoto } from "@/data/photos";
 
 /**
- * Homepage — v6.1 (MSN-2961-V6.1, 2026-10-12).
+ * Homepage — v6.1.1 (MSN-2962-V6.1.1-PHOTO-INTEGRATION, 2026-10-12).
+ *
+ * v6.1.1 ship over v6.1:
+ *   - Photo integration: 49 curated Unsplash photos replaced with
+ *     42 verified location-specific Wikimedia Commons photos
+ *     (CC-BY-SA 4.0 / CC-BY 2.0 / public domain / CC0 1.0) +
+ *     7 bespoke SVG fallbacks for the locations with no open-licence
+ *     photo (Sunshine Beach; six named eat-and-drink venues;
+ *     pet-friendly / family / accessible). All per Albert's
+ *     `mynoosaheads-photo-manifest-2026-10-12.md`.
+ *   - 4 ESLint `<img>` → `<Image>` conversions (page.tsx, ContentCard,
+ *     Lightbox, MegaMenu) — zero warnings.
+ *   - S9 Webcams: 4 distinct photos (was: same hero on all 4 in v6.1).
+ *   - S7 Eat & drink: 6 venue-specific SVG illustrations (was:
+ *     recycled where-to-stay photos).
  *
  * Layout per Albert's v6 spec §2.1 (P0 + P1):
- *   1.  S1  Hero                   (v6 P0; refined)
- *   2.  S2  Live conditions        (v6.1 P1: scroll-snap polish, icon adoption)
- *   3.  S3  Featured areas grid    (v6 P0; 6 photo cards)
+ *   1.  S1  Hero                   (v6 P0; refined — Commons aerial)
+ *   2.  S2  Live conditions        (v6.1 P1; carry)
+ *   3.  S3  Featured areas grid    (v6 P0; 6 photo cards, 1 SVG)
  *   4.  S4  Things to do           (v6 P0; 8 cards in scroll-snap rail)
- *   5.  S5  Where to stay          (v6 P0; 6 cross-section cards)
- *   6.  S7  Eat & drink strip      (v6.1 P1; 6 venue tiles)
+ *   5.  S5  Where to stay          (v6 P0; 6 cross-section cards, 2 SVG)
+ *   6.  S7  Eat & drink strip      (v6.1 P1; 6 SVG venue tiles)
  *   7.  S6  Plan your trip hub     (v6 P0; 3 cards)
  *   8.  S8  Noosa right now        (v6.1 P1; 4 editorial cards)
- *   9.  S9  Webcams strip          (v6 P0; 4 tiles)
- *  10.  S10 Getting here           (v6 P0; 5 transport modes)
+ *   9.  S9  Webcams strip          (v6 P0; 4 distinct tiles, 1 SVG)
+ *  10.  S10 Getting here           (v6 P0; 5 transport modes, 1 hero)
  *  11.  S13 What's on this week    (v6.1 P1; 6 events)
  *  12.  S15 FAQ accordion          (v6.1 P1; 8 questions)
  *  13.  Disclosure band            (v5 carry; 97-word ACCC band)
  *  14.  S16 Footer                 (v5 carry; column 1 uses new IA)
- *
- * v6.1 P1 additions over v6 P0:
- *   - #P1-1 S2 polish: scroll-snap strip + Icon component adoption
- *   - #P1-2 S7 Eat & drink: 6 venues (Wasabi, Sails, Berardo's,
- *             Sum Yung Guys, Bistro C, Locale) with 1:1 cards
- *   - #P1-3 S8 Noosa right now: 4 editorial cards (markets,
- *             alerts, moon, holidays) with scene illustrations
- *   - #P1-4 S13 What's on: 6 events (date + venue + category)
- *   - #P1-5 S15 FAQ: 8 questions (parking, dog rules, school
- *             holidays, emergencies, accessibility, surf, bar,
- *             dump point) with answers and source links
- *   - Micro-interaction library: Accordion, Lightbox, Tabs,
- *             SearchOverlay added to ui/index.ts
- *   - Mega-menu search (deferred from v6 P0 per Tim's call #2):
- *             Cmd/Ctrl-K opens the global search; static index
- *             built from NAV + MEGA_NAV + named routes
- *   - 15 scene illustrations in Scenes.tsx for use as content-
- *             rail and section accents
- *
- * Photo integration: Albert's photo manifest has not landed at
- * the time of this build. The new sections reuse the v6
- * HOMEPAGE_SECTIONS.* photos with role-matched indices. When
- * the manifest lands, swap photos.ts (single-file) + image
- * references in each section. The /image-credits page is
- * auto-rendered from photos.ts.
  */
 export default async function HomePage() {
   const live = await fetchLiveBundle();
 
+  // v6.1.1 (MSN-2962): LocalBusiness JSON-LD structured data on the
+  // homepage per Albert's §10 launch bar #9 (SEO structured data).
+  // No personal names, no operator identity — generic "LocalBusiness"
+  // with anonymous publisher; address region is the Sunshine Coast /
+  // Noosa Shire, AU.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: "MyNoosaHeads",
+    description:
+      "An independent, sourced, slow-guide field manual for Noosa Heads — surf, weather, the national park, accommodation, and the local rules.",
+    url: SITE.productionUrl,
+    image: `${SITE.productionUrl}/og-image.jpg`,
+    address: {
+      "@type": "PostalAddress",
+      addressRegion: "Queensland",
+      addressCountry: "AU",
+      addressLocality: "Noosa Heads",
+    },
+    areaServed: [
+      { "@type": "Place", name: "Noosa Heads" },
+      { "@type": "Place", name: "Noosaville" },
+      { "@type": "Place", name: "Tewantin" },
+      { "@type": "Place", name: "Sunshine Beach" },
+      { "@type": "Place", name: "Peregian Beach" },
+      { "@type": "Place", name: "Noosa Hinterland" },
+    ],
+    knowsAbout: [
+      "Surf reports",
+      "Tide tables",
+      "Noosa National Park",
+      "Bureau of Meteorology marine forecasts",
+      "Queensland Parks and Wildlife Service alerts",
+    ],
+  };
+
   return (
     <div className="bg-paper-50">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* ─── S1: Hero (P0; refined from v5) ─── */}
       <HeroPhoto
-        src={HOMEPAGE_HERO.url}
-        alt={HOMEPAGE_HERO.caption}
-        credit={`Photo: ${HOMEPAGE_HERO.author} / Unsplash · ${HOMEPAGE_HERO.licence}`}
+        src={HOMEPAGE_HERO.kind === "commons" ? HOMEPAGE_HERO.url : ""}
+        alt={HOMEPAGE_HERO.kind === "commons" ? HOMEPAGE_HERO.altText : HOMEPAGE_HERO.caption}
+        credit={
+          HOMEPAGE_HERO.kind === "commons"
+            ? `Photo: ${HOMEPAGE_HERO.author} / Wikimedia Commons · ${HOMEPAGE_HERO.licence}`
+            : `Illustration: ${HOMEPAGE_HERO.author} · ${HOMEPAGE_HERO.licence}`
+        }
         eyebrow={`${SITE.region} · independent editorial`}
         overlayTitle="By the headland, by the bar."
         caption={HOMEPAGE_HERO.caption}
@@ -245,14 +280,26 @@ export default async function HomePage() {
         </p>
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURED_AREAS.map((area) => {
-            const photo: UnsplashPhoto =
+            const photo: LocationPhoto =
               HOMEPAGE_SECTIONS.featuredAreas[area.imageIndex];
+            // For SVG fallback photos, render LocationPhoto (no next/image
+            // needed — the SVG is inlined). For Commons photos, render
+            // ContentCard with the URL so the standard card layout applies.
+            if (photo.kind === "svg") {
+              return (
+                <FeaturedAreaSvgCard
+                  key={area.slug}
+                  area={area}
+                  photo={photo}
+                />
+              );
+            }
             return (
               <ContentCard
                 key={area.slug}
                 image={photo.url}
-                imageAlt={photo.caption}
-                imageCredit={`Photo: ${photo.author} / Unsplash`}
+                imageAlt={photo.altText}
+                imageCredit={`Photo: ${photo.author} / Wikimedia Commons · ${photo.licence}`}
                 imageAspect="3/2"
                 imagePriority={area.imageIndex === 0}
                 eyebrow={area.name}
@@ -307,14 +354,18 @@ export default async function HomePage() {
               slideCount={THINGS_TO_DO.length}
             >
               {THINGS_TO_DO.map((item, i) => {
-                const photo: UnsplashPhoto =
+                const photo: LocationPhoto =
                   HOMEPAGE_SECTIONS.thingsToDo[i];
                 return (
                   <ContentCard
                     key={item.title}
-                    image={photo.url}
-                    imageAlt={photo.caption}
-                    imageCredit={`Photo: ${photo.author} / Unsplash`}
+                    image={photo.kind === "commons" ? photo.url : ""}
+                    imageAlt={photo.kind === "commons" ? photo.altText : photo.caption}
+                    imageCredit={
+                      photo.kind === "commons"
+                        ? `Photo: ${photo.author} / Wikimedia Commons · ${photo.licence}`
+                        : `Illustration: ${photo.author} · ${photo.licence}`
+                    }
                     imageAspect="3/2"
                     eyebrow={`Experience ${i + 1}`}
                     title={item.title}
@@ -348,14 +399,23 @@ export default async function HomePage() {
         </p>
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {WHERE_TO_STAY.map((stay) => {
-            const photo: UnsplashPhoto =
+            const photo: LocationPhoto =
               HOMEPAGE_SECTIONS.whereToStay[stay.imageIndex];
+            if (photo.kind === "svg") {
+              return (
+                <WhereToStaySvgCard
+                  key={stay.name}
+                  stay={stay}
+                  photo={photo}
+                />
+              );
+            }
             return (
               <ContentCard
                 key={stay.name}
                 image={photo.url}
-                imageAlt={photo.caption}
-                imageCredit={`Photo: ${photo.author} / Unsplash`}
+                imageAlt={photo.altText}
+                imageCredit={`Photo: ${photo.author} / Wikimedia Commons · ${photo.licence}`}
                 imageAspect="3/2"
                 eyebrow={stay.area}
                 title={stay.name}
@@ -411,21 +471,13 @@ export default async function HomePage() {
               slideCount={EAT_AND_DRINK.length}
             >
               {EAT_AND_DRINK.map((venue, i) => {
-                const photo: UnsplashPhoto =
-                  HOMEPAGE_SECTIONS.whereToStay[i] ??
-                  HOMEPAGE_SECTIONS.featuredAreas[i];
+                const photo: LocationPhoto =
+                  HOMEPAGE_SECTIONS.eatAndDrink[i];
                 return (
-                  <ContentCard
+                  <EatDrinkVenueCard
                     key={venue.name}
-                    image={photo.url}
-                    imageAlt={photo.caption}
-                    imageCredit={`Photo: ${photo.author} / Unsplash`}
-                    imageAspect="1/1"
-                    eyebrow={venue.area}
-                    title={venue.name}
-                    body={venue.cuisine}
-                    meta={venue.price}
-                    cta={{ label: "Reserve →", href: venue.href }}
+                    venue={venue}
+                    photo={photo}
                   />
                 );
               })}
@@ -603,19 +655,27 @@ export default async function HomePage() {
           telling you.
         </p>
         <div className="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {WEBCAMS.map((cam) => (
-            <ContentCard
-              key={cam.name}
-              image={HOMEPAGE_HERO.url}
-              imageAlt={`${cam.name} webcam — static placeholder, opens the live feed on click`}
-              imageCredit="Photo: Unsplash"
-              imageAspect="1/1"
-              eyebrow={cam.location}
-              title={cam.name}
-              meta="Live feed via operator"
-              cta={{ label: "View live →", href: cam.href }}
-            />
-          ))}
+          {WEBCAMS.map((cam, i) => {
+            const photo: LocationPhoto = HOMEPAGE_SECTIONS.webcams[i] ?? HOMEPAGE_HERO;
+            if (photo.kind === "svg") {
+              return (
+                <WebcamSvgCard key={cam.name} cam={cam} photo={photo} />
+              );
+            }
+            return (
+              <ContentCard
+                key={cam.name}
+                image={photo.url}
+                imageAlt={`${cam.name} webcam — static preview, opens the live feed on click`}
+                imageCredit={`Photo: ${photo.author} / Wikimedia Commons · ${photo.licence}`}
+                imageAspect="1/1"
+                eyebrow={cam.location}
+                title={cam.name}
+                meta="Live feed via operator"
+                cta={{ label: "View live →", href: cam.href }}
+              />
+            );
+          })}
         </div>
         <div className="mt-8 text-center">
           <Link
@@ -724,14 +784,18 @@ export default async function HomePage() {
               </div>
             </div>
             <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-paper-200 hover-scale-img">
-              <img
-                src={HOMEPAGE_SECTIONS.gettingHere.url}
-                alt={HOMEPAGE_SECTIONS.gettingHere.caption}
-                className="h-full w-full object-cover"
+              <Image
+                src={HOMEPAGE_SECTIONS.gettingHere.kind === "commons" ? HOMEPAGE_SECTIONS.gettingHere.url : ""}
+                alt={HOMEPAGE_SECTIONS.gettingHere.kind === "commons" ? HOMEPAGE_SECTIONS.gettingHere.altText : HOMEPAGE_SECTIONS.gettingHere.caption}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
                 loading="lazy"
               />
               <figcaption className="absolute bottom-2 right-2 rounded-pill bg-ink-900/70 px-2 py-0.5 text-[10px] text-paper-100">
-                Photo: {HOMEPAGE_SECTIONS.gettingHere.author} / Unsplash
+                {HOMEPAGE_SECTIONS.gettingHere.kind === "commons"
+                  ? `Photo: ${HOMEPAGE_SECTIONS.gettingHere.author} / Wikimedia Commons`
+                  : `Illustration: ${HOMEPAGE_SECTIONS.gettingHere.author}`}
               </figcaption>
             </div>
           </div>
@@ -929,5 +993,166 @@ export default async function HomePage() {
         </div>
       </section>
     </div>
+  );
+}
+
+/* =====================================================================
+ * v6.1.1 helper components — S3/S5/S7/S9 card variants for SVG
+ * fallback photos.
+ *
+ * The four sections (featured areas, where-to-stay, eat-and-drink,
+ * webcams) have at least one card that uses a bespoke SVG illustration
+ * (Sunshine Beach, Wasabi, Sails, Berardo's, Sum Yung Guys, Bistro C,
+ * Locale, pet-friendly, family, accessible). These wrappers render the
+ * SVG in a card layout consistent with ContentCard, but without going
+ * through the next/image pipeline (SVGs inline directly into the DOM).
+ * ===================================================================== */
+
+function FeaturedAreaSvgCard({
+  area,
+  photo,
+}: {
+  area: { slug: string; name: string; tagline: string; cta: string; href: string };
+  photo: LocationPhoto;
+}) {
+  return (
+    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-paper-200 bg-paper-50 shadow-sm hover-lift">
+      <div className="hover-scale-img relative aspect-[3/2] w-full bg-paper-100">
+        <LocationPhotoView photo={photo} />
+      </div>
+      <div className="flex flex-1 flex-col p-5">
+        <p className="eyebrow">{area.name}</p>
+        <p className="mt-2 text-body-sm text-ink-800 text-pretty flex-1">
+          {area.tagline}
+        </p>
+        <div className="mt-4">
+          <Link
+            href={area.href}
+            aria-label={`${area.name} — ${area.cta}`}
+            className="link text-ocean-700 text-body-sm font-medium hover-underline"
+          >
+            {area.cta} →
+          </Link>
+        </div>
+      </div>
+      <figcaption className="absolute bottom-2 right-2 rounded-pill bg-ink-900/70 px-2 py-0.5 text-[10px] text-paper-100 opacity-0 transition-opacity duration-base ease-out group-hover:opacity-100">
+        Illustration: {photo.author}
+      </figcaption>
+    </article>
+  );
+}
+
+function WhereToStaySvgCard({
+  stay,
+  photo,
+}: {
+  stay: { name: string; area: string; priceFrom: string; href: string };
+  photo: LocationPhoto;
+}) {
+  return (
+    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-paper-200 bg-paper-50 shadow-sm hover-lift">
+      <div className="hover-scale-img relative aspect-[3/2] w-full bg-paper-100">
+        <LocationPhotoView photo={photo} />
+      </div>
+      <div className="flex flex-1 flex-col p-5">
+        <p className="eyebrow">{stay.area}</p>
+        <h3 className="mt-1 font-display text-headline-lg text-ink-900 text-balance">
+          {stay.name}
+        </h3>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="text-caption text-ink-700">{stay.priceFrom}</span>
+          <span className="pill-disclosure">Affiliate</span>
+        </div>
+        <div className="mt-4">
+          <Link
+            href={stay.href}
+            aria-label={`${stay.name} — View`}
+            className="link text-ocean-700 text-body-sm font-medium hover-underline"
+          >
+            View →
+          </Link>
+        </div>
+      </div>
+      <figcaption className="absolute bottom-2 right-2 rounded-pill bg-ink-900/70 px-2 py-0.5 text-[10px] text-paper-100 opacity-0 transition-opacity duration-base ease-out group-hover:opacity-100">
+        Illustration: {photo.author}
+      </figcaption>
+    </article>
+  );
+}
+
+function EatDrinkVenueCard({
+  venue,
+  photo,
+}: {
+  venue: { name: string; area: string; cuisine: string; price: string; href: string };
+  photo: LocationPhoto;
+}) {
+  return (
+    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-paper-200 bg-paper-50 shadow-sm hover-lift">
+      <div className="hover-scale-img relative aspect-square w-full bg-paper-100">
+        <LocationPhotoView photo={photo} />
+      </div>
+      <div className="flex flex-1 flex-col p-5">
+        <p className="eyebrow">{venue.area}</p>
+        <h3 className="mt-1 font-display text-headline-lg text-ink-900 text-balance">
+          {venue.name}
+        </h3>
+        <p className="mt-2 text-body-sm text-ink-800 text-pretty flex-1">
+          {venue.cuisine}
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="text-caption text-ink-700">{venue.price}</span>
+        </div>
+        <div className="mt-4">
+          <Link
+            href={venue.href}
+            aria-label={`${venue.name} — Reserve`}
+            className="link text-ocean-700 text-body-sm font-medium hover-underline"
+          >
+            Reserve →
+          </Link>
+        </div>
+      </div>
+      <figcaption className="absolute bottom-2 right-2 rounded-pill bg-ink-900/70 px-2 py-0.5 text-[10px] text-paper-100 opacity-0 transition-opacity duration-base ease-out group-hover:opacity-100">
+        Illustration: {photo.author}
+      </figcaption>
+    </article>
+  );
+}
+
+function WebcamSvgCard({
+  cam,
+  photo,
+}: {
+  cam: { name: string; location: string; href: string };
+  photo: LocationPhoto;
+}) {
+  return (
+    <article className="group relative flex flex-col overflow-hidden rounded-xl border border-paper-200 bg-paper-50 shadow-sm hover-lift">
+      <div className="hover-scale-img relative aspect-square w-full bg-paper-100">
+        <LocationPhotoView photo={photo} />
+      </div>
+      <div className="flex flex-1 flex-col p-5">
+        <p className="eyebrow">{cam.location}</p>
+        <h3 className="mt-1 font-display text-headline-lg text-ink-900 text-balance">
+          {cam.name}
+        </h3>
+        <p className="mt-2 text-caption text-ink-700">
+          Live feed via operator
+        </p>
+        <div className="mt-4">
+          <Link
+            href={cam.href}
+            aria-label={`${cam.name} — View live`}
+            className="link text-ocean-700 text-body-sm font-medium hover-underline"
+          >
+            View live →
+          </Link>
+        </div>
+      </div>
+      <figcaption className="absolute bottom-2 right-2 rounded-pill bg-ink-900/70 px-2 py-0.5 text-[10px] text-paper-100 opacity-0 transition-opacity duration-base ease-out group-hover:opacity-100">
+        Illustration: {photo.author}
+      </figcaption>
+    </article>
   );
 }

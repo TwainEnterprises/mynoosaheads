@@ -27,6 +27,7 @@
  */
 
 import { useEffect, useId, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "./Logo";
@@ -407,9 +408,12 @@ function MegaPanel({ category, panelId, onMouseEnter, onMouseLeave }: MegaPanelP
                 {category.featured.svg ? (
                   <div className="h-full w-full">{category.featured.svg}</div>
                 ) : category.featured.image ? (
-                  <img
+                  <Image
                     src={category.featured.image}
                     alt={category.featured.alt ?? category.featured.label}
+                    width={800}
+                    height={450}
+                    sizes="(max-width: 1024px) 100vw, 280px"
                     className="h-full w-full object-cover"
                   />
                 ) : null}

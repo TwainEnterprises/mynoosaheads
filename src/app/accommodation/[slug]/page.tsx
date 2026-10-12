@@ -3,9 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CategoryPage } from "@/components/CategoryPage";
 import { ACCOMMODATION_SUBPAGES, SITE } from "@/data/site";
+import { ACCOMMODATION_PHOTOS } from "@/data/photos";
 
 /**
- * Accommodation sub-pages — v5 (MSN-2959-V5-POLISH #21).
+ * Accommodation sub-pages — v5 (MSN-2959-V5-POLISH #21), v6.1.1 (MSN-2962).
  *
  * Tim's locked answer #4: 9 sub-pages (not Albert's default of 4). Full
  * SEO-audit gap from MSN-3058 §4. Each sub-page is a region/archetype
@@ -13,7 +14,7 @@ import { ACCOMMODATION_SUBPAGES, SITE } from "@/data/site";
  *   - Editorial body (>= 600 words; ~1100 words across 5 sections)
  *   - AU canonical source links (>= 3)
  *   - ACCC affiliate disclosure (the ACCC pill is auto-rendered)
- *   - Hero photo (curated Unsplash)
+ *   - Hero photo (v6.1.1: verified Wikimedia Commons + bespoke SVG)
  *   - Hero overlay H1 + eyebrow (v5 #14)
  *   - Per-page cross-link chips (v5 #19)
  *   - Last-verified stamp
@@ -22,6 +23,17 @@ import { ACCOMMODATION_SUBPAGES, SITE } from "@/data/site";
  *   5 regional: hastings-street, noosaville, sunshine-beach, tewantin, peregian
  *   3 archetype: pet-friendly, family, accessible
  *   1 hinterland: pomona/cooran/kin-kin/cooroy
+ *
+ * v6.1.1 photo map (per Albert's `mynoosaheads-photo-manifest-2026-10-12.md`):
+ *   hastings-street  → Donaldytong panoramic + Kgbo series
+ *   noosaville       → Kgbo Boathouse + Noosa Harbour Resort + river bank
+ *   sunshine-beach   → SVG (no open-licence photo of the suburb)
+ *   tewantin         → Zephyr103 Royal Mail + McPherson 1930s
+ *   peregian         → Mountain/Ash 2012 (reused for hero + inline)
+ *   pet-friendly     → SVG
+ *   family           → SVG
+ *   accessible       → SVG
+ *   hinterland       → Ewen Bell Everglades + McPherson Upper River
  */
 
 const SUBPAGE_BODY_BY_ARCHETYPE = {
@@ -196,6 +208,8 @@ export default function AccommodationSubPage({ params }: { params: { slug: strin
   const sources = isArchetype
     ? SUBPAGE_PRIMARY_SOURCES.archetype
     : SUBPAGE_PRIMARY_SOURCES.region(sub.name);
+
+  const accomPhotos = ACCOMMODATION_PHOTOS[sub.slug];
 
   return (
     <>

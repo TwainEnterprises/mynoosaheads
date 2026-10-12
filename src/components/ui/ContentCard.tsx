@@ -28,6 +28,7 @@
  *   - .hover-underline    — link underline reveal
  */
 
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -89,13 +90,14 @@ export function ContentCard({
 
   const inner = (
     <>
-      <div className={`hover-scale-img ${ASPECT_CLASS[imageAspect]} w-full bg-paper-100`}>
-        <img
+      <div className={`hover-scale-img ${ASPECT_CLASS[imageAspect]} relative w-full overflow-hidden bg-paper-100`}>
+        <Image
           src={image}
           alt={imageAlt}
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           loading={imagePriority ? "eager" : "lazy"}
-          decoding="async"
-          className="h-full w-full object-cover"
+          className="object-cover"
         />
       </div>
       <div className="flex flex-1 flex-col p-5">

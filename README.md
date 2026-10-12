@@ -361,3 +361,53 @@ Visit:
 # Sprint 1.3 — content migration shipped 2026-08-27
 # Sprint 1.1 — auto-deploy verified 2026-08-27T11:06:39Z
 # v5 (MSN-2959-V5-POLISH) — surgical visual polish shipped 2026-10-05
+# v6 (MSN-2960-V6-MEGA-MENU-HOMEPAGE) — mega menu + homepage restructure + design-system polish shipped 2026-10-11
+# v6.1 (MSN-2961-V6.1-P1-CONTENT-RAILS) — P1 content rails + mega-menu search + 15 scenes + micro-interaction library shipped 2026-10-12
+
+# v6.1.1 (MSN-2962-V6.1.1-PHOTO-INTEGRATION) — open-licence photo swap + ESLint fixes + P1 quick wins shipped 2026-10-12
+#
+# Summary
+#   - Photo integration: 49 curated Unsplash photos replaced with 42
+#     verified location-specific Wikimedia Commons photos (CC-BY-SA 4.0,
+#     CC-BY 2.0, public domain, CC0 1.0) per Albert's photo manifest,
+#     plus 10 bespoke SVG illustrations for the locations with no
+#     open-licence photo (Sunshine Beach, six named eat-and-drink
+#     venues, three cross-section accommodation filters).
+#   - 4 ESLint `<img>` → `<Image>` conversions in page.tsx, ContentCard,
+#     Lightbox, MegaMenu. Zero warnings, zero errors.
+#   - next.config.mjs: added `commons.wikimedia.org` to remotePatterns
+#     so next/image can hot-link via Special:FilePath.
+#   - S9 Webcams strip: 4 distinct photos (was: same hero on all 4 in
+#     v6.1). Two of the four are real Commons photos; the other two
+#     are SVG fallbacks.
+#   - S7 Eat & drink: 6 bespoke SVG illustrations of the venue type
+#     (e.g. "riverside Japanese" for Wasabi, "laneway restaurant" for
+#     Sum Yung Guys). Not branded imitations.
+#   - JSON-LD LocalBusiness structured data on the homepage (P1 / §10
+#     launch bar #9 — was partial in v6.1, now full).
+#   - Footer column 1 (Sitemap) updated to reflect the v6 mega-menu
+#     IA (Destinations, Stay, See & Do, Plan, What's On, Book Now),
+#     per Victor's P2-5.
+#   - /hello-noosa linked from /about's "Who writes it" section.
+#   - Peregian Beach: reuses the same Mountain/Ash 2012 photo for both
+#     hero and inline with different crops, per the manifest.
+#   - LocationPhoto union type introduced in src/data/photos.ts; the
+#     LocationPhoto / LocationCaptionedPhoto wrapper components
+#     consolidate the photo-treatment policy in one place.
+#
+# Known deferred items (to v6.1.2 / v6.2)
+#   - P1: JSON-LD Article on inner pages (homepage is now done; inner
+#     pages are still missing per Victor's §10 bar #9).
+#   - P2-3: Webcam tiles still need operator-supplied thumbnails or
+#     tripoded-camera scenes (current build uses Commons photos for
+#     the four beach angles; SVG for Sunshine Beach).
+#   - P2-4: Scene illustrations in /scenes — the v6.1.1 SVG fallbacks
+#     are bespoke for the 10 named gaps; a wider scene library
+#     (Markets, Beach access, etc.) is a v6.2 follow-up.
+#   - P2-7: Mega menu focus-trap is still non-modal by design.
+#   - Sunshine Beach specific photo (no open-licence photo found in
+#     this pass; SVG placeholder ships in v6.1.1).
+#   - Hinterland (Pomona / Cooran / Kin Kin / Cooroy) specific photos
+#     (Everglades photo is used as hinterland context for v6.1.1).
+#   - Direct outreach to the 6 named eat-and-drink venues for CC-BY
+#     photos (Sally to lead, v6.2 follow-up).

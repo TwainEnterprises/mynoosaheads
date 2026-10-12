@@ -10,6 +10,7 @@ import {
   Button,
   Icons,
 } from "@/components/ui";
+import { FALLBACK_SVGS } from "@/components/illustrations/V6P1Fallbacks";
 import { CATEGORY_PHOTOS } from "@/data/photos";
 
 export const metadata: Metadata = {
@@ -79,16 +80,24 @@ const CAMS = [
 export default function WebcamsPage() {
   const photos = CATEGORY_PHOTOS["webcams"];
   const heroCredit = photos
-    ? `Photo: ${photos.hero.author} / Wikimedia Commons · ${photos.hero.licence}`
+    ? photos.hero.kind === "svg"
+      ? `Illustration: ${photos.hero.author} · ${photos.hero.licence}`
+      : `Photo: ${photos.hero.author} / Wikimedia Commons · ${photos.hero.licence}`
     : "";
+  const heroSrc = photos?.hero?.kind === "commons" ? photos.hero.url : "";
+  const heroAlt = photos?.hero?.kind === "commons" ? photos.hero.altText : (photos?.hero?.caption ?? "");
 
   return (
     <div className="bg-paper-50">
-      {/* Sprint 1.5: full-bleed hero photo (drone view) */}
+      {/* Sprint 1.5: full-bleed hero photo (drone view)
+       * v6.1.1 (MSN-2962): handles the LocationPhoto union — SVG kind
+       * gets an empty src (HeroPhoto skips the image render; the SVG
+       * fallback isn't used for the webcams category hero, which uses
+       * a real Commons photo). */}
       {photos?.hero ? (
         <HeroPhoto
-          src={photos.hero.url}
-          alt={photos.hero.caption}
+          src={heroSrc}
+          alt={heroAlt}
           credit={heroCredit}
           caption={photos.hero.caption}
         />
@@ -100,23 +109,33 @@ export default function WebcamsPage() {
         flourish="Check the cam before you check the car keys."
       />
 
-      {/* Sprint 1.5: inline images after the gallery */}
+      {/* Sprint 1.5: inline images after the gallery
+       * v6.1.1 (MSN-2962): handles LocationPhoto union for inline. */}
       {photos?.inline?.length ? (
         <section className="container-page pb-14 md:pb-20" aria-label="Webcam subject photos">
           <div className="grid gap-8 md:grid-cols-2">
             {photos.inline.slice(0, 4).map((p, i) => (
               <figure key={i} className="relative w-full overflow-hidden rounded-2xl border border-paper-200 bg-paper-100">
-                <Image
-                  src={p.url}
-                  alt={p.caption}
-                  width={1280}
-                  height={720}
-                  loading="lazy"
-                  decoding="async"
-                  className="w-full h-auto"
-                  sizes="(min-width: 768px) 50vw, 100vw"
-                  // MSN-2959 / TSK-2959-POLISH-B: Vercel image opt (AVIF/WebP).
-                />
+                {p.kind === "svg" ? (
+                  <div className="aspect-[16/9] w-full" role="img" aria-label={p.altText}>
+                    {(() => {
+                      const SvgComp = FALLBACK_SVGS[p.svgKey];
+                      return <SvgComp className="h-full w-full" />;
+                    })()}
+                  </div>
+                ) : (
+                  <Image
+                    src={p.url}
+                    alt={p.altText}
+                    width={p.width}
+                    height={p.height}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-auto"
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    // MSN-2959 / TSK-2959-POLISH-B: Vercel image opt (AVIF/WebP).
+                  />
+                )}
                 <figcaption className="px-4 py-3 text-caption text-ink-700 bg-paper-100 border-t border-paper-200">
                   <span className="font-medium text-ink-800">{p.caption}</span>
                   <br />
