@@ -111,7 +111,7 @@ const FallbackSection = () => (
     </p>
     <ul className="mt-3 list-disc pl-6 text-body-sm text-ink-800 space-y-1">
       <li>
-        <strong>Gaps where Albert&rsquo;s manifest returned 0 photos</strong>
+        <strong>Gaps where the v2 manifest returned 0 photos</strong>
         {" "}— Noosa Junction (0/1), Sunshine Beach holiday house (no
         open-licence image), accessible ground-floor unit (no
         open-licence image).
@@ -145,7 +145,7 @@ const FallbackSection = () => (
         // Gap fillers (3)
         ["sunshine-beach", "Sunshine Beach — the surf village south of the headland"],
         ["accessible", "Accessible — step-free path to a ground-floor unit"],
-        ["area-noosa-junction", "Noosa Junction — the local plaza (gap, 0/1 in Albert v2)"],
+        ["area-noosa-junction", "Noosa Junction — the local plaza (gap, 0/1 in v2)"],
         // Venue typologies (6 — historical; v6.2 ships photos for Bistro C + Locale)
         ["japanese-riverside", "Wasabi — modern Japanese, riverside (typology)"],
         ["beachfront-seafood", "Sails — modern Australian, beachfront (typology)"],
@@ -205,7 +205,7 @@ export default function ImageCreditsPage() {
           centralised register; each photo also carries its credit line
           in the page where it appears. v6.2 ships <strong>62 verified
           location-specific open-licence photos</strong> from Wikimedia
-          Commons — all passing Albert&rsquo;s 4-test verification
+          Commons — all passing the 4-test verification
           (visible Noosa landmark · EXIF GPS in the Noosa box · caption
           match · visible-content cross-check) — plus <strong>33 bespoke
           SVG illustrations</strong> in editorial register for the gaps
