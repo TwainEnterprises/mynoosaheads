@@ -84,3 +84,24 @@ export type { TabItem, TabsProps } from "./Tabs";
 
 export { SearchOverlay } from "./SearchOverlay";
 export type { SearchOverlayProps } from "./SearchOverlay";
+
+// v6.3 (MSN-2964) — full-scope additions
+export { EditorialGrid } from "./EditorialGrid";
+export type {
+  EditorialGridProps,
+  EditorialGridItem,
+  EditorialGridLayout,
+} from "./EditorialGrid";
+
+export { BeachReport } from "./BeachReport";
+export type {
+  BeachReportProps,
+  BeachReportData,
+  BeachReportVariant,
+} from "./BeachReport";
+
+export { TripPlanner } from "./TripPlanner";
+export type {
+  TripPlannerProps,
+  WeatherSnapshot,
+} from "./TripPlanner";

@@ -163,11 +163,18 @@ const config: Config = {
         "text-muted": "var(--color-text-muted)",
       },
       fontFamily: {
-        // `display` is the editorial serif (Fraunces).
-        // `body` is the workhorse sans (Inter).
+        // v6.3 (MSN-2964) — Phase A: typographic register.
+        // `display` is the editorial serif (Fraunces) — used for H1-H6
+        //   per the v6 spec §4.1 (Fraunces opsz 144 engaged).
+        // `body` is the workhorse sans (Inter) — used for body + nav + UI.
+        // `sans` mirrors `body` so utility classes like `font-sans` map
+        //   to Inter (the Tailwind v4 default name, kept as alias for
+        //   portability with the spec language).
         // `accent` is the handwritten note (Caveat) — use sparingly.
         display: ['var(--font-display)', "ui-serif", "Georgia", "serif"],
         body: ['var(--font-body)', "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ['var(--font-body)', "ui-sans-serif", "system-ui", "sans-serif"],
+        serif: ['var(--font-display)', "ui-serif", "Georgia", "serif"],
         accent: ['var(--font-accent)', "cursive"],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
@@ -273,6 +280,19 @@ const config: Config = {
         "container-6xl": "72rem",
       },
       spacing: {
+        // v6.3 (MSN-2964) — Phase F: editorial spacing scale
+        // (visitnoosa-aligned). Base 4 with 8-pt cadence for layout.
+        // Values are explicit so reviewers can grep a single token list.
+        //   4   8   12   16   24   32   48   64   96
+        "1": "0.25rem",   //  4
+        "2": "0.5rem",    //  8
+        "3": "0.75rem",   // 12
+        "4": "1rem",      // 16 (Tailwind default)
+        "6": "1.5rem",    // 24
+        "8": "2rem",      // 32
+        "12": "3rem",     // 48
+        "16": "4rem",     // 64
+        "24": "6rem",     // 96
         // Editorial spacing scale (8-pt grid with 4-pt half-steps for fine work).
         "10": "2.5rem",
         "14": "3.5rem",

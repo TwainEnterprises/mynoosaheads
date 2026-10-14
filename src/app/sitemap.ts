@@ -47,6 +47,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/webcams`, lastModified, changeFrequency: "weekly", priority: 0.7 },
     // v5 (MSN-2959-V5-POLISH #20) — /plan page (trip planning hub).
     { url: `${SITE_URL}/plan`, lastModified, changeFrequency: "monthly", priority: 0.8 },
+    // v6.3 (MSN-2964) — Phase D: 4 themed 3-day itineraries.
+    { url: `${SITE_URL}/itineraries/family-fun`, lastModified, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE_URL}/itineraries/beach-lover`, lastModified, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE_URL}/itineraries/hinterland-wander`, lastModified, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE_URL}/itineraries/foodie`, lastModified, changeFrequency: "monthly", priority: 0.7 },
+    // v6.3 (MSN-2964) — Phase C: trip planner (interactive).
+    { url: `${SITE_URL}/plan-your-trip`, lastModified, changeFrequency: "monthly", priority: 0.8 },
+    // v6.3 (MSN-2964) — Phase E: beaches (live report).
+    { url: `${SITE_URL}/beaches`, lastModified, changeFrequency: "daily", priority: 0.7 },
     // Editorial / legal — yearly
     { url: `${SITE_URL}/about`, lastModified, changeFrequency: "monthly", priority: 0.5 },
     { url: `${SITE_URL}/image-credits`, lastModified, changeFrequency: "monthly", priority: 0.4 },

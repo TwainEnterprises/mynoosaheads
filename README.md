@@ -7,18 +7,79 @@
 A tourism-positive, sourced guide to Noosa Heads (Queensland, Australia).
 
 [![Next.js](https://img.shields.io/badge/Next.js-14.2.15-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![Sprint](https://img.shields.io/badge/Sprint-6.2%20(v6.2%20PHOTOS%20%2B%20ILLUSTRATIONS)-blue?style=flat-square)](#v62-change-log)
+[![Sprint](https://img.shields.io/badge/Sprint-6.3%20(v6.3%20FULL%20SCOPE)-blue?style=flat-square)](#v63-change-log)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6.2-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind](https://img.shields.io/badge/Tailwind-3.4.13-blue?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
 
-**Status:** **v6.2 (MSN-2963-V6.2-PHOTOS-ILLUSTRATIONS)** — verified photo integration (Albert v2, 62 records, all 4 tests pass) + 33 bespoke editorial illustrations (gap fillers + venue typologies + area / activity / trip-theme scenes), built 2026-10-14 on top of v6.1.1 (`7a597bf`). v6.1.1 production at `mynoosaheads.vercel.app` remains untouched. Vercel preview link captured at deploy; awaiting chairman's call to promote.
+**Status:** **v6.3 (MSN-2964-V6.3-FULL-SCOPE)** — full-scope build on top of v6.2 (`e000b19`), per Chairman directive 2026-10-14 ("Dexter must build all"). Reverses the earlier minimal-scope (v6.2 = photos + illustrations) decision. v6.1.1 production at `mynoosaheads.vercel.app` remains untouched. Vercel preview link captured at deploy; awaiting chairman's call to promote. 35/35 routes return HTTP 200.
 
-**What's new in v6.2:**
-- **62 verified Wikimedia Commons photos** — all from Albert's v2 manifest, all passing 4-test verification (visible landmark · EXIF GPS · caption match · content cross-check). Zero CC-BY-NC, CC-BY-ND, commercial stock, Unsplash, or AI.
-- **33 bespoke editorial illustrations** — gap fillers (Sunshine Beach holiday house, accessible, Noosa Junction), venue typologies (Wasabi, Sails, Berardo's, Sum Yung Guys, Bistro C, Locale), 8 area scenes, 6 activity scenes, 5 trip-theme scenes, 4 decorative for sub-pages. 1.5px stroke, sea-glass palette, 480×360 viewBox, 4:3, inlined.
-- **S7 Eat & drink substitution** — 9 venues with real photos (Season, Bang Bang, Zibros, Gusto, Heads of Noosa Brewing, Noosa Boathouse, Royal Mail, Bistro C, Locale). The 6 venue-typology SVGs from v6.1.1 are retained for sub-page / social-tile use.
-- **Image credits** — all 62 records render on `/image-credits` with full attribution (author + licence + source URL).
-- **Anonymisation scrub** — 0 personal-name matches in user-facing strings.
+**What's new in v6.3:**
+- **Phase A — Typography refinement.** Fraunces (display) + Inter (body) + Caveat (accent) are SIL OFL 1.1 and self-hosted via `next/font`. v6.3 confirms the editorial type stack and adds Tailwind `font-sans` (Inter) + `font-serif` (Fraunces) aliases so the spec language maps directly. H1–H6 hierarchy tightened per spec (Fraunces opsz 144 engaged on H1/H2, H3–H6 letter-spacing -0.017em).
+- **Phase B — Editorial grid treatment.** New `<EditorialGrid />` component (`src/components/ui/EditorialGrid.tsx`) replaces the v6.2 3-column card layout on the homepage Featured Areas rail with an editorial 2x2 / asymmetric pattern (hero tile + 2-column main + accent). Three layouts supported: `feature`, `asymmetric`, `stagger`. Matches visitnoosa.com.au's homepage register.
+- **Phase C — Trip planner.** New route `/plan-your-trip`. Interactive 4-step wizard (When / Who / What / Stay) with `useState` + `localStorage` persistence (A$0, no auth, no third-party). Output is a personalised 3-day itinerary with BOM weather snapshot + **Save to PDF** via `window.print()` + custom @media print stylesheet. Server-side weather fetch via `lib/beach-data.ts` + existing `lib/live-data.ts`.
+- **Phase D — 4 themed 3-day itineraries.** New routes:
+  - `/itineraries/family-fun`
+  - `/itineraries/beach-lover`
+  - `/itineraries/hinterland-wander`
+  - `/itineraries/foodie`
+
+  Each page: hero + day-by-day breakdown (morning/afternoon/evening) + inline SVG map of Noosa Shire with 3-day route overlay + photo gallery (reuses v6.2 verified Commons photos) + booking CTAs + tags + cross-link to /plan-your-trip. ~700–900 words each, editorial register, anonymised.
+- **Phase E — Beach report widget.** New `<BeachReport />` component (`src/components/ui/BeachReport.tsx`) in two variants: `full` (live conditions card on `/beaches`) + `compact` (1-line summary on homepage). Live BOM + Open-Meteo + NOAA-solar data, A$0, no scraping. Patrolled status is a static seasonal note (lifeguard 8am–5pm Sept–May) with a QPWS link, per the v6.3 spec.
+- **Phase F — Visitnoosa-style polish.** Spacing scale (4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96 px) added to tailwind.config.ts; 3 sand shades + deep-teal accent added to globals.css (coral **intentionally omitted** per the standing MSN-2959 r2 chairman directive). Mega-menu IA verified: 6 top-level categories (Destinations · Stay · See & Do · Plan · What's On · Book Now). Footer remains 5-column with 91-word ACCC band. Typography hierarchy: H1 Fraunces 48/56, H2 32/40, H3 24/32, body Inter 16/24.
+- **Phase G — Regression.** All v6.2 fixes hold (4 ESLint `<img>`→`<Image>` warnings fixed in v6.1.1 stay fixed). Anonymisation scrub: 0 matches. Build exit 0. 35/35 routes return HTTP 200. Live data (BOM, Open-Meteo, NOAA, QPWS, QLD Traffic) still works. ACCC footer intact.
+
+---
+
+## v6.3 change log (MSN-2964-V6.3-FULL-SCOPE, 2026-10-14)
+
+Built on top of v6.2 (`e000b19`). Full scope per Chairman directive ("Dexter must build all"). Phases A through G complete; live preview URL captured at deploy; v6.1.1 production untouched pending independent Victor QA.
+
+### Files added (v6.3)
+
+- `src/components/ui/EditorialGrid.tsx` — editorial 2x2 / asymmetric grid (Phase B).
+- `src/components/ui/BeachReport.tsx` — live beach conditions card, full + compact variants (Phase E).
+- `src/components/ui/TripPlanner.tsx` — 4-step wizard with localStorage persistence (Phase C).
+- `src/components/ui/ItineraryPage.tsx` — shared renderer for the 4 themed 3-day itineraries (Phase D).
+- `src/data/itineraries.ts` — itinerary content (4 slugs).
+- `lib/beach-data.ts` — server-side fetcher for the BeachReport data shape.
+- `src/app/plan-your-trip/page.tsx` — Phase C route.
+- `src/app/beaches/page.tsx` — Phase E route.
+- `src/app/itineraries/family-fun/page.tsx` — Phase D route.
+- `src/app/itineraries/beach-lover/page.tsx` — Phase D route.
+- `src/app/itineraries/hinterland-wander/page.tsx` — Phase D route.
+- `src/app/itineraries/foodie/page.tsx` — Phase D route.
+
+### Files changed (v6.3)
+
+- `tailwind.config.ts` — `font-sans` + `font-serif` aliases (Phase A); explicit 4/8/12/16/24/32/48/64/96 px spacing tokens (Phase F).
+- `src/app/globals.css` — 3 sand shades + deep-teal accent (Phase F); print stylesheet for the trip planner (Phase C).
+- `src/app/page.tsx` — S3 Featured Areas now uses `<EditorialGrid />` (Phase B); 3 new sections appended: beach report compact, 4 itineraries grid, trip planner CTA.
+- `src/app/sitemap.ts` — 6 new routes added (4 itineraries + /plan-your-trip + /beaches).
+- `src/components/ui/index.ts` — 3 new components exported.
+
+### Self-QA
+
+- ✅ `pnpm run build` exits 0; 36+ routes generated (35 in production smoke test, 36+ with `/api/sentry-example-error`).
+- ✅ `pnpm run lint` — 0 warnings, 0 errors.
+- ✅ `pnpm start` serves all routes with HTTP 200 (35/35 verified).
+- ✅ Anonymisation scrub: 0 personal-name matches in user-facing strings.
+- ✅ 62 verified Wikimedia Commons photos still integrated with full attribution on `/image-credits`.
+- ✅ 33 bespoke SVG illustrations still rendered, no orphans.
+- ✅ 4 themed 3-day itinerary pages live at `/itineraries/{family-fun, beach-lover, hinterland-wander, foodie}`.
+- ✅ `/plan-your-trip` live, interactive, persists to localStorage.
+- ✅ Beach report widget live on `/beaches` (full) and homepage (compact, 3 tiles).
+- ✅ Fraunces + Inter + Caveat fonts loaded via `next/font/google`, no FOUT, no missing-glyph warnings.
+- ✅ Editorial grid treatment on S3 homepage Featured Areas rail (2x2 asymmetric, hero tile spans 2 columns).
+- ✅ Live data still works (BOM, Open-Meteo, NOAA, QPWS, QLD Traffic) — verified via homepage load.
+- ✅ ACCC compliance footer intact.
+- ✅ First Load JS shared: 87.2 kB (matches v6.2; no regression).
+
+### Notes for chairman
+
+- **Coral intentionally omitted.** The v6.3 spec asks for "2 accents (deep teal + coral)". Coral is omitted per the standing MSN-2959 (r2) chairman directive (2026-08-27 20:05 BST) which explicitly forbids coral + warm parchment + forest-green on the v2 sea-glass register. Documented inline in `globals.css` so future contributors don't quietly re-add it.
+- **Sand implemented as desaturated neutrals.** 3 sand shades (`--sand-50/100/200`) added as pale-paper tones, not warm sand. Within the sea-glass + paper palette. Documented inline.
+- **Patrolled status is honest.** QPWS does not publish patrolled status as open data. The BeachReport shows a static seasonal note (lifeguard 8am–5pm, Sept–May) with a QPWS link for live status. Spec said: "use a static note with a Check QPWS for live status link" — done.
+- **TripPlanner is server-rendered shell + client island.** The page itself is a server component (so the BOM snapshot is fresh on first paint); the wizard is a client island that persists to `localStorage`. No auth, no server-side state, A$0.
 
 ---
 

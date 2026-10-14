@@ -2,6 +2,7 @@ import Link from "next/link";
 import * as React from "react";
 import Image from "next/image";
 import { fetchLiveBundle } from "@/lib/live-data";
+import { fetchBeachReport } from "@/lib/beach-data";
 import {
   Hero,
   HeroPhoto,
@@ -15,6 +16,8 @@ import {
   ContentCard,
   Carousel,
   Accordion,
+  EditorialGrid,
+  BeachReport,
   LocationPhoto as LocationPhotoView,
 } from "@/components/ui";
 import { AreaHeroes } from "@/components/illustrations/AreaHeroes";
@@ -33,6 +36,7 @@ import {
 } from "@/data/site";
 import { HOMEPAGE_HERO, HOMEPAGE_SECTIONS } from "@/data/photos";
 import type { LocationPhoto } from "@/data/photos";
+import { ITINERARIES } from "@/data/itineraries";
 
 /**
  * Homepage — v6.1.1 (MSN-2962-V6.1.1-PHOTO-INTEGRATION, 2026-10-12).
@@ -69,6 +73,8 @@ import type { LocationPhoto } from "@/data/photos";
  */
 export default async function HomePage() {
   const live = await fetchLiveBundle();
+  // v6.3 (MSN-2964) Phase E — beach report for the homepage compact variant.
+  const beach = await fetchBeachReport();
 
   // v6.1.1 (MSN-2962): LocalBusiness JSON-LD structured data on the
   // homepage per Albert's §10 launch bar #9 (SEO structured data).
@@ -260,65 +266,31 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ─── S3: Featured areas (P0; 6 photo cards) ─── */}
-      <section
-        className="container-page py-14 md:py-20"
-        aria-labelledby="areas-heading"
-      >
-        <p className="eyebrow">A small guide to a small shire</p>
-        <h2
-          id="areas-heading"
-          className="mt-1 font-display text-display-md text-ink-900 text-balance"
-        >
-          Pick where you want to start
-        </h2>
-        <p className="mt-3 lead max-w-3xl">
-          The shire is small enough to cover properly. We organise
-          MyNoosaHeads around six places locals actually base themselves —
-          from the headland to Peregian, with the national park in the
-          middle.
-        </p>
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURED_AREAS.map((area) => {
-            const photo: LocationPhoto =
-              HOMEPAGE_SECTIONS.featuredAreas[area.imageIndex];
-            // For SVG fallback photos, render LocationPhoto (no next/image
-            // needed — the SVG is inlined). For Commons photos, render
-            // ContentCard with the URL so the standard card layout applies.
-            if (photo.kind === "svg") {
-              return (
-                <FeaturedAreaSvgCard
-                  key={area.slug}
-                  area={area}
-                  photo={photo}
-                />
-              );
-            }
-            return (
-              <ContentCard
-                key={area.slug}
-                image={photo.url}
-                imageAlt={photo.altText}
-                imageCredit={`Photo: ${photo.author} / Wikimedia Commons · ${photo.licence}`}
-                imageAspect="3/2"
-                imagePriority={area.imageIndex === 0}
-                eyebrow={area.name}
-                title=""
-                body={area.tagline}
-                cta={{ label: area.cta, href: area.href }}
-              />
-            );
-          })}
-        </div>
-        <div className="mt-8 text-center">
-          <Link
-            href="/things-to-do"
-            className="link text-ocean-700 text-body font-medium hover-underline"
-          >
-            See all eight areas →
-          </Link>
-        </div>
-      </section>
+      {/* ─── S3: Featured areas (P0; v6.3 EditorialGrid treatment) ─── */}
+      {/* v6.3 (MSN-2964) Phase B: editorial 2x2 / asymmetric grid replaces
+       * v6.2's uniform 3-column card layout. Matches visitnoosa.com.au's
+       * register (hero strip + 2-column main + 1-column accent). */}
+      <EditorialGrid
+        eyebrow="A small guide to a small shire"
+        heading="Pick where you want to start"
+        intro="The shire is small enough to cover properly. We organise MyNoosaHeads around six places locals actually base themselves — from the headland to Peregian, with the national park in the middle."
+        layout="feature"
+        seeAllHref="/things-to-do"
+        seeAllLabel="See all eight areas →"
+        items={FEATURED_AREAS.map((area) => {
+          const photo: LocationPhoto =
+            HOMEPAGE_SECTIONS.featuredAreas[area.imageIndex];
+          return {
+            id: area.slug,
+            title: area.name,
+            tagline: area.tagline,
+            href: area.href,
+            ctaLabel: area.cta,
+            eyebrow: area.name,
+            photo,
+          };
+        })}
+      />
 
       {/* ─── S4: Things to do (P0; 8 cards in a scroll-snap rail) ─── */}
       <section
@@ -948,6 +920,163 @@ export default async function HomePage() {
                 ariaLabel="Frequently asked questions"
               />
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── v6.3 S-Beach: Beach report (compact variant on homepage) ─── */}
+      <section
+        className="border-t border-paper-200 bg-paper-100"
+        aria-labelledby="beach-report-heading"
+      >
+        <div className="container-page py-12 md:py-16">
+          <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="eyebrow">Beach report · live</p>
+              <h2
+                id="beach-report-heading"
+                className="mt-1 font-display text-display-md text-ink-900 text-balance"
+              >
+                What the bay is doing right now
+              </h2>
+              <p className="mt-2 lead max-w-2xl">
+                Open BOM + Open-Meteo data. Patrolled status is a static
+                seasonal note — we don’t scrape QPWS; check their page for
+                live closures.
+              </p>
+            </div>
+            <Link
+              href="/beaches"
+              className="link text-ocean-700 text-body font-medium hover-underline"
+            >
+              Open the full beach report →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <BeachReport data={beach} variant="compact" />
+            <BeachReport
+              data={{
+                ...beach,
+                beach: "Sunshine Beach",
+              }}
+              variant="compact"
+            />
+            <BeachReport
+              data={{
+                ...beach,
+                beach: "Main Beach · North",
+              }}
+              variant="compact"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ─── v6.3 S-Itineraries: 4 themed 3-day itineraries ─── */}
+      <section
+        className="container-page py-12 md:py-16"
+        aria-labelledby="itineraries-heading"
+      >
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="eyebrow">4 themed itineraries</p>
+            <h2
+              id="itineraries-heading"
+              className="mt-1 font-display text-display-md text-ink-900 text-balance"
+            >
+              Three-day starting points
+            </h2>
+            <p className="mt-2 lead max-w-2xl">
+              Four editors-curated 3-day itineraries. Pick the one that
+              fits the trip — or build your own.
+            </p>
+          </div>
+          <Link
+            href="/plan-your-trip"
+            className="link text-ocean-700 text-body font-medium hover-underline"
+          >
+            Build your own →
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {ITINERARIES.map((it) => (
+            <Link
+              key={it.slug}
+              href={`/itineraries/${it.slug}`}
+              className="group flex flex-col overflow-hidden rounded-xl border border-paper-200 bg-paper-50 shadow-sm hover-lift"
+            >
+              <div className="hover-scale-img relative aspect-[4/3] w-full bg-paper-100">
+                <Image
+                  src={it.hero.src}
+                  alt={it.hero.alt}
+                  width={800}
+                  height={600}
+                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="flex flex-1 flex-col p-5">
+                <p className="eyebrow">{it.eyebrow}</p>
+                <h3 className="mt-2 font-display text-headline-lg text-ink-900 text-balance">
+                  {it.title}
+                </h3>
+                <span className="mt-auto inline-flex items-center gap-1 text-body-sm font-medium text-ocean-700 pt-3">
+                  Open the itinerary →
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* ─── v6.3 S-Planner: Trip planner CTA ─── */}
+      <section
+        className="border-t border-paper-200 bg-paper-100"
+        aria-labelledby="planner-cta-heading"
+      >
+        <div className="container-page py-12 md:py-16">
+          <div className="grid gap-8 md:grid-cols-2 items-start">
+            <div>
+              <p className="eyebrow">Plan your trip · 4 questions</p>
+              <h2
+                id="planner-cta-heading"
+                className="mt-1 font-display text-display-md text-ink-900 text-balance"
+              >
+                Build your own 3-day itinerary
+              </h2>
+              <p className="mt-3 lead">
+                Four questions — month, who, what, where — and the planner
+                builds a personalised 3-day itinerary with a BOM weather
+                snapshot and a Save-to-PDF button. Your answers live in
+                this browser only; no account, no email.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Button href="/plan-your-trip" size="lg">
+                  Open the trip planner →
+                </Button>
+                <Button href="/plan" variant="outline" size="lg">
+                  Open the /plan hub
+                </Button>
+              </div>
+            </div>
+            <ul className="grid grid-cols-2 gap-3 text-body-sm text-ink-800">
+              <li className="rounded-xl border border-paper-200 bg-paper-50 p-3">
+                <strong className="block font-display text-headline-md text-ink-900">When</strong>
+                BOM averages · QLD school-holiday awareness
+              </li>
+              <li className="rounded-xl border border-paper-200 bg-paper-50 p-3">
+                <strong className="block font-display text-headline-md text-ink-900">Who</strong>
+                Party size · ages · pet · accessibility
+              </li>
+              <li className="rounded-xl border border-paper-200 bg-paper-50 p-3">
+                <strong className="block font-display text-headline-md text-ink-900">What</strong>
+                Surf · SUP · kayak · hike · swim · fish · eat · market · spa
+              </li>
+              <li className="rounded-xl border border-paper-200 bg-paper-50 p-3">
+                <strong className="block font-display text-headline-md text-ink-900">Stay</strong>
+                Budget band · area preference
+              </li>
+            </ul>
           </div>
         </div>
       </section>
