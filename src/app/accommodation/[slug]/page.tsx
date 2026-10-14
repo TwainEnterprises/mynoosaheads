@@ -8,7 +8,7 @@ import { ACCOMMODATION_PHOTOS } from "@/data/photos";
 /**
  * Accommodation sub-pages — v5 (MSN-2959-V5-POLISH #21), v6.1.1 (MSN-2962).
  *
- * Tim's locked answer #4: 9 sub-pages (not Albert's default of 4). Full
+ * Chairman's locked answer #4: 9 sub-pages (not Albert's default of 4). Full
  * SEO-audit gap from MSN-3058 §4. Each sub-page is a region/archetype
  * landing page with:
  *   - Editorial body (>= 600 words; ~1100 words across 5 sections)

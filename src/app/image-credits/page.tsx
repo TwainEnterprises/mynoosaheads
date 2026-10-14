@@ -11,32 +11,32 @@ import {
 import { CATEGORIES } from "@/data/site";
 
 /**
- * /image-credits — Per-page attribution page (v6.1.1).
+ * /image-credits — Per-page attribution page (v6.2).
  *
  * Auto-renders from src/data/photos.ts. Lists every photo with author
  * + licence + source URL. The page is the single source of truth for
  * photography attribution on the site.
  *
- * v6.1.1 (MSN-2962) — swapped from curated Unsplash to verified
- * location-specific Wikimedia Commons photos + bespoke SVG
- * illustrations. The 49 Unsplash photos are removed; the new
- * inventory is 42 Commons photos + 10 SVG fallbacks (the SVG
- * fallbacks cover Sunshine Beach, six named eat-and-drink venues,
- * and three cross-section accommodation filters).
+ * v6.2 (MSN-2963) — 62 verified location-specific open-licence photos
+ * from Wikimedia Commons + 33 bespoke SVG illustrations. The 62 photos
+ * are all from Albert's v2 manifest (2026-10-14) and pass all four
+ * verification tests (visible Noosa landmark · EXIF GPS in the Noosa
+ * box · caption match · visible-content cross-check). The 33 SVG
+ * illustrations cover gaps (Sunshine Beach holiday house, accessible
+ * unit, Noosa Junction, plus 7 area scenes + 6 activity scenes + 5
+ * trip-theme scenes + venue typologies + miscellaneous).
  *
  * Compliance summary:
- *   - 28 photos under CC BY-SA 4.0 (Kgbo, Donaldytong, Misaochan2,
- *     John Robert McPherson) — derivative works must carry the
- *     same licence. MyNoosaHeads is not a derivative work.
- *   - 6 photos under CC BY 2.0 (dronepicr, Ewen Bell, Mountain/Ash)
- *     — free for commercial use with attribution.
- *   - 4 photos under CC BY 2.0 (Flickr→Commons import) — attribution
- *     preserved at transfer time.
- *   - 1 photo under CC0 1.0 (John Robert McPherson, Tewantin 1930s).
- *   - 1 photo released to public domain by author (Zephyr103).
- *   - 1 unattributed historical photo (ca. 1920) — public domain via
- *     State Library of Queensland.
- *   - 10 bespoke SVG illustrations, MyNoosaHeads editorial.
+ *   - 50 photos under CC BY-SA 4.0 (Kgbo, Donaldytong, Misaochan2,
+ *     John Robert McPherson, Pezoporus wallicus, et al.) — derivative
+ *     works must carry the same licence. MyNoosaHeads is not a
+ *     derivative work.
+ *   - 6 photos under CC BY-SA 3.0 — alphabetical successor of 4.0;
+ *     same attribution requirements.
+ *   - 4 photos under CC BY 4.0 — attribution only.
+ *   - 2 photos under CC BY 3.0 — attribution only.
+ *   - 33 bespoke SVG illustrations, MyNoosaHeads editorial.
+ *   - Zero CC-BY-NC, CC-BY-ND, commercial stock, Unsplash, or AI.
  *
  * Every photo carries a credit line in the page where it appears
  * AND a row in the table below.
@@ -45,7 +45,7 @@ import { CATEGORIES } from "@/data/site";
 export const metadata: Metadata = {
   title: "Image credits",
   description:
-    "Every photo credit on MyNoosaHeads: photographer, Wikimedia Commons source URL, and licence. v6.1.1 — 42 open-licence photos + 10 SVG fallbacks.",
+    "Every photo credit on MyNoosaHeads: photographer, Wikimedia Commons source URL, and licence. v6.2 — 62 verified open-licence photos + 33 SVG illustrations.",
   alternates: { canonical: "/image-credits" },
   openGraph: {
     title: "Image credits · MyNoosaHeads",
@@ -105,27 +105,83 @@ const FallbackSection = () => (
       Bespoke SVG illustrations
     </h2>
     <p className="mt-2 lead max-w-3xl">
-      For the locations with no open-licence photo at the time of
-      v6.1.1 ship, we commissioned bespoke SVG illustrations consistent
-      with the v5 AreaHeroes style (1.5px stroke, sea-glass palette,
-      4:3 viewBox). These are <em>not</em> branded imitations of any
-      named venue — they depict the venue typology (e.g.&nbsp;&ldquo;riverside
-      Japanese&rdquo; for Wasabi, &ldquo;laneway restaurant&rdquo; for Sum Yung Guys).
-      v6.2 follow-up: direct outreach to each named venue for a
-      CC-BY photo, per Albert&rsquo;s recommendation.
+      v6.2 ships <strong>33 bespoke editorial illustrations</strong> in
+      the same sea-glass palette (1.5px stroke, 480×360 viewBox, 4:3
+      ratio). They cover three categories:
+    </p>
+    <ul className="mt-3 list-disc pl-6 text-body-sm text-ink-800 space-y-1">
+      <li>
+        <strong>Gaps where Albert&rsquo;s manifest returned 0 photos</strong>
+        {" "}— Noosa Junction (0/1), Sunshine Beach holiday house (no
+        open-licence image), accessible ground-floor unit (no
+        open-licence image).
+      </li>
+      <li>
+        <strong>Venue typologies</strong> — generic, not branded
+        imitations of named venues (e.g.&nbsp;&ldquo;riverside Japanese&rdquo;
+        as a typology, not a recreation of any specific venue&rsquo;s
+        facade or branding).
+      </li>
+      <li>
+        <strong>Editorial scene library</strong> — 7 area scenes (Noosa
+        Heads, Hastings Street, Noosaville, Tewantin, Peregian, Noosa
+        National Park, Hinterland), 6 activity scenes (surf, SUP,
+        kayak, swim, hike, fishing), 5 trip-theme scenes (romantic,
+        budget, solo, group, business) — for future use on sub-pages,
+        social tiles, and editorial cards.
+      </li>
+    </ul>
+    <p className="mt-3 text-body-sm text-ink-800">
+      The 4 named-venue typology SVGs from v6.1.1 (Wasabi, Sails,
+      Berardo&rsquo;s, Sum Yung Guys) are retained in the fallback
+      library because v6.2 ships real open-licence photos for 9 other
+      venues (Season, Bang Bang, Zibros, Gusto, Heads of Noosa Brewing,
+      Noosa Boathouse, Royal Mail, Bistro C, Locale) — see the S7
+      venue list above. Editorial honest &gt; venue-typology
+      illustration when a real photo exists.
     </p>
     <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 text-body-sm">
       {[
+        // Gap fillers (3)
         ["sunshine-beach", "Sunshine Beach — the surf village south of the headland"],
-        ["japanese-riverside", "Wasabi — modern Japanese, riverside"],
-        ["beachfront-seafood", "Sails — modern Australian, beachfront"],
-        ["italian-hastings", "Berardo's — Italian, Hastings Street"],
-        ["asian-junction", "Sum Yung Guys — South-east Asian, Noosa Junction"],
-        ["seafood-hastings", "Bistro C — seafood, Hastings Street"],
-        ["italian-noosaville", "Locale — Italian, Noosaville"],
+        ["accessible", "Accessible — step-free path to a ground-floor unit"],
+        ["area-noosa-junction", "Noosa Junction — the local plaza (gap, 0/1 in Albert v2)"],
+        // Venue typologies (6 — historical; v6.2 ships photos for Bistro C + Locale)
+        ["japanese-riverside", "Wasabi — modern Japanese, riverside (typology)"],
+        ["beachfront-seafood", "Sails — modern Australian, beachfront (typology)"],
+        ["italian-hastings", "Berardo's — Italian, Hastings Street (typology)"],
+        ["asian-junction", "Sum Yung Guys — South-east Asian, Noosa Junction (typology)"],
+        ["seafood-hastings", "Bistro C — seafood, Hastings Street (typology; v6.2 also has a photo)"],
+        ["italian-noosaville", "Locale — Italian, Noosaville (typology; v6.2 also has a photo)"],
+        // Trip themes (3 — plus pet-friendly + family which already cover gaps)
         ["pet-friendly", "Pet-friendly — off-leash hours at a Noosa beach"],
         ["family", "Family — a parent and child on the beach"],
-        ["accessible", "Accessible — step-free path to a ground-floor unit"],
+        ["trip-romantic", "Trip theme: romantic — sunset on the river"],
+        ["trip-budget", "Trip theme: budget — picnic on the beach"],
+        ["trip-solo", "Trip theme: solo — quiet morning on the headland"],
+        // Area scenes (7)
+        ["area-noosa-heads", "Area scene: Noosa Heads — headland + surf-club arc"],
+        ["area-hastings-street", "Area scene: Hastings Street — boutique colonnade"],
+        ["area-noosaville", "Area scene: Noosaville — riverfront along Gympie Terrace"],
+        ["area-tewantin", "Area scene: Tewantin — river town main street"],
+        ["area-peregian", "Area scene: Peregian Beach — village square"],
+        ["area-noosa-national-park", "Area scene: Noosa National Park — headland walk"],
+        ["area-hinterland", "Area scene: Hinterland — Mount Cooroora + country town"],
+        // Activity scenes (6)
+        ["activity-surf", "Activity: surf — longboard point break at First Bay"],
+        ["activity-sup", "Activity: stand-up paddle — calm-water hire at Noosaville"],
+        ["activity-kayak", "Activity: kayak — the upper Noosa River"],
+        ["activity-swim", "Activity: swim — the lifeguard-tower bay"],
+        ["activity-hike", "Activity: hike — the headland walk"],
+        ["activity-fishing", "Activity: fishing — angling from a boat at the river mouth"],
+        // Trip themes — extra
+        ["trip-group", "Trip theme: group — friends on a river cruise"],
+        ["trip-business", "Trip theme: business — Hastings Street morning meeting"],
+        // Sub-page decorative (4)
+        ["tewantin", "Tewantin — river town ferry stop (decorative)"],
+        ["peregian", "Peregian — the village surf-front (decorative)"],
+        ["hinterland", "Hinterland — country town beneath the volcanic peak (decorative)"],
+        ["cross-section-pets", "Cross-section: pets — verify each operator's pet policy"],
       ].map(([key, label]) => (
         <li key={key} className="rounded-lg border border-paper-200 p-3">
           <p className="text-caption text-ink-600">SVG · {key}</p>
@@ -147,11 +203,13 @@ export default function ImageCreditsPage() {
         <p className="mt-4 lead max-w-3xl">
           Every photograph on MyNoosaHeads is credited. This page is the
           centralised register; each photo also carries its credit line
-          in the page where it appears. v6.1.1 ships 42 verified
-          location-specific open-licence photos from Wikimedia Commons,
-          the State Library of Queensland, and Flickr-CC imports — plus
-          10 bespoke SVG illustrations for the locations with no
-          open-licence photo at the time of ship.
+          in the page where it appears. v6.2 ships <strong>62 verified
+          location-specific open-licence photos</strong> from Wikimedia
+          Commons — all passing Albert&rsquo;s 4-test verification
+          (visible Noosa landmark · EXIF GPS in the Noosa box · caption
+          match · visible-content cross-check) — plus <strong>33 bespoke
+          SVG illustrations</strong> in editorial register for the gaps
+          and venue typologies where no open-licence photo exists.
         </p>
         <div className="mt-6 callout">
           <p className="eyebrow">Licence</p>
@@ -281,7 +339,7 @@ export default function ImageCreditsPage() {
             <span className="font-accent text-accent-md text-ocean-700">By the editors · MyNoosaHeads</span>
           </p>
           <p>
-            Last verified: <time dateTime="2026-10-12">12 October 2026</time> (Australia/Brisbane)
+            Last verified: <time dateTime="2026-10-14">14 October 2026</time> (Australia/Brisbane)
           </p>
         </div>
       </section>

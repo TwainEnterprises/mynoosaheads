@@ -173,7 +173,7 @@ const STAY_SUB: MegaNavLink[] = [
   { label: "Accessible", href: "/accommodation/accessible" },
   { label: "Unique / Bespoke", href: "/accommodation#unique" },
   { label: "Family", href: "/accommodation/family" },
-  // v5 carryover (9 — Tim's locked answer)
+  // v5 carryover (9 — Chairman's locked answer)
   { label: "Hastings Street", href: "/accommodation/hastings-street" },
   { label: "Noosaville", href: "/accommodation/noosaville" },
   { label: "Sunshine Beach", href: "/accommodation/sunshine-beach" },
@@ -587,10 +587,10 @@ export const RELATED_LINKS = {
 } as const;
 
 /**
- * v5 (MSN-2959-V5-POLISH #21): nine accommodation sub-pages — Tim's
- * locked answer #4 (full SEO-audit gap from MSN-3058 §4).
+ * v5 (MSN-2959-V5-POLISH #21): nine accommodation sub-pages —
+ * Chairman's locked answer #4 (full SEO-audit gap from MSN-3058 §4).
  *
- * Nine region/archetype sub-pages (Tim's locked answer, not Albert's
+ * Nine region/archetype sub-pages (Chairman's locked answer, not Albert's
  * default of 4): regional pages for the 5 places to base yourself +
  * 3 archetype pages (pet-friendly, family, accessible) + 1 hinterland
  * page for the western shire.
@@ -794,7 +794,7 @@ export const CATEGORIES = [
  * monetised link carries an ACCC pill per Competition and Consumer Act
  * 2010 Schedule 2. Every legal link carries the relevant statute pill.
  *
- * Per Tim's directive (2026-08-27) there is no newsletter field anywhere
+ * Per chairman directive (2026-08-27) there is no newsletter field anywhere
  * on the site.
  */
 export const FOOTER_DISCLOSURE = {
@@ -892,7 +892,7 @@ export const ACCC_DISCLOSURE = {
  *   - S8 Noosa right now editorial rail (events + markets + alerts)
  *   - S13 What's on this week rail (5-8 events)
  *   - S15 FAQ accordion (6-8 questions)
- *   - Mega-menu search (deferred from v6 P0 per Tim's call #2; now in)
+ *   - Mega-menu search (deferred from v6 P0 per Chairman's call #2; now in)
  *   - 12+ scene illustrations (in src/components/illustrations/Scenes.tsx)
  *   - Micro-interaction library: Accordion, Lightbox, Tabs, SearchOverlay
  *
@@ -990,47 +990,83 @@ export const SEARCH_INDEX: readonly SearchIndexEntry[] = [
 ] as const;
 
 /* ----------------------------------------------------------------------
- * EAT_AND_DRINK (S7) — 6 venue tiles.
+ * EAT_AND_DRINK (S7) — 9 venue tiles (v6.2 Phase 3 substitution).
+ *
+ * Per Albert's v2 photo manifest (2026-10-14), Wikimedia Commons
+ * returns open-licence photos for nine real Noosa venues (Season,
+ * Bang Bang, Zibros, Gusto, Heads of Noosa Brewing, Noosa Boathouse,
+ * Royal Mail, Bistro C, Locale). The v6.1.1 list of six named venues
+ * (Wasabi, Sails, Berardo's, Sum Yung Guys, Bistro C, Locale) was
+ * paired with venue-typology SVG illustrations because Commons had
+ * zero photos of those four venues.
+ *
+ * v6.2 substitution (Dexter, 2026-10-14): ship the nine Albert-verified
+ * venue photos. Editorial honest > venue-typology illustration. The
+ * six venue-typology SVGs (Wasabi, Sails, Berardo's, Sum Yung Guys,
+ * plus Bistro C and Locale which now have photos too) remain in the
+ * fallback library for any future use (deeper pages, social tiles).
  *
  * Each entry: name, cuisine, area, price, image index (into
- * HOMEPAGE_SECTIONS), CTA href, affiliate disclosure where applicable.
- * All names are well-known Noosa venues from public press coverage;
- * the price indicators are the editorial shorthand ($$$). No
- * commission or partner relationship is implied by inclusion; per
- * v5/ACC the affiliate pill is shown only on monetised links.
+ * HOMEPAGE_SECTIONS.eatAndDrink), CTA href. No commission or partner
+ * relationship is implied by inclusion; per v5/ACC the affiliate
+ * pill is shown only on monetised links.
  * -------------------------------------------------------------------- */
 
 export const EAT_AND_DRINK = [
   {
-    name: "Wasabi",
-    cuisine: "Modern Japanese · riverside",
-    area: "Noosaville",
+    name: "Season",
+    cuisine: "Modern Australian · Hastings Street",
+    area: "Hastings Street",
     price: "$$$",
     imageIndex: 0,
     href: "/things-to-do#eat-and-drink",
   },
   {
-    name: "Sails",
-    cuisine: "Modern Australian · beachfront",
-    area: "Hastings Street",
-    price: "$$$",
+    name: "Bang Bang",
+    cuisine: "Pan-Asian · Noosa Heads",
+    area: "Noosa Heads",
+    price: "$$",
     imageIndex: 1,
     href: "/things-to-do#eat-and-drink",
   },
   {
-    name: "Berardo's",
-    cuisine: "Italian · Hastings Street",
-    area: "Hastings Street",
-    price: "$$$",
+    name: "Zibros",
+    cuisine: "Italian · Noosa Heads",
+    area: "Noosa Heads",
+    price: "$$",
     imageIndex: 2,
     href: "/things-to-do#eat-and-drink",
   },
   {
-    name: "Sum Yung Guys",
-    cuisine: "South-east Asian · Noosa Junction",
-    area: "Noosa Junction",
-    price: "$$",
+    name: "Gusto",
+    cuisine: "Crudo & cocktails · Noosaville",
+    area: "Noosaville",
+    price: "$$$",
     imageIndex: 3,
+    href: "/things-to-do#eat-and-drink",
+  },
+  {
+    name: "Heads of Noosa Brewing Co.",
+    cuisine: "Craft brewery · Noosa Heads",
+    area: "Noosa Heads",
+    price: "$$",
+    imageIndex: 4,
+    href: "/things-to-do#eat-and-drink",
+  },
+  {
+    name: "Noosa Boathouse",
+    cuisine: "Floating seafood · Noosaville",
+    area: "Noosaville",
+    price: "$$$",
+    imageIndex: 5,
+    href: "/things-to-do#eat-and-drink",
+  },
+  {
+    name: "Royal Mail Hotel",
+    cuisine: "Heritage pub · Tewantin",
+    area: "Tewantin",
+    price: "$$",
+    imageIndex: 6,
     href: "/things-to-do#eat-and-drink",
   },
   {
@@ -1038,15 +1074,15 @@ export const EAT_AND_DRINK = [
     cuisine: "Seafood · Hastings Street",
     area: "Hastings Street",
     price: "$$$",
-    imageIndex: 4,
+    imageIndex: 7,
     href: "/things-to-do#eat-and-drink",
   },
   {
     name: "Locale",
-    cuisine: "Italian · Noosaville",
-    area: "Noosaville",
-    price: "$$",
-    imageIndex: 5,
+    cuisine: "Italian · Hastings Street",
+    area: "Hastings Street",
+    price: "$$$",
+    imageIndex: 8,
     href: "/things-to-do#eat-and-drink",
   },
 ] as const;

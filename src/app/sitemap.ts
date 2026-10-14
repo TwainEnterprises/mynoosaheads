@@ -7,7 +7,7 @@
 // project that does not match the marketing hostname). v5 reads from
 // SITE.productionUrl which is resolved from NEXT_PUBLIC_SITE_URL env
 // var at build time, defaulting to "https://mynoosaheads.vercel.app"
-// for the dormant production hostname. When Tim provides the GoDaddy
+// for the dormant production hostname. When the chairman provides the GoDaddy
 // creds for the mynoosaheads.com DNS flip, the env var updates and
 // every canonical URL, sitemap entry, and robots.txt entry changes
 // without touching this file.
@@ -30,7 +30,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/noosa-national-park`, lastModified, changeFrequency: "weekly", priority: 0.9 },
     { url: `${SITE_URL}/accommodation`, lastModified, changeFrequency: "weekly", priority: 0.9 },
     // v5 (MSN-2959-V5-POLISH #21) — nine accommodation sub-pages.
-    // Tim's locked answer #4 (not Albert's default of 4).
+    // Chairman's locked answer #4 (not Albert's default of 4).
     { url: `${SITE_URL}/accommodation/hastings-street`, lastModified, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/accommodation/noosaville`, lastModified, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/accommodation/sunshine-beach`, lastModified, changeFrequency: "weekly", priority: 0.8 },

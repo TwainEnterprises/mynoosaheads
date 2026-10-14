@@ -22,7 +22,7 @@ import { ACCOMMODATION_SUBPAGES, SITE } from "@/data/site";
  * v5 (MSN-2959-V5-POLISH) updates:
  *   - #13/#14: editorial H1 + eyebrow overlay on the hero photo.
  *   - #21: 9 accommodation sub-pages linked via the regions/archetypes
- *     grid (Tim's locked answer #4 — full SEO-audit gap from MSN-3058 §4).
+ *     grid (Chairman's locked answer #4 — full SEO-audit gap from MSN-3058 §4).
  *   - #23: CTAs tightened to action verbs.
  *   - #24: Section eyebrows more editorial ("Where to base yourself" vs "Five places...").
  *

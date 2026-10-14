@@ -17,7 +17,7 @@ import {
 /**
  * Contact page — Sprint 1.3.
  *
- * Per Tim's directive there is no newsletter field and no email storage.
+ * Per chairman directive there is no newsletter field and no email storage.
  * The contact form is a client-side form that simply opens the user's
  * email client with a pre-filled mailto: link; nothing is captured or
  * stored by MyNoosaHeads. The fallback email address is shown for users

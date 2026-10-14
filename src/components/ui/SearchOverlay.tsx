@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * SearchOverlay — global search modal (deferred from v6 P0 to v6.1 per Tim's call #2).
+ * SearchOverlay — global search modal (deferred from v6 P0 to v6.1 per Chairman's call #2).
  *
  * Behaviour:
  *   - Triggered by the search button in MegaMenu (or Cmd/Ctrl-K).

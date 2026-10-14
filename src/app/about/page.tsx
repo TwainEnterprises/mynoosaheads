@@ -43,7 +43,7 @@ export default function AboutPage() {
         credit={brandCredit}
       />
       {/* Sprint 1.5 (MSN-2958) — brand-statement masthead.
-       * Tim's north-star quote as a `<Section>` at the top of /about,
+       * Chairman's north-star quote as a `<Section>` at the top of /about,
        * styled as Fraunces italic display with an ocean accent.
        */}
       <section

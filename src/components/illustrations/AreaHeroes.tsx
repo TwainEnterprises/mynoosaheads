@@ -2,7 +2,7 @@
  * AreaHeroes — bespoke 8 SVG hero illustrations for the homepage's
  * 8-area card grid.
  *
- * v5 (MSN-2959-V5-POLISH #11) — Tim's locked answer #2: custom SVG
+ * v5 (MSN-2959-V5-POLISH #11) — Chairman's locked answer #2: custom SVG
  * area hero illustrations are IN SCOPE. Eight bespoke SVGs, one per
  * functional area, inline-rendered. Per Albert's v5 runbook §3.2:
  * "clean line art, consistent stroke weight, palette-aligned, no twee /

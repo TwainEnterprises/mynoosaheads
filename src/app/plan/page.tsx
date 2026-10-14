@@ -6,7 +6,7 @@ import { Card, CardHeader, CardBody } from "@/components/ui";
 /**
  * /plan — Trip-planning hub.
  *
- * v5 (MSN-2959-V5-POLISH #20) — Tim's locked answer #3: /plan IS in
+ * v5 (MSN-2959-V5-POLISH #20) — Chairman's locked answer #3: /plan IS in
  * v5 scope. Built per Albert's v5 runbook §3.5 #20 as a single hub
  * page that bridges v2's 8 areas with a trip-planning entry. Coverage:
  *   - AU school holidays (QLD, NSW, VIC, SA, WA, TAS, ACT, NT)

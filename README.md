@@ -7,11 +7,18 @@
 A tourism-positive, sourced guide to Noosa Heads (Queensland, Australia).
 
 [![Next.js](https://img.shields.io/badge/Next.js-14.2.15-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![Sprint](https://img.shields.io/badge/Sprint-6.1%20(v6.1%20P1%20%2B%20PHOTOS)-blue?style=flat-square)](#v61-change-log)
+[![Sprint](https://img.shields.io/badge/Sprint-6.2%20(v6.2%20PHOTOS%20%2B%20ILLUSTRATIONS)-blue?style=flat-square)](#v62-change-log)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6.2-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind](https://img.shields.io/badge/Tailwind-3.4.13-blue?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
 
-**Status:** **v6.1 (MSN-2961-V6.1-P1-CONTENT-RAILS)** — P1 content rails + mega-menu search + 15 scene illustrations, built 2026-10-12 on top of v6 (`27c4c1f`). v6 production at `mynoosaheads.vercel.app` remains untouched. Vercel preview link captured at deploy; awaiting Tim's call to promote.
+**Status:** **v6.2 (MSN-2963-V6.2-PHOTOS-ILLUSTRATIONS)** — verified photo integration (Albert v2, 62 records, all 4 tests pass) + 33 bespoke editorial illustrations (gap fillers + venue typologies + area / activity / trip-theme scenes), built 2026-10-14 on top of v6.1.1 (`7a597bf`). v6.1.1 production at `mynoosaheads.vercel.app` remains untouched. Vercel preview link captured at deploy; awaiting chairman's call to promote.
+
+**What's new in v6.2:**
+- **62 verified Wikimedia Commons photos** — all from Albert's v2 manifest, all passing 4-test verification (visible landmark · EXIF GPS · caption match · content cross-check). Zero CC-BY-NC, CC-BY-ND, commercial stock, Unsplash, or AI.
+- **33 bespoke editorial illustrations** — gap fillers (Sunshine Beach holiday house, accessible, Noosa Junction), venue typologies (Wasabi, Sails, Berardo's, Sum Yung Guys, Bistro C, Locale), 8 area scenes, 6 activity scenes, 5 trip-theme scenes, 4 decorative for sub-pages. 1.5px stroke, sea-glass palette, 480×360 viewBox, 4:3, inlined.
+- **S7 Eat & drink substitution** — 9 venues with real photos (Season, Bang Bang, Zibros, Gusto, Heads of Noosa Brewing, Noosa Boathouse, Royal Mail, Bistro C, Locale). The 6 venue-typology SVGs from v6.1.1 are retained for sub-page / social-tile use.
+- **Image credits** — all 62 records render on `/image-credits` with full attribution (author + licence + source URL).
+- **Anonymisation scrub** — 0 personal-name matches in user-facing strings.
 
 ---
 
@@ -34,7 +41,54 @@ A tourism-positive, sourced guide to Noosa Heads (Queensland, Australia).
 - **og:image** — `/public/og-image.jpg` (1200×630) referenced from `layout.tsx`. v5 carry.
 - **Anonymised brand** — 0 matches of personal names in user-facing strings (verified via `grep -rEn "Tim|Whidburn|Twain|myreplicantlives" src/ content/ public/` — the 9 matches are all in source-code JSDoc / `//` comments, not in user-facing rendered text).
 
-## v6.1 change log (MSN-2961-V6.1-P1-CONTENT-RAILS, 2026-10-12)
+## v6.2 change log (MSN-2963-V6.2-PHOTOS-ILLUSTRATIONS, 2026-10-14)
+
+Built on top of v6.1.1 (`7a597bf`). Verified photo integration (Albert v2, 4-test passed) + 33 editorial illustrations.
+
+### Photos (Phase 1)
+
+- **62 verified Wikimedia Commons photos** — all from Albert's v2 manifest dated 2026-10-14. All four tests pass: visible Noosa landmark · EXIF GPS in the central Noosa box (or 'perimeter-GPS' for Pomona / Peregian records where the visible subject is a brief-listed landmark) · caption match · visible-content cross-check. Zero CC-BY-NC / CC-BY-ND / commercial stock / Unsplash / AI.
+- **Photo URL pattern** — `https://upload.wikimedia.org/wikipedia/commons/...` (next/image optimizer follows the redirect).
+- **Per-section coverage** — noosa-heads-landing ×4 · noosa-heads-general ×2 · hastings-street ×4 · noosaville-river ×5 · tewantin ×1 · sunshine-beach ×3 · peregian-beach ×2 · noosa-national-park ×5 · hinterland ×4 · boats-watercraft ×3 · fishing ×2 · things-to-do ×8 · where-to-stay ×6 · eat-drink ×9 · noosa-farmers-market ×1 · cross-section-filters ×3 (TOTAL: 62).
+- **Excluded per Albert's log** — 2 dronepicr "Noosa Heads" files (Test 2 GPS fail — ~140 km north of Noosa despite filename + caption matching).
+- **Gap → SVG only** — Noosa Junction (Albert returned 0/1; covered by `area-noosa-junction` illustration).
+
+### Illustrations (Phase 2)
+
+- **33 bespoke SVG illustrations** in `src/components/illustrations/V6P1Fallbacks.tsx`, replacing the 10 v6.1.1 functional SVGs. Editorial register: small scenes with layered foreground/midground/background, not flat icons.
+  - 3 gap fillers (sunshine-beach, accessible, area-noosa-junction)
+  - 6 venue typologies (japanese-riverside, beachfront-seafood, italian-hastings, asian-junction, seafood-hastings, italian-noosaville — generic typologies, not branded imitations)
+  - 7 area scenes (area-noosa-heads, area-hastings-street, area-noosaville, area-tewantin, area-peregian, area-noosa-national-park, area-hinterland)
+  - 6 activity scenes (activity-surf, activity-sup, activity-kayak, activity-swim, activity-hike, activity-fishing)
+  - 5 trip-theme scenes (trip-romantic, trip-budget, trip-solo, trip-group, trip-business) — plus 3 from gap fillers (pet-friendly, family, accessible)
+  - 4 decorative (tewantin, peregian, hinterland, cross-section-pets)
+  - 2 carry-over trip themes (pet-friendly, family)
+- **Style** — 1.5px stroke, sea-glass palette (`#2F8074` / `#0E4A41`), 480×360 viewBox, 4:3 ratio, inlined into the DOM (no HTTP round-trip), `role="img"` + `aria-label`.
+
+### Eat & drink substitution (Phase 3)
+
+- **S7 Eat & drink rail** — now 9 venues with real photos (per Albert v2): Season, Bang Bang, Zibros, Gusto, Heads of Noosa Brewing Co., Noosa Boathouse, Royal Mail Hotel, Bistro C, Locale. Editorial honest > venue-typology SVG.
+- **6 venue-typology SVGs retained** (Wasabi, Sails, Berardo's, Sum Yung Guys, plus Bistro C and Locale typologies) for future use on sub-pages and social tiles.
+
+### Self-QA
+
+- ✅ `pnpm run build` exits 0 (32 routes generated)
+- ✅ `pnpm run lint` 0 warnings (4 v6.1.1 `<img>`→`<Image>` warnings remain fixed)
+- ✅ `pnpm dev` serves all 27+ routes with HTTP 200
+- ✅ Anonymisation scrub: 0 personal-name matches in user-facing strings
+- ✅ 62 photos integrated with full attribution rendering on `/image-credits`
+- ✅ 33 illustrations shipped, all in editorial register
+- ✅ Live data still works (BOM, Open-Meteo, NOAA, QPWS, QLD Traffic)
+- ✅ ACCC compliance footer intact
+
+### Files changed
+
+- `src/data/photos.ts` — 1920 lines (vs. 1271 v6.1.1): single file holding 62 records + slot allocation
+- `src/components/illustrations/V6P1Fallbacks.tsx` — 1980 lines (vs. 631 v6.1.1): 33 illustrations + `FALLBACK_SVGS` map
+- `src/data/site.tsx` — `EAT_AND_DRINK` updated to 9 verified venues (Season, Bang Bang, Zibros, Gusto, Heads of Noosa Brewing, Noosa Boathouse, Royal Mail, Bistro C, Locale)
+- `src/app/image-credits/page.tsx` — updated to render 62 photos + 33 SVG catalogue
+- `scripts/generate_photos_v62.py` — Python generator for `photos.ts` (deterministic from Albert's JSON manifest)
+- 6 dev-comment files scrubbed for personal-name references
 
 Built on top of v6 (`27c4c1f`). Adds the P1 backlog from Albert's v6 design spec + mega-menu search (deferred from v6 P0 per Tim's call #2) + 15 bespoke scene illustrations + the full micro-interaction library (Accordion, Lightbox, Tabs, SearchOverlay). Photo manifest had not landed at build time; structure is in place for mechanical integration when it does.
 

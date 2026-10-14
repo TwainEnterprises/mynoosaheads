@@ -1,64 +1,62 @@
 /**
- * Location-photo mapping — v6.1.1 (MSN-2962-V6.1.1-PHOTO-INTEGRATION,
- * 2026-10-12).
+ * Location-photo mapping — v6.2 (MSN-2963-V6.2-PHOTOS-ILLUSTRATIONS,
+ * 2026-10-14).
  *
- * v6.1.1 swaps the v5/v6 curated Unsplash inventory for **42 verified
- * location-specific open-licence photographs from Wikimedia Commons,
- * the State Library of Queensland, and Flickr-CC imports**, with
- * bespoke SVG fallbacks for the seven locations that have no
- * open-licence photo at all (Sunshine Beach, six named eat & drink
- * venues, three cross-section filters).
+ * v6.2 swaps the v6.1.1 curated inventory for **62 verified location-
+ * specific open-licence photographs from Wikimedia Commons**, all
+ * passing Albert's 4-test verification suite (visible Noosa landmark ·
+ * EXIF GPS in the Noosa box · author caption matches file description ·
+ * visible-content cross-check). Every record is sourced from Albert's
+ * v2 photo manifest dated 2026-10-14. Zero commercial stock, zero
+ * Unsplash, zero AI.
  *
- * Per Albert's photo manifest (2026-10-12):
- *   - All Wikimedia photos verified by file page + camera GPS + licence
- *     template (no NC, no ND).
- *   - Licence distribution: CC-BY-SA 4.0 ×28 · CC-BY 2.0 ×6 ·
- *     CC-BY 2.0 (Flickr→Commons) ×4 · public domain ×3 · CC0 1.0 ×1.
- *   - 7 bespoke SVGs replace locations with no open-licence photo
- *     (Sunshine Beach, six named eat & drink venues, three cross-
- *     section filters).
- *
- * Photo URL pattern: `https://commons.wikimedia.org/wiki/Special:FilePath/{filename}?width=1920`
- *   - Special:FilePath is Wikimedia's canonical redirect to the
- *     upload.wikimedia.org hot-link. The next/image optimizer follows
- *     the redirect and caches the result.
- *   - `?width=1920` requests a thumbnail at 1920px wide, which the
- *     next/image optimizer can resize further for each `sizes` slot.
- *   - The next.config.mjs `remotePatterns` already allows
- *     `upload.wikimedia.org` (kept from the v2 hot-link era; the
- *     remote pattern is stable across the v5 → v6.1.1 cycle).
+ * Photo URL pattern: `https://upload.wikimedia.org/wikipedia/commons/...`
+ *   - The next/image optimizer follows the upload.wikimedia.org hot-link
+ *     (already allow-listed in next.config.mjs).
+ *   - next/image handles width/height via the standard `sizes` slot.
  *
  * SVG fallbacks:
- *   - 10 illustrations in `src/components/illustrations/V6P1Fallbacks.tsx`,
- *     styled consistent with v5 AreaHeroes (1.5px stroke, sea-glass
- *     palette, 480×360 viewBox, 4:3).
- *   - Inlined into the DOM (no HTTP round-trip), with role="img" +
- *     aria-label = the photo's altText.
- *   - NOT branded imitations of the named venues — generic
- *     venue-typology illustrations (e.g. "riverside Japanese" for
- *     Wasabi, "laneway restaurant" for Sum Yung Guys).
+ *   - 33 illustrations in `src/components/illustrations/V6P1Fallbacks.tsx`,
+ *     styled in editorial register (1.5px stroke, sea-glass palette,
+ *     480×360 viewBox, 4:3). Each is a small scene, not a flat icon.
  *
- * Coverage map:
- *   - FULL: Noosa Heads · Hastings Street · Noosaville · Tewantin ·
- *           Noosa National Park (gateway) · Boats & watercraft ·
- *           Fishing · Things to do (8/8) · Hinterland ·
- *           Noosa Farmers Market.
- *   - PARTIAL: Peregian Beach (one photo, reused with different
- *              objectPosition crops).
- *   - GAP → SVG: Sunshine Beach · Wasabi · Sails · Berardo's ·
- *                Sum Yung Guys · Bistro C · Locale ·
- *                Pet-friendly · Family · Accessible.
+ * Coverage map (per Albert v2 manifest, 2026-10-14):
+ *   - FULL: noosa-heads-landing ×4 · noosa-heads-general ×2 ·
+ *           hastings-street ×4 · noosaville-river ×5 · tewantin ×1 ·
+ *           sunshine-beach ×3 · peregian-beach ×2 ·
+ *           noosa-national-park ×5 · hinterland ×4 ·
+ *           boats-watercraft ×3 · fishing ×2 · things-to-do ×8 ·
+ *           where-to-stay ×6 · eat-drink ×9 · noosa-farmers-market ×1 ·
+ *           cross-section-filters ×3 (TOTAL: 62 verified records).
+ *   - GAP → SVG only: noosa-junction (Albert returned 0/1; covered by
+ *           the Noosa Junction illustration in the fallback library).
+ *   - GAP → SVG (typology): sunshine-beach holiday house (no
+ *           open-licence holiday-house photo); accessible ground-floor
+ *           unit (no open-licence accessible-accommodation photo).
+ *
+ * Per Albert's exclusion log: 2 dronepicr "Noosa Heads" files were
+ * EXCLUDED — filename says "Noosa Heads" but EXIF GPS places them ~140
+ * km north of Noosa (Test 2 fail). Filename + caption alone is not
+ * enough. Pomona / Peregian perimeter-GPS records are flagged
+ * 'perimeter-GPS' rather than FAIL because the visible subject is a
+ * brief-listed Noosa landmark (Pomona Railway, Peregian Beach).
+ *
+ * Compliance: CC BY-SA 4.0 ×50 · CC BY-SA 3.0 ×6 · CC BY 4.0 ×4 ·
+ *             CC BY 3.0 ×2. 0× CC-BY-NC / CC-BY-ND / commercial /
+ *             Unsplash / AI.
  */
 
 import type { FallbackSvgKey } from "@/components/illustrations/V6P1Fallbacks";
 
 /* ----------------------------------------------------------------------
- * Photo kinds — discriminated union. Consumers should use the
+ * Photo kinds — discriminated union. Consumers use the
  * LocationPhoto wrapper component (src/components/ui/LocationPhoto.tsx)
  * to handle both kinds with a single API.
  * -------------------------------------------------------------------- */
 
 export type CommonsPhoto = {
+  /** Albert record id — stable across the v6.2 cycle. */
+  id: string;
   kind: "commons";
   /** Editorial caption — rendered as figcaption / hero overlay text. */
   caption: string;
@@ -70,9 +68,9 @@ export type CommonsPhoto = {
   licence: string;
   /** Canonical source URL — the Wikimedia file page. */
   sourceUrl: string;
-  /** Hot-link URL — upload.wikimedia.org via Special:FilePath. */
+  /** Hot-link URL — upload.wikimedia.org. */
   url: string;
-  /** Source resolution width in pixels (for next/image width/height). */
+  /** Source resolution width in pixels. */
   width: number;
   /** Source resolution height in pixels. */
   height: number;
@@ -80,915 +78,1741 @@ export type CommonsPhoto = {
 
 export type SvgPhoto = {
   kind: "svg";
-  /** Editorial caption. */
   caption: string;
-  /** Alt text for screen readers. */
   altText: string;
-  /** Author / illustration credit. */
   author: string;
-  /** Licence — always "Bespoke SVG illustration" for SVG fallbacks. */
   licence: "Bespoke SVG illustration";
-  /** Source — the /image-credits page entry. */
   sourceUrl: string;
-  /** Reference to the SVG component in V6P1Fallbacks. */
   svgKey: FallbackSvgKey;
-  /** Standard viewBox width. */
   width: 480;
-  /** Standard viewBox height. */
   height: 360;
 };
 
 export type LocationPhoto = CommonsPhoto | SvgPhoto;
 
 /* ----------------------------------------------------------------------
- * Helpers — small constructors for each kind.
+ * 62 verified Commons records — Albert's v2 manifest, 2026-10-14.
+ * All four tests pass (visible landmark · GPS · caption · content).
  * -------------------------------------------------------------------- */
 
-const commons = (
-  filename: string,
-  author: string,
-  licence: string,
-  caption: string,
-  altText: string,
-  width: number,
-  height: number,
-  filePageUrl?: string,
-): CommonsPhoto => {
-  const encoded = encodeURIComponent(filename);
-  return {
+export const VERIFIED_PHOTOS: readonly CommonsPhoto[] = [
+  {
+    id: "noosa-boats-watercraft-boats-boathouse-deck-20261014",
     kind: "commons",
-    caption,
-    altText,
-    author,
-    licence,
-    sourceUrl:
-      filePageUrl ??
-      `https://commons.wikimedia.org/wiki/File:${filename.replace(/ /g, "_")}`,
-    url: `https://commons.wikimedia.org/wiki/Special:FilePath/${encoded}?width=1920`,
-    width,
-    height,
+    caption: "Noosa Boathouse floating restaurant",
+    altText: "The floating Boathouse restaurant on the Noosa River in Noosaville \u2014 also a riverside watercraft stop",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Boathouse,_Noosaville,_Queensland_01.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Noosa_Boathouse%2C_Noosaville%2C_Queensland_01.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-boats-watercraft-boats-noosa-ferry-tg-20261014",
+    kind: "commons",
+    caption: "Noosa Ferry on the river",
+    altText: "Passenger ferry of the Noosa Ferries approaching the Noosaville jetty on the Noosa River",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Ferry_on_Noosa_River_approching_Noosaville,_Queensland_02.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/6/67/Noosa_Ferry_on_Noosa_River_approching_Noosaville%2C_Queensland_02.jpg",
+    width: 3945,
+    height: 2959,
+  },
+  {
+    id: "noosa-boats-watercraft-boats-tewantin-ferry-20261014",
+    kind: "commons",
+    caption: "Noosa Ferry at Noosa Marina",
+    altText: "Ferry of the Noosa Ferries line arriving at Noosa Marina at Tewantin",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Ferry_at_Noosa_Marina,_Tewantin,_Queensland,_2021.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/c/c2/Noosa_Ferry_at_Noosa_Marina%2C_Tewantin%2C_Queensland%2C_2021.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-cross-section-filters-xs-accessible-boardwalk-20261014",
+    kind: "commons",
+    caption: "Accessible timber boardwalk",
+    altText: "Level timber boardwalk at Noosa Main Beach suitable for prams and wheelchairs",
+    author: "Kgbo",
+    licence: "CC BY-SA 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Heads_Main_Beach_04.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/a/a7/Noosa_Heads_Main_Beach_04.jpg",
+    width: 3264,
+    height: 2448,
+  },
+  {
+    id: "noosa-cross-section-filters-xs-family-sandcastle-20261014",
+    kind: "commons",
+    caption: "Sand castles on Noosa Main Beach",
+    altText: "Sand-castle building at Noosa Heads beach \u2014 accessible, family-friendly beach activity",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Sand_castles_at_Noosa_Heads_beach,_Queensland,_Australia_03.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/30/Sand_castles_at_Noosa_Heads_beach%2C_Queensland%2C_Australia_03.jpg",
+    width: 3988,
+    height: 2991,
+  },
+  {
+    id: "noosa-cross-section-filters-xs-pet-dog-20261014",
+    kind: "commons",
+    caption: "Dog beach, Noosa Botanic Gardens",
+    altText: "Dog-friendly beach section within the Noosa Botanic Gardens precinct",
+    author: "Misaochan2",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Dog_beach_at_Noosa_Botanic_Gardens.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/8/8f/Dog_beach_at_Noosa_Botanic_Gardens.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-eat-drink-eat-bang-bang-20261014",
+    kind: "commons",
+    caption: "Bang Bang Noosa Restaurant",
+    altText: "Bang Bang Noosa Restaurant exterior at Hastings Street, Noosa Heads, 2024",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Bang_Bang_Noosa_Restaurant,_Noosa_Heads,_2024,_01.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/31/Bang_Bang_Noosa_Restaurant%2C_Noosa_Heads%2C_2024%2C_01.jpg",
+    width: 8064,
+    height: 6048,
+  },
+  {
+    id: "noosa-eat-drink-eat-bistro-c-bar-20261014",
+    kind: "commons",
+    caption: "Bistro C bar, Hastings Street",
+    altText: "Bar counter at the Bistro C restaurant on Hastings Street, Noosa Heads",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Bar_at_Bistro_C,_Hastings_Street,_Noosa_Heads,_Queensland.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/1/14/Bar_at_Bistro_C%2C_Hastings_Street%2C_Noosa_Heads%2C_Queensland.jpg",
+    width: 3926,
+    height: 2944,
+  },
+  {
+    id: "noosa-eat-drink-eat-boathouse-20261014",
+    kind: "commons",
+    caption: "Noosa Boathouse floating restaurant",
+    altText: "The floating Noosa Boathouse restaurant on the Noosa River in Noosaville",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Boathouse,_Noosaville,_Queensland_01.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Noosa_Boathouse%2C_Noosaville%2C_Queensland_01.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-eat-drink-eat-gusto-20261014",
+    kind: "commons",
+    caption: "Gusto Noosa Restaurant, Noosaville",
+    altText: "Gusto Noosa Restaurant on Gympie Terrace in Noosaville",
+    author: "Chris Olszewski",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Gusto_Noosa_Restaurant,_Noosaville,_2024,_02.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/c/c9/Gusto_Noosa_Restaurant%2C_Noosaville%2C_2024%2C_02.jpg",
+    width: 8064,
+    height: 6048,
+  },
+  {
+    id: "noosa-eat-drink-eat-heads-of-noosa-20261014",
+    kind: "commons",
+    caption: "Heads of Noosa Brewing Co.",
+    altText: "Heads of Noosa Brewing Co. taproom in Noosa Heads",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Heads_of_Noosa_Brewing_Co.,_Noosa_Heads,_Queensland,_03.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/b/b2/Heads_of_Noosa_Brewing_Co.%2C_Noosa_Heads%2C_Queensland%2C_03.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-eat-drink-eat-locale-dining-20261014",
+    kind: "commons",
+    caption: "Locale Restaurant, Hastings Street",
+    altText: "Dining area of the Locale Restaurant on Hastings Street, Noosa Heads",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Dining_area,_Locale_Restaurant,_Hastings_Street,_Noosa_Heads.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/35/Dining_area%2C_Locale_Restaurant%2C_Hastings_Street%2C_Noosa_Heads.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-eat-drink-eat-royal-mail-20261014",
+    kind: "commons",
+    caption: "Royal Mail Hotel, Tewantin",
+    altText: "Heritage Royal Mail Hotel pub facade in Tewantin",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Royal_Mail_Hotel,_Tewantin,_Queensland,_2022,_01.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Royal_Mail_Hotel%2C_Tewantin%2C_Queensland%2C_2022%2C_01.jpg",
+    width: 2939,
+    height: 3091,
+  },
+  {
+    id: "noosa-eat-drink-eat-season-20261014",
+    kind: "commons",
+    caption: "Season Restaurant, Noosa Heads",
+    altText: "Interior/dining view at the Season Restaurant in Noosa Heads",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Season_Restaurant,_Noosa_Heads,_2024,_02.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/7/78/Season_Restaurant%2C_Noosa_Heads%2C_2024%2C_02.jpg",
+    width: 4031,
+    height: 2596,
+  },
+  {
+    id: "noosa-eat-drink-eat-zibros-20261014",
+    kind: "commons",
+    caption: "Zibros Italian Restaurant",
+    altText: "Zibros Italian Restaurant in Noosa Heads, photographed in 2025",
+    author: "Chris Olszewski",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Zibros_Italian_Restaurant,_Noosa_Heads,_2025,_03.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/6/65/Zibros_Italian_Restaurant%2C_Noosa_Heads%2C_2025%2C_03.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-fishing-fishing-angling-boat-20261014",
+    kind: "commons",
+    caption: "Boat fishing on the Noosa River",
+    altText: "Two anglers fishing from a boat on the Noosa River, Noosa North Shore",
+    author: "Chris Olszewski",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Angling_from_a_boat_at_Noosa_River,_Noosa_North_Shore,_Queensland,_2019.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/1/19/Angling_from_a_boat_at_Noosa_River%2C_Noosa_North_Shore%2C_Queensland%2C_2019.jpg",
+    width: 3911,
+    height: 2933,
+  },
+  {
+    id: "noosa-fishing-fishing-boat-shore-20261014",
+    kind: "commons",
+    caption: "Boat fishing on the Noosa River (shore-side)",
+    altText: "Fishing boats moored along the Noosa River bank at Noosa North Shore",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Boat_fishing_at_Noosa_River,_Noosa_North_Shore,_Queensland,_02.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/6/69/Boat_fishing_at_Noosa_River%2C_Noosa_North_Shore%2C_Queensland%2C_02.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-hastings-street-hastings-2023-01-20261014",
+    kind: "commons",
+    caption: "Hastings Street pedestrian strip",
+    altText: "Pedestrian section of Hastings Street in Noosa Heads lined with pandanus trees and outdoor dining",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Hastings_Street,_Noosa_Heads,_2023,_01.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/0/05/Hastings_Street%2C_Noosa_Heads%2C_2023%2C_01.jpg",
+    width: 3726,
+    height: 2794,
+  },
+  {
+    id: "noosa-hastings-street-hastings-2023-02-20261014",
+    kind: "commons",
+    caption: "Hastings Street colonnade",
+    altText: "Hastings Street colonnade building and pedestrians, Noosa Heads, 2023",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Hastings_Street,_Noosa_Heads,_2023,_02.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/5/55/Hastings_Street%2C_Noosa_Heads%2C_2023%2C_02.jpg",
+    width: 3924,
+    height: 2943,
+  },
+  {
+    id: "noosa-hastings-street-hastings-nov-2013-20261014",
+    kind: "commons",
+    caption: "Hastings Street, November 2013",
+    altText: "Pedestrian view of Hastings Street in Noosa Heads taken November 2013, looking towards the beach",
+    author: "Donaldytong",
+    licence: "CC BY-SA 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Hastings_Street,_Noosa_Heads_QLD_Nov_2013.JPG",
+    url: "https://upload.wikimedia.org/wikipedia/commons/4/4d/Hastings_Street%2C_Noosa_Heads_QLD_Nov_2013.JPG",
+    width: 5551,
+    height: 3570,
+  },
+  {
+    id: "noosa-hastings-street-hastings-queensland-04-20261014",
+    kind: "commons",
+    caption: "Hastings Street parade of shops",
+    altText: "Quiet daytime view of Hastings Street, Noosa Heads, showing the parade of shops under the pandanus trees",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Hastings_Street,_Noosa_Heads,_Queensland_02.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/a/af/Hastings_Street%2C_Noosa_Heads%2C_Queensland_02.jpg",
+    width: 1536,
+    height: 2048,
+  },
+  {
+    id: "noosa-hinterland-pomona-cooran-cooroy-hinterland-majestic-20261014",
+    kind: "commons",
+    caption: "Majestic Theatre, Pomona",
+    altText: "Front facade of the historic Majestic Theatre on Pomona's main street, photographed July 2023",
+    author: "Nford24",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Majestic_Theatre_July_2023.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/0/07/Majestic_Theatre_July_2023.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-hinterland-pomona-cooran-cooroy-hinterland-mt-cooroora-20261014",
+    kind: "commons",
+    caption: "Mount Cooroora seen from Pomona",
+    altText: "Mount Cooroora, the dominant volcanic plug above Pomona, as seen from a Hill Street vantage point",
+    author: "Nford24",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Mount_Cooroora_from_Hill_Street_2023.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/4/42/Mount_Cooroora_from_Hill_Street_2023.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-hinterland-pomona-cooran-cooroy-hinterland-pomona-memorial-20261014",
+    kind: "commons",
+    caption: "Pomona Memorial School of Arts",
+    altText: "The Pomona Memorial School of Arts community hall, a heritage landmark on the Pomona main street",
+    author: "Nford24",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Pomona_Memorial_School_of_Arts.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/a/ae/Pomona_Memorial_School_of_Arts.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-hinterland-pomona-cooran-cooroy-hinterland-pomona-railway-20261014",
+    kind: "commons",
+    caption: "Pomona railway station",
+    altText: "Front facade of Pomona railway station showing aboriginal art tiles, photographed July 2023",
+    author: "Nford24",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Pomona_railway_station_-_front.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Pomona_railway_station_-_front.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-noosa-farmers-market-farmers-market-20261014",
+    kind: "commons",
+    caption: "Noosa Farmers Market",
+    altText: "Stalls and shoppers at the Noosa Farmers Market",
+    author: "Misaochan2",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_farmers_market.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/6/60/Noosa_farmers_market.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-noosa-heads-general-heads-lookout-2017-20261014",
+    kind: "commons",
+    caption: "View from Noosa Heads Lookout down to the river and bay",
+    altText: "Elevated view from Noosa Heads Lookout looking down at Noosaville and Laguna Bay with the Noosa River mouth",
+    author: "Dronepicr",
+    licence: "CC BY 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Heads_(134205601).jpeg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/6/6a/Noosa_Heads_%28134205601%29.jpeg",
+    width: 2048,
+    height: 1536,
+  },
+  {
+    id: "noosa-noosa-heads-general-heads-panoramio-1982-20261014",
+    kind: "commons",
+    caption: "1982 panorama of Noosa Headland and beach",
+    altText: "Coastal panorama of Noosa Headland and Noosa Main Beach taken in 1982 showing the curved bay and headland forest",
+    author: "John Gillmore",
+    licence: "CC BY 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_-_1982_-_panoramio.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/c/c5/Noosa_-_1982_-_panoramio.jpg",
+    width: 3614,
+    height: 1857,
+  },
+  {
+    id: "noosa-noosa-heads-landing-main-beach-04-20261014",
+    kind: "commons",
+    caption: "Noosa Main Beach boardwalk under pandanus trees",
+    altText: "Wooden boardwalk along Noosa Main Beach lined with pandanus trees, beach on the left, hotel balconies on the right",
+    author: "Kgbo",
+    licence: "CC BY-SA 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Heads_Main_Beach_04.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/a/a7/Noosa_Heads_Main_Beach_04.jpg",
+    width: 3264,
+    height: 2448,
+  },
+  {
+    id: "noosa-noosa-heads-landing-main-beach-08-20261014",
+    kind: "commons",
+    caption: "Noosa Main Beach on a busy day",
+    altText: "Wide curved beach at Noosa Main Beach with surf lifesaving flags and people on the sand beside the timber boardwalk",
+    author: "Kgbo",
+    licence: "CC BY-SA 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Heads_Main_Beach_08.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/c/cb/Noosa_Heads_Main_Beach_08.jpg",
+    width: 3264,
+    height: 2448,
+  },
+  {
+    id: "noosa-noosa-heads-landing-slsc-2024-20261014",
+    kind: "commons",
+    caption: "Noosa Heads SLSC building, 2024 high-resolution",
+    altText: "High-resolution photograph of the Noosa Heads Surf Life Saving Club building taken 2024",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Heads_Surf_Lifesaving_Club_building,_2024.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/31/Noosa_Heads_Surf_Lifesaving_Club_building%2C_2024.jpg",
+    width: 7911,
+    height: 5332,
+  },
+  {
+    id: "noosa-noosa-heads-landing-slsc-building-2013-20261014",
+    kind: "commons",
+    caption: "Noosa Heads Surf Life Saving Club building",
+    altText: "Two-storey white and red Noosa Heads surf club with lifeguard sign and IRB rescue boats out front",
+    author: "Kgbo",
+    licence: "CC BY-SA 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Heads_SLSC_building.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/1/1d/Noosa_Heads_SLSC_building.jpg",
+    width: 3264,
+    height: 2448,
+  },
+  {
+    id: "noosa-noosa-national-park-np-alexandria-bay-20261014",
+    kind: "commons",
+    caption: "Alexandria Bay beach",
+    altText: "Alexandria Bay in Noosa National Park with the headland cliff and turquoise water",
+    author: "Juan Jose Basagoiti Mancera",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Alexandria_Bay.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Alexandria_Bay.jpg",
+    width: 5472,
+    height: 3648,
+  },
+  {
+    id: "noosa-noosa-national-park-np-coastal-walk-trail-20261014",
+    kind: "commons",
+    caption: "Noosa coastal headland walk",
+    altText: "Walkers on the Noosa Heads Trail Walk looking across to the coastline",
+    author: "B.east168",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Heads_Trail_Walk.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/c/c8/Noosa_Heads_Trail_Walk.jpg",
+    width: 3024,
+    height: 4032,
+  },
+  {
+    id: "noosa-noosa-national-park-np-granite-bay-20261014",
+    kind: "commons",
+    caption: "Granite Bay rocks",
+    altText: "The aged granite rocks forming Granite Bay on the Noosa Heads headland walk",
+    author: "Keith Sinclair",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Granite_Bay_at_Noosa_Heads,_Queensland_Australia.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/3d/Granite_Bay_at_Noosa_Heads%2C_Queensland_Australia.jpg",
+    width: 3072,
+    height: 2048,
+  },
+  {
+    id: "noosa-noosa-national-park-np-hells-gates-20261014",
+    kind: "commons",
+    caption: "Hell's Gates rock formation",
+    altText: "Hell's Gates \u2014 the rocky gap between the headlands of Noosa National Park where waves crash into the chasm",
+    author: "Pezoporus wallicus",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Hell\u2019s_Gates_in_Noosa_National_Park.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Hell%E2%80%99s_Gates_in_Noosa_National_Park.jpg",
+    width: 2304,
+    height: 1536,
+  },
+  {
+    id: "noosa-noosa-national-park-np-tea-tree-bay-20261014",
+    kind: "commons",
+    caption: "Tea Tree Bay",
+    altText: "Tea Tree Bay on the Noosa National Park headland walk, looking down from the coastal track",
+    author: "Misaochan2",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Tea_Tree_Bay_4.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/b/b2/Tea_Tree_Bay_4.jpg",
+    width: 3024,
+    height: 4032,
+  },
+  {
+    id: "noosa-noosaville-river-gympie-terrace-20261014",
+    kind: "commons",
+    caption: "Gympie Terrace riverside walk",
+    altText: "Wide pedestrian section of Gympie Terrace at Noosaville along the Noosa River",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Gympie_Terrace,_Noosaville,_Queensland.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/38/Gympie_Terrace%2C_Noosaville%2C_Queensland.jpg",
+    width: 3984,
+    height: 2988,
+  },
+  {
+    id: "noosa-noosaville-river-gympie-terrace-bridge-20261014",
+    kind: "commons",
+    caption: "Bridge over the Noosa River at Gympie Terrace",
+    altText: "The bridge carrying Gympie Terrace over the Noosa River with boat hire buildings in the background",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Gympie_Terrace_Road_Bridge,_Noosaville,_Queensland,_2023.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/1/1a/Gympie_Terrace_Road_Bridge%2C_Noosaville%2C_Queensland%2C_2023.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-noosaville-river-noosa-boathouse-20261014",
+    kind: "commons",
+    caption: "Noosa Boathouse on the river",
+    altText: "Riverside dining venue the Noosa Boathouse on the Noosa River in Noosaville",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Boathouse,_Noosaville,_Queensland.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/7/79/Noosa_Boathouse%2C_Noosaville%2C_Queensland.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-noosaville-river-noosa-ferry-crossing-20261014",
+    kind: "commons",
+    caption: "Noosa North Shore vehicle ferry",
+    altText: "Vehicle ferry of the Noosa North Shore Ferries crossing the Noosa River under its cable",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Ferry_in_the_middle_of_the_Noosa_River,_Noosa_North_Shore_Ferries,_2019.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/6/6a/Ferry_in_the_middle_of_the_Noosa_River%2C_Noosa_North_Shore_Ferries%2C_2019.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-noosaville-river-noosa-river-upstream-boathouse-20261014",
+    kind: "commons",
+    caption: "Noosa River upstream from the Boathouse",
+    altText: "Looking upriver along the Noosa River from the Noosa Boathouse at Noosaville",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_River_upstream_seen_from_Noosa_Boathouse,_Noosaville,_Queensland.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/d/dc/Noosa_River_upstream_seen_from_Noosa_Boathouse%2C_Noosaville%2C_Queensland.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-peregian-beach-peregian-114059-20261014",
+    kind: "commons",
+    caption: "Peregian Beach surf and scrub",
+    altText: "View across Peregian Beach with the surf and the dune vegetation in the foreground",
+    author: "ASphericalBird",
+    licence: "CC BY 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Peregian_Beach_20250914_114059.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Peregian_Beach_20250914_114059.jpg",
+    width: 4000,
+    height: 3000,
+  },
+  {
+    id: "noosa-peregian-beach-peregian-shops-20261014",
+    kind: "commons",
+    caption: "Peregian Beach village centre",
+    altText: "Shop fronts at the village centre of Peregian Beach with the surf club sign at the end of the street",
+    author: "ASphericalBird",
+    licence: "CC BY 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Shops_in_Peregian_Beach_20250914_115544.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/8/8a/Shops_in_Peregian_Beach_20250914_115544.jpg",
+    width: 4000,
+    height: 3000,
+  },
+  {
+    id: "noosa-sunshine-beach-sunshine-external-deck-20261014",
+    kind: "commons",
+    caption: "External viewing deck at Sunshine Beach",
+    altText: "The external timber deck overlooking Sunshine Beach at the SLSC building",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:External_deck_overlooking_the_Sunshine_Beach_at_Sunshine_Beach_Surf_Life_Saving_Club.jpeg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/9/97/External_deck_overlooking_the_Sunshine_Beach_at_Sunshine_Beach_Surf_Life_Saving_Club.jpeg",
+    width: 3154,
+    height: 2365,
+  },
+  {
+    id: "noosa-sunshine-beach-sunshine-from-slsc-20261014",
+    kind: "commons",
+    caption: "Sunshine Beach from the SLSC deck",
+    altText: "View of Sunshine Beach taken from the deck of the Sunshine Beach SLSC",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Sunshine_Beach_seen_from_the_Sunshine_Beach_Surf_Life_Saving_Club.jpeg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Sunshine_Beach_seen_from_the_Sunshine_Beach_Surf_Life_Saving_Club.jpeg",
+    width: 3264,
+    height: 2448,
+  },
+  {
+    id: "noosa-sunshine-beach-sunshine-slsc-20261014",
+    kind: "commons",
+    caption: "Sunshine Beach surf club building",
+    altText: "The Sunshine Beach Surf Life Saving Club building with its main facade facing the beach",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Sunshine_Beach_Surf_Life_Saving_Club_main_building.jpeg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/5/55/Sunshine_Beach_Surf_Life_Saving_Club_main_building.jpeg",
+    width: 3033,
+    height: 1955,
+  },
+  {
+    id: "noosa-tewantin-tewantin-mainstreet-20261014",
+    kind: "commons",
+    caption: "Tewantin main street",
+    altText: "Looking along the high-street strip in Tewantin with heritage pub and shopfronts",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Main_street,_Tewantin,_Queensland,_2022.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/3c/Main_street%2C_Tewantin%2C_Queensland%2C_2022.jpg",
+    width: 4032,
+    height: 2539,
+  },
+  {
+    id: "noosa-things-to-do-todo-dine-bistro-c-20261014",
+    kind: "commons",
+    caption: "Dining at Bistro C, Hastings Street",
+    altText: "Bar area at the Bistro C restaurant on Hastings Street in Noosa Heads",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Bar_at_Bistro_C,_Hastings_Street,_Noosa_Heads,_Queensland.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/1/14/Bar_at_Bistro_C%2C_Hastings_Street%2C_Noosa_Heads%2C_Queensland.jpg",
+    width: 3926,
+    height: 2944,
+  },
+  {
+    id: "noosa-things-to-do-todo-fish-angling-20261014",
+    kind: "commons",
+    caption: "Fishing at Noosa River",
+    altText: "Anglers fishing from a boat on the Noosa River",
+    author: "Chris Olszewski",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Angling_from_a_boat_at_Noosa_River,_Noosa_North_Shore,_Queensland,_2019.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/1/19/Angling_from_a_boat_at_Noosa_River%2C_Noosa_North_Shore%2C_Queensland%2C_2019.jpg",
+    width: 3911,
+    height: 2933,
+  },
+  {
+    id: "noosa-things-to-do-todo-hike-hells-gates-20261014",
+    kind: "commons",
+    caption: "Hiking the Noosa headland walk",
+    altText: "Hikers' view of the headland at Hell's Gates on the Noosa coastal walk",
+    author: "Pezoporus wallicus",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Hell\u2019s_Gates_in_Noosa_National_Park.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Hell%E2%80%99s_Gates_in_Noosa_National_Park.jpg",
+    width: 2304,
+    height: 1536,
+  },
+  {
+    id: "noosa-things-to-do-todo-kayak-canoe-20261014",
+    kind: "commons",
+    caption: "Canoeing on Upper Noosa River (kayak-class substitution)",
+    altText: "Two people relaxing in a canoe on the calm upper reaches of the Noosa River \u2014 kayak-class paddlesport equivalent",
+    author: "Anonymous",
+    licence: "CC BY 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Lazing_about_on_Upper_Noosa_River_in_a_canoe,_2022.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/b/b6/Lazing_about_on_Upper_Noosa_River_in_a_canoe%2C_2022.jpg",
+    width: 900,
+    height: 675,
+  },
+  {
+    id: "noosa-things-to-do-todo-markets-farmers-20261014",
+    kind: "commons",
+    caption: "Noosa Farmers Market",
+    altText: "Stalls under gum trees at the Noosa Farmers Market",
+    author: "Misaochan2",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_farmers_market.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/6/60/Noosa_farmers_market.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-things-to-do-todo-sup-board-20261014",
+    kind: "commons",
+    caption: "SUP at Noosa Heads beach",
+    altText: "Man with a stand-up paddleboard walking along Noosa Heads beach",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Man_with_stand_up_board_at_Noosa_Heads_beach,_Queensland.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/a/a7/Man_with_stand_up_board_at_Noosa_Heads_beach%2C_Queensland.jpg",
+    width: 1536,
+    height: 2048,
+  },
+  {
+    id: "noosa-things-to-do-todo-surf-children-20261014",
+    kind: "commons",
+    caption: "Children learning to surf at Noosa Heads",
+    altText: "Children learning to surf in the gentle waves at Noosa Main Beach with their instructor",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Children_learning_surfing_at_Noosa_Heads_beach,_Queensland.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/4/49/Children_learning_surfing_at_Noosa_Heads_beach%2C_Queensland.jpg",
+    width: 2048,
+    height: 1536,
+  },
+  {
+    id: "noosa-things-to-do-todo-swim-mainbeach-20261014",
+    kind: "commons",
+    caption: "Noosa Main Beach swimming",
+    altText: "The Noosa Main Beach from the surf club with the iconic curved bay \u2014 a natural, lifeguard-patrolled swimming beach",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Heads_Surf_Lifesaving_Club_building_seen_from_the_beach,_Noosa_Heads,_Queensland.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/7/77/Noosa_Heads_Surf_Lifesaving_Club_building_seen_from_the_beach%2C_Noosa_Heads%2C_Queensland.jpg",
+    width: 3969,
+    height: 2745,
+  },
+  {
+    id: "noosa-where-to-stay-stay-french-quarter-20261014",
+    kind: "commons",
+    caption: "French Quarter Noosa Heads",
+    altText: "Low-rise Mediterranean-style French Quarter resort on Hastings Street in Noosa Heads",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:French_Quarter_resort,_Noosa_Heads.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/9/98/French_Quarter_resort%2C_Noosa_Heads.jpg",
+    width: 1536,
+    height: 2048,
+  },
+  {
+    id: "noosa-where-to-stay-stay-halse-lodge-20261014",
+    kind: "commons",
+    caption: "Halse Lodge, Noosa Heads",
+    altText: "Heritage-listed Halse Lodge, a YHA heritage hostel on Noosa Heads with traditional verandah",
+    author: "Unknown authorUnknown author",
+    licence: "CC BY 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Halse_Lodge,_Noosa.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/b/b5/Halse_Lodge%2C_Noosa.jpg",
+    width: 1400,
+    height: 920,
+  },
+  {
+    id: "noosa-where-to-stay-stay-islander-2024-02-20261014",
+    kind: "commons",
+    caption: "The Islander Noosa Resort, Noosaville",
+    altText: "The Islander Noosa Resort with the Noosa River visible in the background",
+    author: "Chris Olszewski",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:The_Islander_Noosa_Resort,_Noosaville,_2024,_02.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/c/c5/The_Islander_Noosa_Resort%2C_Noosaville%2C_2024%2C_02.jpg",
+    width: 5717,
+    height: 7623,
+  },
+  {
+    id: "noosa-where-to-stay-stay-maison-20261014",
+    kind: "commons",
+    caption: "Maison Noosa Heads Resort",
+    altText: "Street-side view of Maison Noosa Heads Resort on Hastings Street",
+    author: "Kgbo",
+    licence: "CC BY-SA 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Maison_Noosa_Resort.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/c/c3/Maison_Noosa_Resort.jpg",
+    width: 2448,
+    height: 3264,
+  },
+  {
+    id: "noosa-where-to-stay-stay-peppers-02-20261014",
+    kind: "commons",
+    caption: "Peppers Noosa Resort",
+    altText: "Peppers Noosa Resort property with its sub-tropical landscaping",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Peppers_Noosa_Resort,_Noosa_Heads,_Queensland_02.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/f/fb/Peppers_Noosa_Resort%2C_Noosa_Heads%2C_Queensland_02.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  {
+    id: "noosa-where-to-stay-stay-sofitel-01-20261014",
+    kind: "commons",
+    caption: "Sofitel Noosa Pacific Resort",
+    altText: "Exterior facade of Sofitel Noosa Pacific Resort on Hastings Street, Noosa Heads",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Sofitel_Noosa_Pacific_Resort,_Noosa_Heads,_Queensland_01.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/5/50/Sofitel_Noosa_Pacific_Resort%2C_Noosa_Heads%2C_Queensland_01.jpg",
+    width: 4032,
+    height: 3024,
+  },] as const;
+
+/* ----------------------------------------------------------------------
+ * Lookup table — keyed by record id, for clean export wiring.
+ * -------------------------------------------------------------------- */
+
+const PHOTOS_BY_ID = {
+  "noosa-boats-watercraft-boats-boathouse-deck-20261014": {
+    id: "noosa-boats-watercraft-boats-boathouse-deck-20261014",
+    kind: "commons",
+    caption: "Noosa Boathouse floating restaurant",
+    altText: "The floating Boathouse restaurant on the Noosa River in Noosaville \u2014 also a riverside watercraft stop",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Boathouse,_Noosaville,_Queensland_01.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Noosa_Boathouse%2C_Noosaville%2C_Queensland_01.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-boats-watercraft-boats-noosa-ferry-tg-20261014": {
+    id: "noosa-boats-watercraft-boats-noosa-ferry-tg-20261014",
+    kind: "commons",
+    caption: "Noosa Ferry on the river",
+    altText: "Passenger ferry of the Noosa Ferries approaching the Noosaville jetty on the Noosa River",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Ferry_on_Noosa_River_approching_Noosaville,_Queensland_02.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/6/67/Noosa_Ferry_on_Noosa_River_approching_Noosaville%2C_Queensland_02.jpg",
+    width: 3945,
+    height: 2959,
+  },
+  "noosa-boats-watercraft-boats-tewantin-ferry-20261014": {
+    id: "noosa-boats-watercraft-boats-tewantin-ferry-20261014",
+    kind: "commons",
+    caption: "Noosa Ferry at Noosa Marina",
+    altText: "Ferry of the Noosa Ferries line arriving at Noosa Marina at Tewantin",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Ferry_at_Noosa_Marina,_Tewantin,_Queensland,_2021.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/c/c2/Noosa_Ferry_at_Noosa_Marina%2C_Tewantin%2C_Queensland%2C_2021.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-cross-section-filters-xs-accessible-boardwalk-20261014": {
+    id: "noosa-cross-section-filters-xs-accessible-boardwalk-20261014",
+    kind: "commons",
+    caption: "Accessible timber boardwalk",
+    altText: "Level timber boardwalk at Noosa Main Beach suitable for prams and wheelchairs",
+    author: "Kgbo",
+    licence: "CC BY-SA 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Heads_Main_Beach_04.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/a/a7/Noosa_Heads_Main_Beach_04.jpg",
+    width: 3264,
+    height: 2448,
+  },
+  "noosa-cross-section-filters-xs-family-sandcastle-20261014": {
+    id: "noosa-cross-section-filters-xs-family-sandcastle-20261014",
+    kind: "commons",
+    caption: "Sand castles on Noosa Main Beach",
+    altText: "Sand-castle building at Noosa Heads beach \u2014 accessible, family-friendly beach activity",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Sand_castles_at_Noosa_Heads_beach,_Queensland,_Australia_03.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/30/Sand_castles_at_Noosa_Heads_beach%2C_Queensland%2C_Australia_03.jpg",
+    width: 3988,
+    height: 2991,
+  },
+  "noosa-cross-section-filters-xs-pet-dog-20261014": {
+    id: "noosa-cross-section-filters-xs-pet-dog-20261014",
+    kind: "commons",
+    caption: "Dog beach, Noosa Botanic Gardens",
+    altText: "Dog-friendly beach section within the Noosa Botanic Gardens precinct",
+    author: "Misaochan2",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Dog_beach_at_Noosa_Botanic_Gardens.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/8/8f/Dog_beach_at_Noosa_Botanic_Gardens.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-eat-drink-eat-bang-bang-20261014": {
+    id: "noosa-eat-drink-eat-bang-bang-20261014",
+    kind: "commons",
+    caption: "Bang Bang Noosa Restaurant",
+    altText: "Bang Bang Noosa Restaurant exterior at Hastings Street, Noosa Heads, 2024",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Bang_Bang_Noosa_Restaurant,_Noosa_Heads,_2024,_01.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/31/Bang_Bang_Noosa_Restaurant%2C_Noosa_Heads%2C_2024%2C_01.jpg",
+    width: 8064,
+    height: 6048,
+  },
+  "noosa-eat-drink-eat-bistro-c-bar-20261014": {
+    id: "noosa-eat-drink-eat-bistro-c-bar-20261014",
+    kind: "commons",
+    caption: "Bistro C bar, Hastings Street",
+    altText: "Bar counter at the Bistro C restaurant on Hastings Street, Noosa Heads",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Bar_at_Bistro_C,_Hastings_Street,_Noosa_Heads,_Queensland.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/1/14/Bar_at_Bistro_C%2C_Hastings_Street%2C_Noosa_Heads%2C_Queensland.jpg",
+    width: 3926,
+    height: 2944,
+  },
+  "noosa-eat-drink-eat-boathouse-20261014": {
+    id: "noosa-eat-drink-eat-boathouse-20261014",
+    kind: "commons",
+    caption: "Noosa Boathouse floating restaurant",
+    altText: "The floating Noosa Boathouse restaurant on the Noosa River in Noosaville",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Boathouse,_Noosaville,_Queensland_01.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Noosa_Boathouse%2C_Noosaville%2C_Queensland_01.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-eat-drink-eat-gusto-20261014": {
+    id: "noosa-eat-drink-eat-gusto-20261014",
+    kind: "commons",
+    caption: "Gusto Noosa Restaurant, Noosaville",
+    altText: "Gusto Noosa Restaurant on Gympie Terrace in Noosaville",
+    author: "Chris Olszewski",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Gusto_Noosa_Restaurant,_Noosaville,_2024,_02.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/c/c9/Gusto_Noosa_Restaurant%2C_Noosaville%2C_2024%2C_02.jpg",
+    width: 8064,
+    height: 6048,
+  },
+  "noosa-eat-drink-eat-heads-of-noosa-20261014": {
+    id: "noosa-eat-drink-eat-heads-of-noosa-20261014",
+    kind: "commons",
+    caption: "Heads of Noosa Brewing Co.",
+    altText: "Heads of Noosa Brewing Co. taproom in Noosa Heads",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Heads_of_Noosa_Brewing_Co.,_Noosa_Heads,_Queensland,_03.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/b/b2/Heads_of_Noosa_Brewing_Co.%2C_Noosa_Heads%2C_Queensland%2C_03.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-eat-drink-eat-locale-dining-20261014": {
+    id: "noosa-eat-drink-eat-locale-dining-20261014",
+    kind: "commons",
+    caption: "Locale Restaurant, Hastings Street",
+    altText: "Dining area of the Locale Restaurant on Hastings Street, Noosa Heads",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Dining_area,_Locale_Restaurant,_Hastings_Street,_Noosa_Heads.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/35/Dining_area%2C_Locale_Restaurant%2C_Hastings_Street%2C_Noosa_Heads.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-eat-drink-eat-royal-mail-20261014": {
+    id: "noosa-eat-drink-eat-royal-mail-20261014",
+    kind: "commons",
+    caption: "Royal Mail Hotel, Tewantin",
+    altText: "Heritage Royal Mail Hotel pub facade in Tewantin",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Royal_Mail_Hotel,_Tewantin,_Queensland,_2022,_01.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/6/6f/Royal_Mail_Hotel%2C_Tewantin%2C_Queensland%2C_2022%2C_01.jpg",
+    width: 2939,
+    height: 3091,
+  },
+  "noosa-eat-drink-eat-season-20261014": {
+    id: "noosa-eat-drink-eat-season-20261014",
+    kind: "commons",
+    caption: "Season Restaurant, Noosa Heads",
+    altText: "Interior/dining view at the Season Restaurant in Noosa Heads",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Season_Restaurant,_Noosa_Heads,_2024,_02.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/7/78/Season_Restaurant%2C_Noosa_Heads%2C_2024%2C_02.jpg",
+    width: 4031,
+    height: 2596,
+  },
+  "noosa-eat-drink-eat-zibros-20261014": {
+    id: "noosa-eat-drink-eat-zibros-20261014",
+    kind: "commons",
+    caption: "Zibros Italian Restaurant",
+    altText: "Zibros Italian Restaurant in Noosa Heads, photographed in 2025",
+    author: "Chris Olszewski",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Zibros_Italian_Restaurant,_Noosa_Heads,_2025,_03.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/6/65/Zibros_Italian_Restaurant%2C_Noosa_Heads%2C_2025%2C_03.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-fishing-fishing-angling-boat-20261014": {
+    id: "noosa-fishing-fishing-angling-boat-20261014",
+    kind: "commons",
+    caption: "Boat fishing on the Noosa River",
+    altText: "Two anglers fishing from a boat on the Noosa River, Noosa North Shore",
+    author: "Chris Olszewski",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Angling_from_a_boat_at_Noosa_River,_Noosa_North_Shore,_Queensland,_2019.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/1/19/Angling_from_a_boat_at_Noosa_River%2C_Noosa_North_Shore%2C_Queensland%2C_2019.jpg",
+    width: 3911,
+    height: 2933,
+  },
+  "noosa-fishing-fishing-boat-shore-20261014": {
+    id: "noosa-fishing-fishing-boat-shore-20261014",
+    kind: "commons",
+    caption: "Boat fishing on the Noosa River (shore-side)",
+    altText: "Fishing boats moored along the Noosa River bank at Noosa North Shore",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Boat_fishing_at_Noosa_River,_Noosa_North_Shore,_Queensland,_02.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/6/69/Boat_fishing_at_Noosa_River%2C_Noosa_North_Shore%2C_Queensland%2C_02.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-hastings-street-hastings-2023-01-20261014": {
+    id: "noosa-hastings-street-hastings-2023-01-20261014",
+    kind: "commons",
+    caption: "Hastings Street pedestrian strip",
+    altText: "Pedestrian section of Hastings Street in Noosa Heads lined with pandanus trees and outdoor dining",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Hastings_Street,_Noosa_Heads,_2023,_01.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/0/05/Hastings_Street%2C_Noosa_Heads%2C_2023%2C_01.jpg",
+    width: 3726,
+    height: 2794,
+  },
+  "noosa-hastings-street-hastings-2023-02-20261014": {
+    id: "noosa-hastings-street-hastings-2023-02-20261014",
+    kind: "commons",
+    caption: "Hastings Street colonnade",
+    altText: "Hastings Street colonnade building and pedestrians, Noosa Heads, 2023",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Hastings_Street,_Noosa_Heads,_2023,_02.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/5/55/Hastings_Street%2C_Noosa_Heads%2C_2023%2C_02.jpg",
+    width: 3924,
+    height: 2943,
+  },
+  "noosa-hastings-street-hastings-nov-2013-20261014": {
+    id: "noosa-hastings-street-hastings-nov-2013-20261014",
+    kind: "commons",
+    caption: "Hastings Street, November 2013",
+    altText: "Pedestrian view of Hastings Street in Noosa Heads taken November 2013, looking towards the beach",
+    author: "Donaldytong",
+    licence: "CC BY-SA 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Hastings_Street,_Noosa_Heads_QLD_Nov_2013.JPG",
+    url: "https://upload.wikimedia.org/wikipedia/commons/4/4d/Hastings_Street%2C_Noosa_Heads_QLD_Nov_2013.JPG",
+    width: 5551,
+    height: 3570,
+  },
+  "noosa-hastings-street-hastings-queensland-04-20261014": {
+    id: "noosa-hastings-street-hastings-queensland-04-20261014",
+    kind: "commons",
+    caption: "Hastings Street parade of shops",
+    altText: "Quiet daytime view of Hastings Street, Noosa Heads, showing the parade of shops under the pandanus trees",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Hastings_Street,_Noosa_Heads,_Queensland_02.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/a/af/Hastings_Street%2C_Noosa_Heads%2C_Queensland_02.jpg",
+    width: 1536,
+    height: 2048,
+  },
+  "noosa-hinterland-pomona-cooran-cooroy-hinterland-majestic-20261014": {
+    id: "noosa-hinterland-pomona-cooran-cooroy-hinterland-majestic-20261014",
+    kind: "commons",
+    caption: "Majestic Theatre, Pomona",
+    altText: "Front facade of the historic Majestic Theatre on Pomona's main street, photographed July 2023",
+    author: "Nford24",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Majestic_Theatre_July_2023.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/0/07/Majestic_Theatre_July_2023.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-hinterland-pomona-cooran-cooroy-hinterland-mt-cooroora-20261014": {
+    id: "noosa-hinterland-pomona-cooran-cooroy-hinterland-mt-cooroora-20261014",
+    kind: "commons",
+    caption: "Mount Cooroora seen from Pomona",
+    altText: "Mount Cooroora, the dominant volcanic plug above Pomona, as seen from a Hill Street vantage point",
+    author: "Nford24",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Mount_Cooroora_from_Hill_Street_2023.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/4/42/Mount_Cooroora_from_Hill_Street_2023.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-hinterland-pomona-cooran-cooroy-hinterland-pomona-memorial-20261014": {
+    id: "noosa-hinterland-pomona-cooran-cooroy-hinterland-pomona-memorial-20261014",
+    kind: "commons",
+    caption: "Pomona Memorial School of Arts",
+    altText: "The Pomona Memorial School of Arts community hall, a heritage landmark on the Pomona main street",
+    author: "Nford24",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Pomona_Memorial_School_of_Arts.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/a/ae/Pomona_Memorial_School_of_Arts.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-hinterland-pomona-cooran-cooroy-hinterland-pomona-railway-20261014": {
+    id: "noosa-hinterland-pomona-cooran-cooroy-hinterland-pomona-railway-20261014",
+    kind: "commons",
+    caption: "Pomona railway station",
+    altText: "Front facade of Pomona railway station showing aboriginal art tiles, photographed July 2023",
+    author: "Nford24",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Pomona_railway_station_-_front.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Pomona_railway_station_-_front.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-noosa-farmers-market-farmers-market-20261014": {
+    id: "noosa-noosa-farmers-market-farmers-market-20261014",
+    kind: "commons",
+    caption: "Noosa Farmers Market",
+    altText: "Stalls and shoppers at the Noosa Farmers Market",
+    author: "Misaochan2",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_farmers_market.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/6/60/Noosa_farmers_market.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-noosa-heads-general-heads-lookout-2017-20261014": {
+    id: "noosa-noosa-heads-general-heads-lookout-2017-20261014",
+    kind: "commons",
+    caption: "View from Noosa Heads Lookout down to the river and bay",
+    altText: "Elevated view from Noosa Heads Lookout looking down at Noosaville and Laguna Bay with the Noosa River mouth",
+    author: "Dronepicr",
+    licence: "CC BY 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Heads_(134205601).jpeg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/6/6a/Noosa_Heads_%28134205601%29.jpeg",
+    width: 2048,
+    height: 1536,
+  },
+  "noosa-noosa-heads-general-heads-panoramio-1982-20261014": {
+    id: "noosa-noosa-heads-general-heads-panoramio-1982-20261014",
+    kind: "commons",
+    caption: "1982 panorama of Noosa Headland and beach",
+    altText: "Coastal panorama of Noosa Headland and Noosa Main Beach taken in 1982 showing the curved bay and headland forest",
+    author: "John Gillmore",
+    licence: "CC BY 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_-_1982_-_panoramio.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/c/c5/Noosa_-_1982_-_panoramio.jpg",
+    width: 3614,
+    height: 1857,
+  },
+  "noosa-noosa-heads-landing-main-beach-04-20261014": {
+    id: "noosa-noosa-heads-landing-main-beach-04-20261014",
+    kind: "commons",
+    caption: "Noosa Main Beach boardwalk under pandanus trees",
+    altText: "Wooden boardwalk along Noosa Main Beach lined with pandanus trees, beach on the left, hotel balconies on the right",
+    author: "Kgbo",
+    licence: "CC BY-SA 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Heads_Main_Beach_04.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/a/a7/Noosa_Heads_Main_Beach_04.jpg",
+    width: 3264,
+    height: 2448,
+  },
+  "noosa-noosa-heads-landing-main-beach-08-20261014": {
+    id: "noosa-noosa-heads-landing-main-beach-08-20261014",
+    kind: "commons",
+    caption: "Noosa Main Beach on a busy day",
+    altText: "Wide curved beach at Noosa Main Beach with surf lifesaving flags and people on the sand beside the timber boardwalk",
+    author: "Kgbo",
+    licence: "CC BY-SA 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Heads_Main_Beach_08.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/c/cb/Noosa_Heads_Main_Beach_08.jpg",
+    width: 3264,
+    height: 2448,
+  },
+  "noosa-noosa-heads-landing-slsc-2024-20261014": {
+    id: "noosa-noosa-heads-landing-slsc-2024-20261014",
+    kind: "commons",
+    caption: "Noosa Heads SLSC building, 2024 high-resolution",
+    altText: "High-resolution photograph of the Noosa Heads Surf Life Saving Club building taken 2024",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Heads_Surf_Lifesaving_Club_building,_2024.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/31/Noosa_Heads_Surf_Lifesaving_Club_building%2C_2024.jpg",
+    width: 7911,
+    height: 5332,
+  },
+  "noosa-noosa-heads-landing-slsc-building-2013-20261014": {
+    id: "noosa-noosa-heads-landing-slsc-building-2013-20261014",
+    kind: "commons",
+    caption: "Noosa Heads Surf Life Saving Club building",
+    altText: "Two-storey white and red Noosa Heads surf club with lifeguard sign and IRB rescue boats out front",
+    author: "Kgbo",
+    licence: "CC BY-SA 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Heads_SLSC_building.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/1/1d/Noosa_Heads_SLSC_building.jpg",
+    width: 3264,
+    height: 2448,
+  },
+  "noosa-noosa-national-park-np-alexandria-bay-20261014": {
+    id: "noosa-noosa-national-park-np-alexandria-bay-20261014",
+    kind: "commons",
+    caption: "Alexandria Bay beach",
+    altText: "Alexandria Bay in Noosa National Park with the headland cliff and turquoise water",
+    author: "Juan Jose Basagoiti Mancera",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Alexandria_Bay.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/5/5c/Alexandria_Bay.jpg",
+    width: 5472,
+    height: 3648,
+  },
+  "noosa-noosa-national-park-np-coastal-walk-trail-20261014": {
+    id: "noosa-noosa-national-park-np-coastal-walk-trail-20261014",
+    kind: "commons",
+    caption: "Noosa coastal headland walk",
+    altText: "Walkers on the Noosa Heads Trail Walk looking across to the coastline",
+    author: "B.east168",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Heads_Trail_Walk.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/c/c8/Noosa_Heads_Trail_Walk.jpg",
+    width: 3024,
+    height: 4032,
+  },
+  "noosa-noosa-national-park-np-granite-bay-20261014": {
+    id: "noosa-noosa-national-park-np-granite-bay-20261014",
+    kind: "commons",
+    caption: "Granite Bay rocks",
+    altText: "The aged granite rocks forming Granite Bay on the Noosa Heads headland walk",
+    author: "Keith Sinclair",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Granite_Bay_at_Noosa_Heads,_Queensland_Australia.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/3d/Granite_Bay_at_Noosa_Heads%2C_Queensland_Australia.jpg",
+    width: 3072,
+    height: 2048,
+  },
+  "noosa-noosa-national-park-np-hells-gates-20261014": {
+    id: "noosa-noosa-national-park-np-hells-gates-20261014",
+    kind: "commons",
+    caption: "Hell's Gates rock formation",
+    altText: "Hell's Gates \u2014 the rocky gap between the headlands of Noosa National Park where waves crash into the chasm",
+    author: "Pezoporus wallicus",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Hell\u2019s_Gates_in_Noosa_National_Park.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Hell%E2%80%99s_Gates_in_Noosa_National_Park.jpg",
+    width: 2304,
+    height: 1536,
+  },
+  "noosa-noosa-national-park-np-tea-tree-bay-20261014": {
+    id: "noosa-noosa-national-park-np-tea-tree-bay-20261014",
+    kind: "commons",
+    caption: "Tea Tree Bay",
+    altText: "Tea Tree Bay on the Noosa National Park headland walk, looking down from the coastal track",
+    author: "Misaochan2",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Tea_Tree_Bay_4.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/b/b2/Tea_Tree_Bay_4.jpg",
+    width: 3024,
+    height: 4032,
+  },
+  "noosa-noosaville-river-gympie-terrace-20261014": {
+    id: "noosa-noosaville-river-gympie-terrace-20261014",
+    kind: "commons",
+    caption: "Gympie Terrace riverside walk",
+    altText: "Wide pedestrian section of Gympie Terrace at Noosaville along the Noosa River",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Gympie_Terrace,_Noosaville,_Queensland.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/38/Gympie_Terrace%2C_Noosaville%2C_Queensland.jpg",
+    width: 3984,
+    height: 2988,
+  },
+  "noosa-noosaville-river-gympie-terrace-bridge-20261014": {
+    id: "noosa-noosaville-river-gympie-terrace-bridge-20261014",
+    kind: "commons",
+    caption: "Bridge over the Noosa River at Gympie Terrace",
+    altText: "The bridge carrying Gympie Terrace over the Noosa River with boat hire buildings in the background",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Gympie_Terrace_Road_Bridge,_Noosaville,_Queensland,_2023.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/1/1a/Gympie_Terrace_Road_Bridge%2C_Noosaville%2C_Queensland%2C_2023.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-noosaville-river-noosa-boathouse-20261014": {
+    id: "noosa-noosaville-river-noosa-boathouse-20261014",
+    kind: "commons",
+    caption: "Noosa Boathouse on the river",
+    altText: "Riverside dining venue the Noosa Boathouse on the Noosa River in Noosaville",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Boathouse,_Noosaville,_Queensland.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/7/79/Noosa_Boathouse%2C_Noosaville%2C_Queensland.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-noosaville-river-noosa-ferry-crossing-20261014": {
+    id: "noosa-noosaville-river-noosa-ferry-crossing-20261014",
+    kind: "commons",
+    caption: "Noosa North Shore vehicle ferry",
+    altText: "Vehicle ferry of the Noosa North Shore Ferries crossing the Noosa River under its cable",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Ferry_in_the_middle_of_the_Noosa_River,_Noosa_North_Shore_Ferries,_2019.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/6/6a/Ferry_in_the_middle_of_the_Noosa_River%2C_Noosa_North_Shore_Ferries%2C_2019.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-noosaville-river-noosa-river-upstream-boathouse-20261014": {
+    id: "noosa-noosaville-river-noosa-river-upstream-boathouse-20261014",
+    kind: "commons",
+    caption: "Noosa River upstream from the Boathouse",
+    altText: "Looking upriver along the Noosa River from the Noosa Boathouse at Noosaville",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_River_upstream_seen_from_Noosa_Boathouse,_Noosaville,_Queensland.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/d/dc/Noosa_River_upstream_seen_from_Noosa_Boathouse%2C_Noosaville%2C_Queensland.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-peregian-beach-peregian-114059-20261014": {
+    id: "noosa-peregian-beach-peregian-114059-20261014",
+    kind: "commons",
+    caption: "Peregian Beach surf and scrub",
+    altText: "View across Peregian Beach with the surf and the dune vegetation in the foreground",
+    author: "ASphericalBird",
+    licence: "CC BY 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Peregian_Beach_20250914_114059.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Peregian_Beach_20250914_114059.jpg",
+    width: 4000,
+    height: 3000,
+  },
+  "noosa-peregian-beach-peregian-shops-20261014": {
+    id: "noosa-peregian-beach-peregian-shops-20261014",
+    kind: "commons",
+    caption: "Peregian Beach village centre",
+    altText: "Shop fronts at the village centre of Peregian Beach with the surf club sign at the end of the street",
+    author: "ASphericalBird",
+    licence: "CC BY 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Shops_in_Peregian_Beach_20250914_115544.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/8/8a/Shops_in_Peregian_Beach_20250914_115544.jpg",
+    width: 4000,
+    height: 3000,
+  },
+  "noosa-sunshine-beach-sunshine-external-deck-20261014": {
+    id: "noosa-sunshine-beach-sunshine-external-deck-20261014",
+    kind: "commons",
+    caption: "External viewing deck at Sunshine Beach",
+    altText: "The external timber deck overlooking Sunshine Beach at the SLSC building",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:External_deck_overlooking_the_Sunshine_Beach_at_Sunshine_Beach_Surf_Life_Saving_Club.jpeg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/9/97/External_deck_overlooking_the_Sunshine_Beach_at_Sunshine_Beach_Surf_Life_Saving_Club.jpeg",
+    width: 3154,
+    height: 2365,
+  },
+  "noosa-sunshine-beach-sunshine-from-slsc-20261014": {
+    id: "noosa-sunshine-beach-sunshine-from-slsc-20261014",
+    kind: "commons",
+    caption: "Sunshine Beach from the SLSC deck",
+    altText: "View of Sunshine Beach taken from the deck of the Sunshine Beach SLSC",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Sunshine_Beach_seen_from_the_Sunshine_Beach_Surf_Life_Saving_Club.jpeg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Sunshine_Beach_seen_from_the_Sunshine_Beach_Surf_Life_Saving_Club.jpeg",
+    width: 3264,
+    height: 2448,
+  },
+  "noosa-sunshine-beach-sunshine-slsc-20261014": {
+    id: "noosa-sunshine-beach-sunshine-slsc-20261014",
+    kind: "commons",
+    caption: "Sunshine Beach surf club building",
+    altText: "The Sunshine Beach Surf Life Saving Club building with its main facade facing the beach",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Sunshine_Beach_Surf_Life_Saving_Club_main_building.jpeg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/5/55/Sunshine_Beach_Surf_Life_Saving_Club_main_building.jpeg",
+    width: 3033,
+    height: 1955,
+  },
+  "noosa-tewantin-tewantin-mainstreet-20261014": {
+    id: "noosa-tewantin-tewantin-mainstreet-20261014",
+    kind: "commons",
+    caption: "Tewantin main street",
+    altText: "Looking along the high-street strip in Tewantin with heritage pub and shopfronts",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Main_street,_Tewantin,_Queensland,_2022.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/3/3c/Main_street%2C_Tewantin%2C_Queensland%2C_2022.jpg",
+    width: 4032,
+    height: 2539,
+  },
+  "noosa-things-to-do-todo-dine-bistro-c-20261014": {
+    id: "noosa-things-to-do-todo-dine-bistro-c-20261014",
+    kind: "commons",
+    caption: "Dining at Bistro C, Hastings Street",
+    altText: "Bar area at the Bistro C restaurant on Hastings Street in Noosa Heads",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Bar_at_Bistro_C,_Hastings_Street,_Noosa_Heads,_Queensland.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/1/14/Bar_at_Bistro_C%2C_Hastings_Street%2C_Noosa_Heads%2C_Queensland.jpg",
+    width: 3926,
+    height: 2944,
+  },
+  "noosa-things-to-do-todo-fish-angling-20261014": {
+    id: "noosa-things-to-do-todo-fish-angling-20261014",
+    kind: "commons",
+    caption: "Fishing at Noosa River",
+    altText: "Anglers fishing from a boat on the Noosa River",
+    author: "Chris Olszewski",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Angling_from_a_boat_at_Noosa_River,_Noosa_North_Shore,_Queensland,_2019.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/1/19/Angling_from_a_boat_at_Noosa_River%2C_Noosa_North_Shore%2C_Queensland%2C_2019.jpg",
+    width: 3911,
+    height: 2933,
+  },
+  "noosa-things-to-do-todo-hike-hells-gates-20261014": {
+    id: "noosa-things-to-do-todo-hike-hells-gates-20261014",
+    kind: "commons",
+    caption: "Hiking the Noosa headland walk",
+    altText: "Hikers' view of the headland at Hell's Gates on the Noosa coastal walk",
+    author: "Pezoporus wallicus",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Hell\u2019s_Gates_in_Noosa_National_Park.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Hell%E2%80%99s_Gates_in_Noosa_National_Park.jpg",
+    width: 2304,
+    height: 1536,
+  },
+  "noosa-things-to-do-todo-kayak-canoe-20261014": {
+    id: "noosa-things-to-do-todo-kayak-canoe-20261014",
+    kind: "commons",
+    caption: "Canoeing on Upper Noosa River (kayak-class substitution)",
+    altText: "Two people relaxing in a canoe on the calm upper reaches of the Noosa River \u2014 kayak-class paddlesport equivalent",
+    author: "Anonymous",
+    licence: "CC BY 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Lazing_about_on_Upper_Noosa_River_in_a_canoe,_2022.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/b/b6/Lazing_about_on_Upper_Noosa_River_in_a_canoe%2C_2022.jpg",
+    width: 900,
+    height: 675,
+  },
+  "noosa-things-to-do-todo-markets-farmers-20261014": {
+    id: "noosa-things-to-do-todo-markets-farmers-20261014",
+    kind: "commons",
+    caption: "Noosa Farmers Market",
+    altText: "Stalls under gum trees at the Noosa Farmers Market",
+    author: "Misaochan2",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_farmers_market.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/6/60/Noosa_farmers_market.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-things-to-do-todo-sup-board-20261014": {
+    id: "noosa-things-to-do-todo-sup-board-20261014",
+    kind: "commons",
+    caption: "SUP at Noosa Heads beach",
+    altText: "Man with a stand-up paddleboard walking along Noosa Heads beach",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Man_with_stand_up_board_at_Noosa_Heads_beach,_Queensland.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/a/a7/Man_with_stand_up_board_at_Noosa_Heads_beach%2C_Queensland.jpg",
+    width: 1536,
+    height: 2048,
+  },
+  "noosa-things-to-do-todo-surf-children-20261014": {
+    id: "noosa-things-to-do-todo-surf-children-20261014",
+    kind: "commons",
+    caption: "Children learning to surf at Noosa Heads",
+    altText: "Children learning to surf in the gentle waves at Noosa Main Beach with their instructor",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Children_learning_surfing_at_Noosa_Heads_beach,_Queensland.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/4/49/Children_learning_surfing_at_Noosa_Heads_beach%2C_Queensland.jpg",
+    width: 2048,
+    height: 1536,
+  },
+  "noosa-things-to-do-todo-swim-mainbeach-20261014": {
+    id: "noosa-things-to-do-todo-swim-mainbeach-20261014",
+    kind: "commons",
+    caption: "Noosa Main Beach swimming",
+    altText: "The Noosa Main Beach from the surf club with the iconic curved bay \u2014 a natural, lifeguard-patrolled swimming beach",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Noosa_Heads_Surf_Lifesaving_Club_building_seen_from_the_beach,_Noosa_Heads,_Queensland.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/7/77/Noosa_Heads_Surf_Lifesaving_Club_building_seen_from_the_beach%2C_Noosa_Heads%2C_Queensland.jpg",
+    width: 3969,
+    height: 2745,
+  },
+  "noosa-where-to-stay-stay-french-quarter-20261014": {
+    id: "noosa-where-to-stay-stay-french-quarter-20261014",
+    kind: "commons",
+    caption: "French Quarter Noosa Heads",
+    altText: "Low-rise Mediterranean-style French Quarter resort on Hastings Street in Noosa Heads",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:French_Quarter_resort,_Noosa_Heads.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/9/98/French_Quarter_resort%2C_Noosa_Heads.jpg",
+    width: 1536,
+    height: 2048,
+  },
+  "noosa-where-to-stay-stay-halse-lodge-20261014": {
+    id: "noosa-where-to-stay-stay-halse-lodge-20261014",
+    kind: "commons",
+    caption: "Halse Lodge, Noosa Heads",
+    altText: "Heritage-listed Halse Lodge, a YHA heritage hostel on Noosa Heads with traditional verandah",
+    author: "Unknown authorUnknown author",
+    licence: "CC BY 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Halse_Lodge,_Noosa.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/b/b5/Halse_Lodge%2C_Noosa.jpg",
+    width: 1400,
+    height: 920,
+  },
+  "noosa-where-to-stay-stay-islander-2024-02-20261014": {
+    id: "noosa-where-to-stay-stay-islander-2024-02-20261014",
+    kind: "commons",
+    caption: "The Islander Noosa Resort, Noosaville",
+    altText: "The Islander Noosa Resort with the Noosa River visible in the background",
+    author: "Chris Olszewski",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:The_Islander_Noosa_Resort,_Noosaville,_2024,_02.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/c/c5/The_Islander_Noosa_Resort%2C_Noosaville%2C_2024%2C_02.jpg",
+    width: 5717,
+    height: 7623,
+  },
+  "noosa-where-to-stay-stay-maison-20261014": {
+    id: "noosa-where-to-stay-stay-maison-20261014",
+    kind: "commons",
+    caption: "Maison Noosa Heads Resort",
+    altText: "Street-side view of Maison Noosa Heads Resort on Hastings Street",
+    author: "Kgbo",
+    licence: "CC BY-SA 3.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Maison_Noosa_Resort.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/c/c3/Maison_Noosa_Resort.jpg",
+    width: 2448,
+    height: 3264,
+  },
+  "noosa-where-to-stay-stay-peppers-02-20261014": {
+    id: "noosa-where-to-stay-stay-peppers-02-20261014",
+    kind: "commons",
+    caption: "Peppers Noosa Resort",
+    altText: "Peppers Noosa Resort property with its sub-tropical landscaping",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Peppers_Noosa_Resort,_Noosa_Heads,_Queensland_02.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/f/fb/Peppers_Noosa_Resort%2C_Noosa_Heads%2C_Queensland_02.jpg",
+    width: 4032,
+    height: 3024,
+  },
+  "noosa-where-to-stay-stay-sofitel-01-20261014": {
+    id: "noosa-where-to-stay-stay-sofitel-01-20261014",
+    kind: "commons",
+    caption: "Sofitel Noosa Pacific Resort",
+    altText: "Exterior facade of Sofitel Noosa Pacific Resort on Hastings Street, Noosa Heads",
+    author: "Kgbo",
+    licence: "CC BY-SA 4.0",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:Sofitel_Noosa_Pacific_Resort,_Noosa_Heads,_Queensland_01.jpg",
+    url: "https://upload.wikimedia.org/wikipedia/commons/5/50/Sofitel_Noosa_Pacific_Resort%2C_Noosa_Heads%2C_Queensland_01.jpg",
+    width: 4032,
+    height: 3024,
+  },} as const;
+
+/** Look up a verified Commons record by its Albert id. Throws if missing. */
+const get = (id: string): CommonsPhoto => {
+  const found = PHOTOS_BY_ID[id as keyof typeof PHOTOS_BY_ID];
+  if (!found) throw new Error(`Missing verified photo: ${id}`);
+  return found;
+};
+
+/* ----------------------------------------------------------------------
+ * SVG-fallback constructor — caption + altText travel with the key.
+ * Keeps the editorial copy close to the data layer.
+ * -------------------------------------------------------------------- */
+
+const SVG_CAPTIONS: Record<string, { caption: string; altText: string }> = {
+  "sunshine-beach": { caption: "Sunshine Beach \u2014 the surf village south of the headland.", altText: "Illustration of Sunshine Beach, the surf village south of Noosa Heads, with the headland in the background." },
+  "japanese-riverside": { caption: "Riverside Japanese \u2014 a low-slung timber building on the river", altText: "Illustration of a riverside Japanese restaurant, low-slung timber building on pylons over the river." },
+  "beachfront-seafood": { caption: "Beachfront restaurant \u2014 open-sided dining on the sand", altText: "Illustration of a beachfront restaurant with open-sided dining on the sand." },
+  "italian-hastings": { caption: "Italian restaurant \u2014 awning and footpath tables on the street", altText: "Illustration of an Italian restaurant with an awning and footpath tables on the street." },
+  "asian-junction": { caption: "Laneway restaurant \u2014 casual South-east Asian on a Junction lane", altText: "Illustration of a laneway restaurant, casual South-east Asian on a Junction lane with hanging lanterns." },
+  "seafood-hastings": { caption: "Modern seafood \u2014 white beachfront dining looking out to sea", altText: "Illustration of a modern seafood restaurant with white beachfront dining looking out to sea." },
+  "italian-noosaville": { caption: "Riverside Italian \u2014 terracotta awning over outdoor tables", altText: "Illustration of a riverside Italian restaurant with a terracotta awning over outdoor tables." },
+  "pet-friendly": { caption: "Pet-friendly \u2014 a dog on the beach at the off-leash hours", altText: "Illustration of a pet-friendly Noosa beach, with a person and a dog silhouette during the off-leash hours." },
+  "family": { caption: "Family \u2014 a parent and child on the beach", altText: "Illustration of a family-friendly Noosa beach, with a parent and child silhouette near the water." },
+  "accessible": { caption: "Accessible \u2014 step-free path to a ground-floor unit", altText: "Illustration of an accessible ground-floor unit with a step-free ramp, wide doorway, and wheelchair access." },
+  "area-noosa-heads": { caption: "Noosa Heads \u2014 the coastal headland and surf-club arc", altText: "Editorial illustration of the Noosa Heads coastal headland: the headland, Main Beach, and the surf club arc." },
+  "area-hastings-street": { caption: "Hastings Street \u2014 the boutique colonnade", altText: "Editorial illustration of Hastings Street colonnade: parasol-lined boutique strip fronting Noosa Main Beach." },
+  "area-noosaville": { caption: "Noosaville \u2014 riverfront along Gympie Terrace", altText: "Editorial illustration of Noosaville: the Noosa River, hire craft at the dock, and palm-fringed terrace." },
+  "area-tewantin": { caption: "Tewantin \u2014 the river town main street", altText: "Editorial illustration of Tewantin main street: heritage pub facades, country-town awning, distant hill." },
+  "area-peregian": { caption: "Peregian Beach \u2014 the village square south of Sunshine", altText: "Editorial illustration of Peregian Beach village square: surf-shop storefronts, pandanus, the village green." },
+  "area-noosa-national-park": { caption: "Noosa National Park \u2014 the headland walk", altText: "Editorial illustration of the Noosa National Park headland walk: the coastal path, pandanus canopy, and rocky bays." },
+  "area-hinterland": { caption: "Hinterland \u2014 Mount Cooroora and the country town", altText: "Editorial illustration of the Noosa hinterland: Mount Cooroora above Pomona, the timber country-town main street." },
+  "area-noosa-junction": { caption: "Noosa Junction \u2014 the local plaza", altText: "Editorial illustration of Noosa Junction: the plaza, elm canopy, bus stop, and lane-caf\u00e9 strip." },
+  "activity-surf": { caption: "Surf \u2014 longboard point break at First Bay", altText: "Editorial illustration of a surfer on the longboard point break at First Bay, Noosa Main Beach." },
+  "activity-sup": { caption: "Stand-up paddle \u2014 calm-water hire at Noosaville", altText: "Editorial illustration of a stand-up paddleboarder on the calm-water reach at Noosaville." },
+  "activity-kayak": { caption: "Kayak \u2014 the upper Noosa River", altText: "Editorial illustration of a kayaker on the upper Noosa River, paperbark forest, glassy water." },
+  "activity-swim": { caption: "Swim \u2014 the lifeguard-tower bay", altText: "Editorial illustration of a swimmer in the lifeguard-tower bay, Noosa Main Beach." },
+  "activity-hike": { caption: "Hike \u2014 the headland walk", altText: "Editorial illustration of a hiker on the Noosa headland walk: coastal path, pandanus, rocky bays below." },
+  "activity-fishing": { caption: "Fishing \u2014 angling from a boat at the river mouth", altText: "Editorial illustration of an angler fishing from a boat near the Noosa River mouth." },
+  "trip-romantic": { caption: "Romantic \u2014 sunset on the river", altText: "Editorial illustration of a couple at sunset on the Noosa River: silhouetted jetty, golden-hour sky." },
+  "trip-budget": { caption: "Budget \u2014 picnic on the beach", altText: "Editorial illustration of a budget Noosa day: picnic rug on the beach, hire-craft on the river in the distance." },
+  "trip-solo": { caption: "Solo \u2014 quiet morning on the headland", altText: "Editorial illustration of a solo traveller on the Noosa headland walk at dawn." },
+  "trip-group": { caption: "Group \u2014 friends on a river cruise", altText: "Editorial illustration of a group of friends on a Noosa River cruise, sunset over the river." },
+  "trip-business": { caption: "Business \u2014 Hastings Street morning meeting", altText: "Editorial illustration of a business meeting at a Hastings Street caf\u00e9, parasol boards above." },
+  "tewantin": { caption: "Tewantin \u2014 river town ferry stop", altText: "Editorial illustration of the Tewantin ferry landing: ferry at the marina, Noosa River upstream." },
+  "peregian": { caption: "Peregian \u2014 the village surf-front", altText: "Editorial illustration of Peregian Beach village surf-front: shopfronts, dunes, the beach path." },
+  "hinterland": { caption: "Hinterland \u2014 country town beneath the volcanic peak", altText: "Editorial illustration of a Noosa hinterland country town beneath the volcanic peak." },
+  "cross-section-pets": { caption: "Pet-friendly \u2014 verify each operator's pet policy", altText: "Editorial illustration of pet-friendly accommodation: a fenced holiday yard and a coastal path." },
+} as const;
+
+const svg = (key: FallbackSvgKey): SvgPhoto => {
+  const meta = SVG_CAPTIONS[key];
+  if (!meta) throw new Error(`Missing SVG fallback: ${key}`);
+  return {
+    kind: "svg",
+    caption: meta.caption,
+    altText: meta.altText,
+    author: "MyNoosaHeads editorial illustration",
+    licence: "Bespoke SVG illustration",
+    sourceUrl: "/image-credits#fallbacks",
+    svgKey: key,
+    width: 480,
+    height: 360,
   };
 };
 
-const svg = (
-  svgKey: FallbackSvgKey,
-  caption: string,
-  altText: string,
-): SvgPhoto => ({
-  kind: "svg",
-  caption,
-  altText,
-  author: "MyNoosaHeads editorial illustration",
-  licence: "Bespoke SVG illustration",
-  sourceUrl: "/image-credits#fallbacks",
-  svgKey,
-  width: 480,
-  height: 360,
-});
-
 /* ----------------------------------------------------------------------
- * HERO photos — one per category + homepage + about brand image.
- *
- * Role assignment (largest / most representative file → hero slot):
- *   - dronepicr 2009 aerial       → Homepage hero + About brand
- *   - Kgbo Noosa Main Beach 2020  → Surf hero + S3 featured areas
- *   - Kgbo Weyba Creek            → Noosa National Park hero (gateway)
- *   - Donaldytong Hastings Street → Accommodation hero
- *   - Noosa River / North Shore   → Things to do hero
- *   - Kgbo Noosa River boating    → Fishing hero
- *   - Kgbo Noosa Ferry            → Boats & watercraft hero
- *   - Kgbo North Shore Ferry      → Travel & transport hero
- *   - Kgbo Main Beach 2020-02     → Webcams hero
+ * HERO + INLINE exports — same surface as v6.1.1 so consumers don't
+ * change. Roles are described in the caption; reuse is intentional.
  * -------------------------------------------------------------------- */
 
 const HERO = {
-  homepage: commons(
-    "Noosa_Heads_(23720155369).jpg",
-    "dronepicr",
-    "CC BY 2.0",
-    "Aerial of Noosa Heads — the headland, Laguna Bay, and the river mouth.",
-    "Aerial photograph of Noosa Heads township showing the headland, Laguna Bay, and the Noosa River mouth.",
-    2133,
-    1600,
-    "https://commons.wikimedia.org/wiki/File:Noosa_Heads_(23720155369).jpg",
-  ),
-  about: commons(
-    "Noosa_Heads_(23720155369).jpg",
-    "dronepicr",
-    "CC BY 2.0",
-    "The aerial of Noosa Heads that defines the shire's eastern edge.",
-    "Aerial photograph of Noosa Heads with the headland, Laguna Bay, and the river mouth.",
-    2133,
-    1600,
-    "https://commons.wikimedia.org/wiki/File:Noosa_Heads_(23720155369).jpg",
-  ),
-  surf: commons(
-    "Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_01.jpg",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Noosa Main Beach — the longboard point break at First Bay.",
-    "Noosa Main Beach at Noosa Heads, Queensland, with the headland at First Point.",
-    4032,
-    3024,
-    "https://commons.wikimedia.org/wiki/File:Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_01.jpg",
-  ),
-  noosaNationalPark: commons(
-    "Noosa_Heads_and_Weyba_Creek.JPG",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Noosa Heads from the bridge over Weyba Creek — the western approach to the National Park.",
-    "Noosa Heads seen from the bridge over Weyba Creek on the western approach to the National Park.",
-    3264,
-    2448,
-    "https://commons.wikimedia.org/wiki/File:Noosa_Heads_and_Weyba_Creek.JPG",
-  ),
-  accommodation: commons(
-    "Hastings_Street,_Noosa_Heads_QLD_Nov_2013.JPG",
-    "Donaldytong",
-    "CC BY-SA 4.0",
-    "Hastings Street — the boutique shopping and dining strip fronting Noosa Main Beach.",
-    "Panoramic view of Hastings Street, a boutique shopping street in Noosa Heads, Queensland.",
-    5551,
-    3570,
-    "https://commons.wikimedia.org/wiki/File:Hastings_Street,_Noosa_Heads_QLD_Nov_2013.JPG",
-  ),
-  thingsToDo: commons(
-    "Noosa_Ferry_on_Noosa_River_approching_Noosaville,_Queensland_01.jpg",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Noosa Ferry crossing the Noosa River toward Noosaville — the calm-water golden-hour canvas.",
-    "Noosa Ferry crossing the Noosa River toward Noosaville, Queensland.",
-    4032,
-    3024,
-    "https://commons.wikimedia.org/wiki/File:Noosa_Ferry_on_Noosa_River_approching_Noosaville,_Queensland_01.jpg",
-  ),
-  fishingReports: commons(
-    "Boating_at_Noosa_River,_Noosa_North_Shore,_Queensland,_03.jpg",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Boating on the Noosa River — the working water above the ferry crossing.",
-    "A boat on the Noosa River at Noosa North Shore, Queensland.",
-    4032,
-    3024,
-    "https://commons.wikimedia.org/wiki/File:Boating_at_Noosa_River,_Noosa_North_Shore,_Queensland,_03.jpg",
-  ),
-  boatsAndWatercraft: commons(
-    "Noosa_Ferry_outside_Sofitel_Noosa_Pacific_Resort,_Noosa_Heads,_Queensland.jpg",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Noosa Ferry at its stop outside the Sofitel Noosa Pacific Resort — the river-to-Hastings route.",
-    "Noosa Ferry at its stop outside the Sofitel Noosa Pacific Resort, Hastings Street, Noosa Heads.",
-    4032,
-    3024,
-    "https://commons.wikimedia.org/wiki/File:Noosa_Ferry_outside_Sofitel_Noosa_Pacific_Resort,_Noosa_Heads,_Queensland.jpg",
-  ),
-  travelAndTransport: commons(
-    "Noosa_North_Shore_Ferries,_Queensland,_2024,_02.jpg",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Noosa North Shore Ferries on the Noosa River — the river crossing as transport mode.",
-    "Noosa North Shore Ferries on the Noosa River, Queensland, 2024.",
-    4032,
-    3024,
-    "https://commons.wikimedia.org/wiki/File:Noosa_North_Shore_Ferries,_Queensland,_2024,_02.jpg",
-  ),
-  webcams: commons(
-    "Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_02.jpg",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Noosa Main Beach — the long, north-facing curve that the headland protects.",
-    "Noosa Main Beach, Noosa Heads, Queensland, 2020, afternoon view.",
-    3971,
-    2978,
-    "https://commons.wikimedia.org/wiki/File:Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_02.jpg",
-  ),
+  homepage: get("noosa-noosa-heads-landing-main-beach-04-20261014"),
+  about: get("noosa-noosa-heads-general-heads-lookout-2017-20261014"),
+  surf: get("noosa-noosa-heads-landing-main-beach-04-20261014"),
+  noosaNationalPark: get("noosa-noosa-national-park-np-hells-gates-20261014"),
+  accommodation: get("noosa-hastings-street-hastings-nov-2013-20261014"),
+  thingsToDo: get("noosa-noosaville-river-noosa-ferry-crossing-20261014"),
+  fishingReports: get("noosa-fishing-fishing-angling-boat-20261014"),
+  boatsAndWatercraft: get("noosa-boats-watercraft-boats-boathouse-deck-20261014"),
+  travelAndTransport: get("noosa-noosaville-river-noosa-ferry-crossing-20261014"),
+  webcams: get("noosa-noosa-heads-landing-main-beach-04-20261014"),
 } as const;
 
 /* ----------------------------------------------------------------------
- * INLINE photos — per category. Each role is described in the
- * caption. Some photos are reused across categories where the
- * subject fits multiple pages (e.g. a beach shot works for surf and
- * webcams). Attribution travels with the photo.
- * -------------------------------------------------------------------- */
-
-const INLINE = {
-  surf: [
-    commons(
-      "Noosa_Heads_beach_in_January_2015.JPG",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Late afternoon at Noosa Main Beach — the soft-light window between southerly and seabreeze.",
-      "Late afternoon view of Noosa Heads beach with the headland visible in the distance.",
-      3264,
-      2448,
-      "https://commons.wikimedia.org/wiki/File:Noosa_Heads_beach_in_January_2015.JPG",
-    ),
-    commons(
-      "Boardwalk_along_Noosa_Heads%E2%80%99_main_beach,_Queensland.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Boardwalk along Noosa Main Beach — the morning walk from Hastings Street to First Point.",
-      "Boardwalk along Noosa Main Beach at Noosa Heads, Queensland.",
-      3870,
-      2900,
-      "https://commons.wikimedia.org/wiki/File:Boardwalk_along_Noosa_Heads%E2%80%99_main_beach,_Queensland.jpg",
-    ),
-    commons(
-      "Noosa_Heads_beach_on_Christmas_Day_2015_01.jpeg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Noosa Main Beach on Christmas Day — peak-season crowds.",
-      "Noosa Main Beach on Christmas Day 2015, with the beach and people in view.",
-      3264,
-      2448,
-      "https://commons.wikimedia.org/wiki/File:Noosa_Heads_beach_on_Christmas_Day_2015_01.jpeg",
-    ),
-    commons(
-      "Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_02.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Noosa Main Beach — the long, north-facing curve that the headland protects.",
-      "Noosa Main Beach, Noosa Heads, Queensland, 2020.",
-      3971,
-      2978,
-      "https://commons.wikimedia.org/wiki/File:Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_02.jpg",
-    ),
-  ],
-  noosaNationalPark: [
-    commons(
-      "Noosa_Heads_and_Weyba_Creek.JPG",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Noosa Heads from the bridge over Weyba Creek — the western approach.",
-      "Noosa Heads seen from the bridge over Weyba Creek, Noosa Heads, Queensland.",
-      3264,
-      2448,
-      "https://commons.wikimedia.org/wiki/File:Noosa_Heads_and_Weyba_Creek.JPG",
-    ),
-    commons(
-      "Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_02.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Noosa Main Beach — looking north from the headland approach.",
-      "Noosa Main Beach, Noosa Heads, Queensland, 2020.",
-      3971,
-      2978,
-      "https://commons.wikimedia.org/wiki/File:Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_02.jpg",
-    ),
-    commons(
-      "Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_05.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Noosa Main Beach — looking north from the boardwalk (vertical view).",
-      "Noosa Main Beach, Noosa Heads, Queensland, 2020, vertical view.",
-      3024,
-      4032,
-      "https://commons.wikimedia.org/wiki/File:Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_05.jpg",
-    ),
-    commons(
-      "Noosa_Beach,_Noosa_Heads,_Queensland,_2022.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Noosa Main Beach — the sheltered north-facing beach.",
-      "Noosa Beach, Noosa Heads, Queensland, 2022.",
-      4000,
-      3000,
-      "https://commons.wikimedia.org/wiki/File:Noosa_Beach,_Noosa_Heads,_Queensland,_2022.jpg",
-    ),
-  ],
-  accommodation: [
-    commons(
-      "Hastings_Street,_Noosa_Heads,_Queensland_03.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Hastings Street — the boutique retail strip on a quiet morning.",
-      "Hastings Street, Noosa Heads, Queensland, with the boutique retail strip visible.",
-      4032,
-      3024,
-      "https://commons.wikimedia.org/wiki/File:Hastings_Street,_Noosa_Heads,_Queensland_03.jpg",
-    ),
-    commons(
-      "Hastings_Street,_Noosa_Heads,_Queensland_04.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Hastings Street — the hospitality and shopping strip fronting Noosa Main Beach.",
-      "Hastings Street, Noosa Heads, Queensland, looking along the boutique shopping strip.",
-      4032,
-      3024,
-      "https://commons.wikimedia.org/wiki/File:Hastings_Street,_Noosa_Heads,_Queensland_04.jpg",
-    ),
-    commons(
-      "Noosa_Boathouse,_Noosaville,_Queensland.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Noosa Boathouse — the riverfront dining landmark on the Noosa River.",
-      "Noosa Boathouse on the Noosa River, Noosaville, Queensland.",
-      4032,
-      3024,
-      "https://commons.wikimedia.org/wiki/File:Noosa_Boathouse,_Noosaville,_Queensland.jpg",
-    ),
-    commons(
-      "Noosa_River_bank_at_Noosaville,_Queensland,_2024.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "The Noosa River bank at Noosaville — the calm-water hire-craft zone.",
-      "The Noosa River bank at Noosaville, Queensland, 2024.",
-      6048,
-      6048,
-      "https://commons.wikimedia.org/wiki/File:Noosa_River_bank_at_Noosaville,_Queensland,_2024.jpg",
-    ),
-  ],
-  thingsToDo: [
-    commons(
-      "Boardwalk_along_Noosa_Heads%E2%80%99_main_beach,_Queensland.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Boardwalk along Noosa Main Beach — the morning walk from Hastings Street to First Point.",
-      "Boardwalk along Noosa Main Beach at Noosa Heads, Queensland.",
-      3870,
-      2900,
-      "https://commons.wikimedia.org/wiki/File:Boardwalk_along_Noosa_Heads%E2%80%99_main_beach,_Queensland.jpg",
-    ),
-    commons(
-      "Noosa_Beach,_Noosa_Heads,_Queensland,_2022.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Noosa Main Beach — the sheltered north-facing beach, the starting point for every Noosa day.",
-      "Noosa Beach, Noosa Heads, Queensland, 2022.",
-      4000,
-      3000,
-      "https://commons.wikimedia.org/wiki/File:Noosa_Beach,_Noosa_Heads,_Queensland,_2022.jpg",
-    ),
-    commons(
-      "Noosa_Ferry_on_Noosa_River_approching_Noosaville,_Queensland_01.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Noosa Ferry on the Noosa River — the calm-water cruise.",
-      "Noosa Ferry crossing the Noosa River toward Noosaville, Queensland.",
-      4032,
-      3024,
-      "https://commons.wikimedia.org/wiki/File:Noosa_Ferry_on_Noosa_River_approching_Noosaville,_Queensland_01.jpg",
-    ),
-    commons(
-      "Noosa_farmers_market.jpg",
-      "Misaochan2",
-      "CC BY-SA 4.0",
-      "Noosa Farmers Market — the Sunday-morning community market.",
-      "Noosa Farmers Market stallholders and produce, 2020.",
-      4032,
-      3024,
-      "https://commons.wikimedia.org/wiki/File:Noosa_farmers_market.jpg",
-    ),
-  ],
-  fishingReports: [
-    commons(
-      "Noosa_River_seen_upstream_from_Noosa_Boathouse,_Noosaville,_Queensland.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "The Noosa River upstream from the Boathouse — the upper-river direction toward Tewantin.",
-      "The Noosa River seen upstream from the Noosa Boathouse, Noosaville, Queensland.",
-      4032,
-      3024,
-      "https://commons.wikimedia.org/wiki/File:Noosa_River_seen_upstream_from_Noosa_Boathouse,_Noosaville,_Queensland.jpg",
-    ),
-    commons(
-      "Boat_fishing_at_Noosa_River,_Noosa_North_Shore,_Queensland,_02.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Boat fishing on the Noosa River, Noosa North Shore.",
-      "A fishing boat on the Noosa River, Noosa North Shore, Queensland.",
-      4032,
-      3024,
-      "https://commons.wikimedia.org/wiki/File:Boat_fishing_at_Noosa_River,_Noosa_North_Shore,_Queensland,_02.jpg",
-    ),
-    commons(
-      "Angling_from_a_boat_at_Noosa_River,_Noosa_North_Shore,_Queensland,_2019.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Angling from a boat on the Noosa River, 2019.",
-      "A person angling from a boat on the Noosa River, Noosa North Shore, Queensland.",
-      3911,
-      2933,
-      "https://commons.wikimedia.org/wiki/File:Angling_from_a_boat_at_Noosa_River,_Noosa_North_Shore,_Queensland,_2019.jpg",
-    ),
-    commons(
-      "Noosa_River_at_Tewantin_1930s_01.jpg",
-      "John Robert McPherson",
-      "CC0 1.0",
-      "The Noosa River at Tewantin, 1930s — the river town in the timber-rafting era (historical context).",
-      "Historical photo of the Noosa River at Tewantin, ca. 1930s.",
-      1958,
-      1294,
-      "https://commons.wikimedia.org/wiki/File:Noosa_River_at_Tewantin_1930s_01.jpg",
-    ),
-  ],
-  boatsAndWatercraft: [
-    commons(
-      "Noosa_Boathouse,_Noosaville,_Queensland.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Noosa Boathouse — the riverfront dining landmark, on the Noosa River.",
-      "Noosa Boathouse on the Noosa River, Noosaville, Queensland.",
-      4032,
-      3024,
-      "https://commons.wikimedia.org/wiki/File:Noosa_Boathouse,_Noosaville,_Queensland.jpg",
-    ),
-    commons(
-      "Noosa_River_downstream_seen_from_Noosa_Boathouse,_Noosaville,_Queensland.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "The Noosa River downstream from the Boathouse — the working water for ferries and hire craft.",
-      "The Noosa River seen downstream from the Noosa Boathouse, Noosaville, Queensland.",
-      4032,
-      3024,
-      "https://commons.wikimedia.org/wiki/File:Noosa_River_downstream_seen_from_Noosa_Boathouse,_Noosaville,_Queensland.jpg",
-    ),
-    commons(
-      "Noosa_North_Shore_Ferries,_Queensland,_2024,_01.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Noosa North Shore Ferry crossing the Noosa River.",
-      "Noosa North Shore Ferry on the Noosa River, Queensland, 2024.",
-      4032,
-      3024,
-      "https://commons.wikimedia.org/wiki/File:Noosa_North_Shore_Ferries,_Queensland,_2024,_01.jpg",
-    ),
-    commons(
-      "Noosa_Ferry_outside_Sofitel_Noosa_Pacific_Resort,_Noosa_Heads,_Queensland.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Noosa Ferry at the Sofitel stop — the river-to-Hastings ferry route.",
-      "Noosa Ferry at its stop outside the Sofitel Noosa Pacific Resort, Hastings Street, Noosa Heads.",
-      4032,
-      3024,
-      "https://commons.wikimedia.org/wiki/File:Noosa_Ferry_outside_Sofitel_Noosa_Pacific_Resort,_Noosa_Heads,_Queensland.jpg",
-    ),
-  ],
-  travelAndTransport: [
-    commons(
-      "Noosa_North_Shore_Ferries,_Queensland,_2024,_01.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Noosa North Shore Ferry — the river crossing as transport mode.",
-      "Noosa North Shore Ferry on the Noosa River, Queensland, 2024.",
-      4032,
-      3024,
-      "https://commons.wikimedia.org/wiki/File:Noosa_North_Shore_Ferries,_Queensland,_2024,_01.jpg",
-    ),
-    commons(
-      "Noosa_North_Shore_Ferries,_Queensland,_2024,_02.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Noosa North Shore Ferries on the Noosa River, 2024.",
-      "Noosa North Shore Ferries on the Noosa River, Queensland, 2024.",
-      4032,
-      3024,
-      "https://commons.wikimedia.org/wiki/File:Noosa_North_Shore_Ferries,_Queensland,_2024,_02.jpg",
-    ),
-    commons(
-      "Noosa_River_at_the_ferry_crossing,_Maximillian_Road,_Noosa_North_Shore,_Queensland.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "The Noosa River at the Maximillian Road ferry crossing — the gateway to the North Shore.",
-      "The Noosa River at the Maximillian Road ferry crossing, Noosa North Shore, Queensland.",
-      3955,
-      2966,
-      "https://commons.wikimedia.org/wiki/File:Noosa_River_at_the_ferry_crossing,_Maximillian_Road,_Noosa_North_Shore,_Queensland.jpg",
-    ),
-    commons(
-      "Noosa_River_bank_at_Noosaville,_Queensland,_2024.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "The Noosa River bank at Noosaville — the river-based transport access.",
-      "The Noosa River bank at Noosaville, Queensland, 2024.",
-      6048,
-      6048,
-      "https://commons.wikimedia.org/wiki/File:Noosa_River_bank_at_Noosaville,_Queensland,_2024.jpg",
-    ),
-  ],
-  webcams: [
-    commons(
-      "Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_02.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Noosa Main Beach, 2020 — the long, north-facing curve the public webcams approximate.",
-      "Noosa Main Beach, Noosa Heads, Queensland, 2020.",
-      3971,
-      2978,
-      "https://commons.wikimedia.org/wiki/File:Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_02.jpg",
-    ),
-    commons(
-      "Noosa_Heads_beach_on_Christmas_Day_2015_01.jpeg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Noosa Main Beach on Christmas Day 2015 — peak season for the public cams.",
-      "Noosa Main Beach on Christmas Day 2015, with the beach and people in view.",
-      3264,
-      2448,
-      "https://commons.wikimedia.org/wiki/File:Noosa_Heads_beach_on_Christmas_Day_2015_01.jpeg",
-    ),
-    commons(
-      "Noosa_Heads_(23720155369).jpg",
-      "dronepicr",
-      "CC BY 2.0",
-      "Aerial of Noosa Heads — the long-view subject of the regional webcam feed.",
-      "Aerial of Noosa Heads township, Laguna Bay, and the headland.",
-      2133,
-      1600,
-      "https://commons.wikimedia.org/wiki/File:Noosa_Heads_(23720155369).jpg",
-    ),
-    commons(
-      "Noosa_Heads_beach_in_January_2015.JPG",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Late afternoon at Noosa Main Beach — the soft-light webcam window.",
-      "Late afternoon view of Noosa Heads beach, Queensland.",
-      3264,
-      2448,
-      "https://commons.wikimedia.org/wiki/File:Noosa_Heads_beach_in_January_2015.JPG",
-    ),
-  ],
-} as const;
-
-/* ----------------------------------------------------------------------
- * Export — every category slug maps to its photo set.
+ * Category page photos — one hero + four inline per category.
  * -------------------------------------------------------------------- */
 
 export const CATEGORY_PHOTOS: Record<string, { hero: LocationPhoto; inline: LocationPhoto[] }> = {
-  "surf-and-weather": { hero: HERO.surf, inline: [...INLINE.surf] },
-  "noosa-national-park": {
-    hero: HERO.noosaNationalPark,
-    inline: [...INLINE.noosaNationalPark],
+  "surf-and-weather": {
+    hero: get("noosa-noosa-heads-landing-main-beach-04-20261014"),
+    inline: [
+      get("noosa-noosa-heads-landing-main-beach-08-20261014"),
+      get("noosa-noosa-heads-landing-slsc-2024-20261014"),
+      get("noosa-noosa-heads-landing-slsc-building-2013-20261014"),
+      get("noosa-noosa-heads-general-heads-panoramio-1982-20261014"),
+    ],
   },
-  accommodation: { hero: HERO.accommodation, inline: [...INLINE.accommodation] },
-  "things-to-do": { hero: HERO.thingsToDo, inline: [...INLINE.thingsToDo] },
+  "noosa-national-park": {
+    hero: get("noosa-noosa-national-park-np-hells-gates-20261014"),
+    inline: [
+      get("noosa-noosa-national-park-np-alexandria-bay-20261014"),
+      get("noosa-noosa-national-park-np-coastal-walk-trail-20261014"),
+      get("noosa-noosa-national-park-np-granite-bay-20261014"),
+      get("noosa-noosa-national-park-np-tea-tree-bay-20261014"),
+    ],
+  },
+  "accommodation": {
+    hero: get("noosa-hastings-street-hastings-nov-2013-20261014"),
+    inline: [
+      get("noosa-where-to-stay-stay-peppers-02-20261014"),
+      get("noosa-where-to-stay-stay-sofitel-01-20261014"),
+      get("noosa-where-to-stay-stay-french-quarter-20261014"),
+      get("noosa-where-to-stay-stay-maison-20261014"),
+    ],
+  },
+  "things-to-do": {
+    hero: get("noosa-noosaville-river-noosa-ferry-crossing-20261014"),
+    inline: [
+      get("noosa-things-to-do-todo-dine-bistro-c-20261014"),
+      get("noosa-things-to-do-todo-sup-board-20261014"),
+      get("noosa-things-to-do-todo-markets-farmers-20261014"),
+      get("noosa-things-to-do-todo-swim-mainbeach-20261014"),
+    ],
+  },
   "fishing-reports": {
-    hero: HERO.fishingReports,
-    inline: [...INLINE.fishingReports],
+    hero: get("noosa-fishing-fishing-angling-boat-20261014"),
+    inline: [
+      get("noosa-fishing-fishing-boat-shore-20261014"),
+      get("noosa-noosaville-river-noosa-river-upstream-boathouse-20261014"),
+      get("noosa-things-to-do-todo-fish-angling-20261014"),
+      get("noosa-boats-watercraft-boats-boathouse-deck-20261014"),
+    ],
   },
   "boats-and-watercraft": {
-    hero: HERO.boatsAndWatercraft,
-    inline: [...INLINE.boatsAndWatercraft],
+    hero: get("noosa-boats-watercraft-boats-boathouse-deck-20261014"),
+    inline: [
+      get("noosa-boats-watercraft-boats-noosa-ferry-tg-20261014"),
+      get("noosa-boats-watercraft-boats-tewantin-ferry-20261014"),
+      get("noosa-noosaville-river-noosa-ferry-crossing-20261014"),
+      get("noosa-eat-drink-eat-boathouse-20261014"),
+    ],
   },
   "travel-and-transport": {
-    hero: HERO.travelAndTransport,
-    inline: [...INLINE.travelAndTransport],
+    hero: get("noosa-noosaville-river-noosa-ferry-crossing-20261014"),
+    inline: [
+      get("noosa-boats-watercraft-boats-noosa-ferry-tg-20261014"),
+      get("noosa-boats-watercraft-boats-tewantin-ferry-20261014"),
+      get("noosa-noosaville-river-gympie-terrace-bridge-20261014"),
+      get("noosa-fishing-fishing-boat-shore-20261014"),
+    ],
   },
-  webcams: { hero: HERO.webcams, inline: [...INLINE.webcams] },
+  "webcams": {
+    hero: get("noosa-noosa-heads-landing-main-beach-04-20261014"),
+    inline: [
+      get("noosa-noosa-heads-landing-main-beach-08-20261014"),
+      get("noosa-noosa-heads-landing-slsc-2024-20261014"),
+      get("noosa-noosa-heads-general-heads-lookout-2017-20261014"),
+      get("noosa-noosa-national-park-np-coastal-walk-trail-20261014"),
+    ],
+  },
 };
 
 /* ----------------------------------------------------------------------
- * Homepage hero — a single full-bleed image.
+ * Homepage hero + section photos.
  * -------------------------------------------------------------------- */
 
 export const HOMEPAGE_HERO: LocationPhoto = HERO.homepage;
 
-/* ======================================================================
- * v6.1.1 — homepage section photos.
- *
- * Per Albert's photo manifest, the S3 / S4 / S5 / S7 / S9 / S10
- * homepage sections are swapped from the v6 generic Unsplash photos to
- * the 42 verified location-specific Commons photos. Gaps are filled
- * with bespoke SVG illustrations (sunshine-beach, six named eat &
- * drink venues, three cross-section filters).
- * ====================================================================== */
-
-/* ----------------------------------------------------------------------
- * S3 — Featured areas (6 photo cards).
- *   - Noosa Heads      → noosa-main-beach-01
- *   - Hastings Street  → hastings-street-hero-01 (Donaldytong)
- *   - Noosaville       → noosa-boathouse-01
- *   - Sunshine Beach   → SVG illustration (no open-licence photo)
- *   - Peregian Beach   → peregian-beach-2012 (Mountain/Ash)
- *   - Noosa National Park → noosa-heads-weyba-creek (gateway)
- * -------------------------------------------------------------------- */
-
 const FEATURED_AREAS: LocationPhoto[] = [
-  commons(
-    "Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_01.jpg",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Noosa Heads — the coastal headland that gives the shire its name.",
-    "Noosa Main Beach at Noosa Heads, Queensland.",
-    4032,
-    3024,
-    "https://commons.wikimedia.org/wiki/File:Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_01.jpg",
-  ),
-  commons(
-    "Hastings_Street,_Noosa_Heads_QLD_Nov_2013.JPG",
-    "Donaldytong",
-    "CC BY-SA 4.0",
-    "Hastings Street — the boutique shopping and dining strip.",
-    "Panoramic view of Hastings Street, Noosa Heads, Queensland.",
-    5551,
-    3570,
-    "https://commons.wikimedia.org/wiki/File:Hastings_Street,_Noosa_Heads_QLD_Nov_2013.JPG",
-  ),
-  commons(
-    "Noosa_Boathouse,_Noosaville,_Queensland_01.jpg",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Noosaville — across the river, along Gympie Terrace.",
-    "Noosa Boathouse restaurant on the Noosa River, Noosaville, Queensland.",
-    4032,
-    3024,
-    "https://commons.wikimedia.org/wiki/File:Noosa_Boathouse,_Noosaville,_Queensland_01.jpg",
-  ),
-  svg(
-    "sunshine-beach",
-    "Sunshine Beach — the surf village south of the headland.",
-    "Illustration of Sunshine Beach, the surf village south of Noosa Heads, with the headland in the background.",
-  ),
-  commons(
-    "Peregian_Beach,_2012.jpg",
-    "Mountain/Ash",
-    "CC BY 2.0",
-    "Peregian Beach — the village square south past Sunshine Beach.",
-    "Peregian Beach, Queensland, 2012.",
-    4000,
-    3000,
-    "https://commons.wikimedia.org/wiki/File:Peregian_Beach,_2012.jpg",
-  ),
-  commons(
-    "Noosa_Heads_and_Weyba_Creek.JPG",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Noosa National Park — the gateway via Weyba Creek.",
-    "Noosa Heads seen from the bridge over Weyba Creek, Noosa Heads, Queensland.",
-    3264,
-    2448,
-    "https://commons.wikimedia.org/wiki/File:Noosa_Heads_and_Weyba_Creek.JPG",
-  ),
+  get("noosa-noosa-heads-landing-main-beach-08-20261014"),
+  get("noosa-hastings-street-hastings-2023-01-20261014"),
+  get("noosa-noosaville-river-gympie-terrace-20261014"),
+  get("noosa-sunshine-beach-sunshine-slsc-20261014"),
+  get("noosa-peregian-beach-peregian-shops-20261014"),
+  get("noosa-noosa-national-park-np-coastal-walk-trail-20261014"),
 ];
 
-/* ----------------------------------------------------------------------
- * S4 — Things to do (8 experience cards).
- *
- *   1. Learn to surf at First Bay     → noosa-main-beach-01
- *   2. National Park guided walk      → noosa-heads-beach-2022
- *   3. Noosa River sunset cruise      → noosa-ferry-noosaville-01
- *   4. Noosa Farmers Market           → noosa-farmers-market-2020
- *   5. Fishing charter half-day       → noosa-fishing-river-2019
- *   6. Stand-up paddle hire           → noosa-river-bank-noosaville
- *   7. Hinterland day trip            → noosa-everglades-2013
- *   8. Kayak the Noosa Everglades     → noosa-upper-river-canoe-2022
- * -------------------------------------------------------------------- */
-
-const THINGS_TO_DO: LocationPhoto[] = [
-  commons(
-    "Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_01.jpg",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Learn to surf at First Bay — the longboard point break locals use.",
-    "Noosa Main Beach at Noosa Heads, Queensland, with the headland at First Point.",
-    4032,
-    3024,
-    "https://commons.wikimedia.org/wiki/File:Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_01.jpg",
-  ),
-  commons(
-    "Noosa_Beach,_Noosa_Heads,_Queensland,_2022.jpg",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Guided headland walk — the eastern access to the coastal forest.",
-    "Noosa Beach, Noosa Heads, Queensland, 2022, the sheltered north-facing beach near the headland.",
-    4000,
-    3000,
-    "https://commons.wikimedia.org/wiki/File:Noosa_Beach,_Noosa_Heads,_Queensland,_2022.jpg",
-  ),
-  commons(
-    "Noosa_Ferry_on_Noosa_River_approching_Noosaville,_Queensland_01.jpg",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Noosa River sunset cruise — the calm-water golden hour.",
-    "Noosa Ferry crossing the Noosa River toward Noosaville, Queensland.",
-    4032,
-    3024,
-    "https://commons.wikimedia.org/wiki/File:Noosa_Ferry_on_Noosa_River_approching_Noosaville,_Queensland_01.jpg",
-  ),
-  commons(
-    "Noosa_farmers_market.jpg",
-    "Misaochan2",
-    "CC BY-SA 4.0",
-    "Noosa Farmers Market — the Sunday-morning community market.",
-    "Noosa Farmers Market stallholders and produce, 2020.",
-    4032,
-    3024,
-    "https://commons.wikimedia.org/wiki/File:Noosa_farmers_market.jpg",
-  ),
-  commons(
-    "Boat_fishing_at_Noosa_River,_Noosa_North_Shore,_Queensland,_02.jpg",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Half-day fishing charter — Tewantin to the river mouth.",
-    "A fishing boat on the Noosa River, Noosa North Shore, Queensland.",
-    4032,
-    3024,
-    "https://commons.wikimedia.org/wiki/File:Boat_fishing_at_Noosa_River,_Noosa_North_Shore,_Queensland,_02.jpg",
-  ),
-  commons(
-    "Noosa_River_bank_at_Noosaville,_Queensland,_2024.jpg",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Stand-up paddle hire — the river at Noosaville.",
-    "The Noosa River bank at Noosaville, Queensland, 2024, the calm-water paddle zone.",
-    6048,
-    6048,
-    "https://commons.wikimedia.org/wiki/File:Noosa_River_bank_at_Noosaville,_Queensland,_2024.jpg",
-  ),
-  commons(
-    "Noosa_Everglades_Australia._(12046547304).jpg",
-    "Ewen Bell",
-    "CC BY 2.0",
-    "Hinterland day trip — the Noosa Everglades, Cooran / upper Noosa River.",
-    "The Noosa Everglades, the upper reach of the Noosa River.",
-    2400,
-    1430,
-    "https://commons.wikimedia.org/wiki/File:Noosa_Everglades_Australia._(12046547304).jpg",
-  ),
-  commons(
-    "Lazing_about_on_Upper_Noosa_River_in_a_canoe,_2022.jpg",
-    "John Robert McPherson",
-    "CC BY-SA 4.0",
-    "Kayak the Noosa Everglades — canoeing on the upper Noosa River.",
-    "A canoe on the Upper Noosa River, 2022.",
-    900,
-    675,
-    "https://commons.wikimedia.org/wiki/File:Lazing_about_on_Upper_Noosa_River_in_a_canoe,_2022.jpg",
-  ),
+const THINGS_TO_DO_RAIL: LocationPhoto[] = [
+  get("noosa-things-to-do-todo-surf-children-20261014"),
+  get("noosa-things-to-do-todo-hike-hells-gates-20261014"),
+  get("noosa-noosaville-river-noosa-ferry-crossing-20261014"),
+  get("noosa-things-to-do-todo-markets-farmers-20261014"),
+  get("noosa-things-to-do-todo-fish-angling-20261014"),
+  get("noosa-things-to-do-todo-sup-board-20261014"),
+  get("noosa-hinterland-pomona-cooran-cooroy-hinterland-mt-cooroora-20261014"),
+  get("noosa-things-to-do-todo-kayak-canoe-20261014"),
 ];
 
-/* ----------------------------------------------------------------------
- * S5 — Where to stay (6 cross-section cards).
- *   1. Hastings Street boutique hotel  → hastings-street-peppers-resort
- *   2. Noosaville family apartment     → noosa-harbour-resort
- *   3. Sunshine Beach holiday house    → SVG (no photo)
- *   4. Hinterland B&B                  → noosa-everglades-2013
- *   5. Peregian dog-friendly cottage   → peregian-beach-2012
- *   6. Accessible ground-floor unit    → SVG (no photo)
- * -------------------------------------------------------------------- */
-
-const WHERE_TO_STAY: LocationPhoto[] = [
-  commons(
-    "Christmas_decorations_in_Peppers_Noosa_Resort,_Noosa_Heads,_Queensland.jpg",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Hastings Street boutique hotel — the walkable end of town.",
-    "Peppers Noosa Resort with Christmas decorations, Hastings Street, Noosa Heads.",
-    1535,
-    2048,
-    "https://commons.wikimedia.org/wiki/File:Christmas_decorations_in_Peppers_Noosa_Resort,_Noosa_Heads,_Queensland.jpg",
-  ),
-  commons(
-    "Noosa_Harbour_Resort.jpg",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Noosaville family apartment — riverfront, ferry at the door.",
-    "Noosa Harbour Resort on the Noosa River, Noosaville.",
-    3264,
-    2448,
-    "https://commons.wikimedia.org/wiki/File:Noosa_Harbour_Resort.jpg",
-  ),
-  svg(
-    "sunshine-beach",
-    "Sunshine Beach holiday house — the surf village, family-sized.",
-    "Illustration of Sunshine Beach, the surf village south of Noosa Heads.",
-  ),
-  commons(
-    "Noosa_Everglades_Australia._(12046547304).jpg",
-    "Ewen Bell",
-    "CC BY 2.0",
-    "Hinterland B&B — inland villages, slow mornings.",
-    "The Noosa Everglades, the upper reach of the Noosa River.",
-    2400,
-    1430,
-    "https://commons.wikimedia.org/wiki/File:Noosa_Everglades_Australia._(12046547304).jpg",
-  ),
-  commons(
-    "Peregian_Beach,_2012.jpg",
-    "Mountain/Ash",
-    "CC BY 2.0",
-    "Peregian dog-friendly cottage — village-square, fenced yard.",
-    "Peregian Beach, Queensland, 2012.",
-    4000,
-    3000,
-    "https://commons.wikimedia.org/wiki/File:Peregian_Beach,_2012.jpg",
-  ),
-  svg(
-    "accessible",
-    "Accessible ground-floor unit — step-free, open-plan living.",
-    "Illustration of an accessible ground-floor unit with a step-free ramp and wheelchair access.",
-  ),
+const WHERE_TO_STAY_RAIL: LocationPhoto[] = [
+  get("noosa-where-to-stay-stay-peppers-02-20261014"),
+  get("noosa-where-to-stay-stay-islander-2024-02-20261014"),
+  svg("sunshine-beach"),
+  get("noosa-hinterland-pomona-cooran-cooroy-hinterland-pomona-memorial-20261014"),
+  get("noosa-peregian-beach-peregian-shops-20261014"),
+  svg("accessible"),
 ];
 
-/* ----------------------------------------------------------------------
- * S7 — Eat & drink (6 venue tiles).
- * No named-restaurant photos on Commons; bespoke SVG illustrations
- * (NOT branded imitations) per the v6.1.1 brief.
- * -------------------------------------------------------------------- */
-
-const EAT_AND_DRINK_SVGS: LocationPhoto[] = [
-  svg(
-    "japanese-riverside",
-    "Wasabi — modern Japanese, riverside.",
-    "Illustration of a riverside Japanese restaurant, low-slung timber building on pylons over the river.",
-  ),
-  svg(
-    "beachfront-seafood",
-    "Sails — modern Australian, beachfront.",
-    "Illustration of a beachfront restaurant with open-sided dining on the sand.",
-  ),
-  svg(
-    "italian-hastings",
-    "Berardo's — Italian, Hastings Street.",
-    "Illustration of an Italian restaurant with an awning and footpath tables on the street.",
-  ),
-  svg(
-    "asian-junction",
-    "Sum Yung Guys — South-east Asian, Noosa Junction.",
-    "Illustration of a laneway restaurant, casual South-east Asian on a Junction lane with hanging lanterns.",
-  ),
-  svg(
-    "seafood-hastings",
-    "Bistro C — seafood, Hastings Street.",
-    "Illustration of a modern seafood restaurant with white beachfront dining looking out to sea.",
-  ),
-  svg(
-    "italian-noosaville",
-    "Locale — Italian, Noosaville.",
-    "Illustration of a riverside Italian restaurant with a terracotta awning over outdoor tables.",
-  ),
+const EAT_AND_DRINK_RAIL: LocationPhoto[] = [
+  get("noosa-eat-drink-eat-season-20261014"),
+  get("noosa-eat-drink-eat-bang-bang-20261014"),
+  get("noosa-eat-drink-eat-zibros-20261014"),
+  get("noosa-eat-drink-eat-gusto-20261014"),
+  get("noosa-eat-drink-eat-heads-of-noosa-20261014"),
+  get("noosa-eat-drink-eat-boathouse-20261014"),
+  get("noosa-eat-drink-eat-royal-mail-20261014"),
+  get("noosa-eat-drink-eat-bistro-c-bar-20261014"),
+  get("noosa-eat-drink-eat-locale-dining-20261014"),
 ];
-
-/* ----------------------------------------------------------------------
- * S9 — Webcams strip (4 tiles, 1:1 aspect). v6.1.1 uses 4 distinct
- * beach/webcam angles per Victor's P2-3 (was: same hero photo on all
- * 4 tiles in v6.1).
- * -------------------------------------------------------------------- */
 
 const WEBCAM_TILES: LocationPhoto[] = [
-  commons(
-    "Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_01.jpg",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Main Beach — the longboard point break at First Bay.",
-    "Noosa Main Beach at Noosa Heads, Queensland, 2020.",
-    4032,
-    3024,
-    "https://commons.wikimedia.org/wiki/File:Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_01.jpg",
-  ),
-  commons(
-    "Noosa_River_downstream_seen_from_Noosa_Boathouse,_Noosaville,_Queensland.jpg",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Noosa Bar — the river-mouth bar crossing.",
-    "The Noosa River seen downstream from the Noosa Boathouse, Noosaville, Queensland.",
-    4032,
-    3024,
-    "https://commons.wikimedia.org/wiki/File:Noosa_River_downstream_seen_from_Noosa_Boathouse,_Noosaville,_Queensland.jpg",
-  ),
-  svg(
-    "sunshine-beach",
-    "Sunshine Beach — the surf village south of the headland.",
-    "Illustration of Sunshine Beach, the surf village south of Noosa Heads.",
-  ),
-  commons(
-    "Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_02.jpg",
-    "Kgbo",
-    "CC BY-SA 4.0",
-    "Maroochydore — the next-shire beach, with a similar curve to Noosa Main Beach.",
-    "Noosa Main Beach, Noosa Heads, Queensland, 2020.",
-    3971,
-    2978,
-    "https://commons.wikimedia.org/wiki/File:Noosa_Beach,_Noosa_Heads,_Queensland,_2020,_02.jpg",
-  ),
+  get("noosa-noosa-heads-landing-main-beach-08-20261014"),
+  get("noosa-noosaville-river-noosa-ferry-crossing-20261014"),
+  get("noosa-sunshine-beach-sunshine-slsc-20261014"),
+  get("noosa-noosa-heads-landing-main-beach-04-20261014"),
 ];
 
-/* ----------------------------------------------------------------------
- * S10 — Getting here (1 hero photo). River-crossing ferry, the
- * transport mode that fits the "Getting here" page.
- * -------------------------------------------------------------------- */
-
-const GETTING_HERE: LocationPhoto = commons(
-  "Noosa_North_Shore_Ferries,_Queensland,_2024,_02.jpg",
-  "Kgbo",
-  "CC BY-SA 4.0",
-  "The Noosa River ferry crossing — one of the ways in to the shire.",
-  "Noosa North Shore Ferries on the Noosa River, Queensland, 2024.",
-  4032,
-  3024,
-  "https://commons.wikimedia.org/wiki/File:Noosa_North_Shore_Ferries,_Queensland,_2024,_02.jpg",
-);
-
-/* ----------------------------------------------------------------------
- * Public exports — single-import surface for consumers.
- * -------------------------------------------------------------------- */
+const GETTING_HERE: LocationPhoto = get("noosa-boats-watercraft-boats-tewantin-ferry-20261014");
 
 export const HOMEPAGE_FEATURED_AREAS = FEATURED_AREAS;
-export const HOMEPAGE_THINGS_TO_DO = THINGS_TO_DO;
-export const HOMEPAGE_WHERE_TO_STAY = WHERE_TO_STAY;
-export const HOMEPAGE_EAT_AND_DRINK = EAT_AND_DRINK_SVGS;
+export const HOMEPAGE_THINGS_TO_DO = THINGS_TO_DO_RAIL;
+export const HOMEPAGE_WHERE_TO_STAY = WHERE_TO_STAY_RAIL;
+export const HOMEPAGE_EAT_AND_DRINK = EAT_AND_DRINK_RAIL;
 export const HOMEPAGE_WEBCAM_TILES = WEBCAM_TILES;
-export const HOMEPAGE_GETTING_HERE = GETTING_HERE;
 
 export type HomepageSectionPhotos = {
   featuredAreas: readonly LocationPhoto[];
@@ -1001,31 +1825,21 @@ export type HomepageSectionPhotos = {
 
 export const HOMEPAGE_SECTIONS: HomepageSectionPhotos = {
   featuredAreas: FEATURED_AREAS,
-  thingsToDo: THINGS_TO_DO,
-  whereToStay: WHERE_TO_STAY,
-  eatAndDrink: EAT_AND_DRINK_SVGS,
+  thingsToDo: THINGS_TO_DO_RAIL,
+  whereToStay: WHERE_TO_STAY_RAIL,
+  eatAndDrink: EAT_AND_DRINK_RAIL,
   webcams: WEBCAM_TILES,
   gettingHere: GETTING_HERE,
 };
 
 /* ----------------------------------------------------------------------
- * About brand image — quieter aerial of the headland, used on /about.
+ * About brand image — quieter than the homepage hero.
  * -------------------------------------------------------------------- */
 
 export const ABOUT_BRAND_IMAGE: LocationPhoto = HERO.about;
 
 /* ----------------------------------------------------------------------
- * Accommodation sub-page photos — one hero + one inline per sub-page.
- *
- *   hastings-street  → Hero: Donaldytong panoramic · Inline: Kgbo 03 + 04
- *   noosaville       → Hero: Kgbo Boathouse ·     Inline: Boathouse 02 + river bank
- *   sunshine-beach   → Hero: SVG ·                Inline: SVG (no open-licence photo)
- *   tewantin         → Hero: Zephyr103 Royal Mail · Inline: McPherson 1930s
- *   peregian         → Hero: Mountain/Ash 2012 (also inline, different crop)
- *   pet-friendly     → Hero: SVG (no Noosa-specific pet photo)
- *   family           → Hero: SVG (no Noosa-specific family photo)
- *   accessible       → Hero: SVG (no Noosa-specific accessible-property photo)
- *   hinterland       → Hero: Ewen Bell Everglades · Inline: McPherson Upper River
+ * Accommodation sub-page photos.
  * -------------------------------------------------------------------- */
 
 export const ACCOMMODATION_PHOTOS: Record<
@@ -1033,239 +1847,76 @@ export const ACCOMMODATION_PHOTOS: Record<
   { hero: LocationPhoto; inline: LocationPhoto[] }
 > = {
   "hastings-street": {
-    hero: commons(
-      "Hastings_Street,_Noosa_Heads_QLD_Nov_2013.JPG",
-      "Donaldytong",
-      "CC BY-SA 4.0",
-      "Hastings Street — the boutique shopping strip fronting Noosa Main Beach.",
-      "Panoramic view of Hastings Street, Noosa Heads, Queensland.",
-      5551,
-      3570,
-      "https://commons.wikimedia.org/wiki/File:Hastings_Street,_Noosa_Heads_QLD_Nov_2013.JPG",
-    ),
+    hero: get("noosa-hastings-street-hastings-2023-01-20261014"),
     inline: [
-      commons(
-        "Hastings_Street,_Noosa_Heads,_Queensland_03.jpg",
-        "Kgbo",
-        "CC BY-SA 4.0",
-        "Hastings Street — the boutique retail strip on a quiet morning.",
-        "Hastings Street, Noosa Heads, Queensland.",
-        4032,
-        3024,
-        "https://commons.wikimedia.org/wiki/File:Hastings_Street,_Noosa_Heads,_Queensland_03.jpg",
-      ),
-      commons(
-        "Hastings_Street,_Noosa_Heads,_Queensland_04.jpg",
-        "Kgbo",
-        "CC BY-SA 4.0",
-        "Hastings Street — the hospitality and shopping strip fronting Noosa Main Beach.",
-        "Hastings Street, Noosa Heads, Queensland.",
-        4032,
-        3024,
-        "https://commons.wikimedia.org/wiki/File:Hastings_Street,_Noosa_Heads,_Queensland_04.jpg",
-      ),
-      commons(
-        "Christmas_decorations_in_Peppers_Noosa_Resort,_Noosa_Heads,_Queensland.jpg",
-        "Kgbo",
-        "CC BY-SA 4.0",
-        "Peppers Noosa Resort — the Hastings Street flagship stay.",
-        "Peppers Noosa Resort with Christmas decorations, Hastings Street, Noosa Heads.",
-        1535,
-        2048,
-        "https://commons.wikimedia.org/wiki/File:Christmas_decorations_in_Peppers_Noosa_Resort,_Noosa_Heads,_Queensland.jpg",
-      ),
-      commons(
-        "Interior_of_Aromas_Noosa_Heads,_Queensland.jpg",
-        "Kgbo",
-        "CC BY-SA 4.0",
-        "Aromas Noosa — the Hastings Street café.",
-        "Interior of Aromas Noosa, Hastings Street, Noosa Heads.",
-        3939,
-        2954,
-        "https://commons.wikimedia.org/wiki/File:Interior_of_Aromas_Noosa_Heads,_Queensland.jpg",
-      ),
+      get("noosa-hastings-street-hastings-2023-02-20261014"),
+      get("noosa-hastings-street-hastings-nov-2013-20261014"),
+      get("noosa-hastings-street-hastings-queensland-04-20261014"),
+      get("noosa-where-to-stay-stay-halse-lodge-20261014"),
     ],
   },
-  noosaville: {
-    hero: commons(
-      "Noosa_Boathouse,_Noosaville,_Queensland_01.jpg",
-      "Kgbo",
-      "CC BY-SA 4.0",
-      "Noosa Boathouse on the Noosa River, Noosaville.",
-      "Noosa Boathouse restaurant on the Noosa River, Noosaville, Queensland.",
-      4032,
-      3024,
-      "https://commons.wikimedia.org/wiki/File:Noosa_Boathouse,_Noosaville,_Queensland_01.jpg",
-    ),
+  "noosaville": {
+    hero: get("noosa-noosaville-river-noosa-boathouse-20261014"),
     inline: [
-      commons(
-        "Noosa_Boathouse,_Noosaville,_Queensland.jpg",
-        "Kgbo",
-        "CC BY-SA 4.0",
-        "Noosa Boathouse — the riverfront dining landmark.",
-        "Noosa Boathouse on the Noosa River, Noosaville, Queensland.",
-        4032,
-        3024,
-        "https://commons.wikimedia.org/wiki/File:Noosa_Boathouse,_Noosaville,_Queensland.jpg",
-      ),
-      commons(
-        "Noosa_River_bank_at_Noosaville,_Queensland,_2024.jpg",
-        "Kgbo",
-        "CC BY-SA 4.0",
-        "The Noosa River bank at Noosaville — the calm-water hire-craft zone.",
-        "The Noosa River bank at Noosaville, Queensland, 2024.",
-        6048,
-        6048,
-        "https://commons.wikimedia.org/wiki/File:Noosa_River_bank_at_Noosaville,_Queensland,_2024.jpg",
-      ),
-      commons(
-        "Noosa_Harbour_Resort.jpg",
-        "Kgbo",
-        "CC BY-SA 4.0",
-        "Noosa Harbour Resort — the Noosaville riverfront apartments.",
-        "Noosa Harbour Resort on the Noosa River, Noosaville.",
-        3264,
-        2448,
-        "https://commons.wikimedia.org/wiki/File:Noosa_Harbour_Resort.jpg",
-      ),
-      commons(
-        "Noosa_Ferry_on_Noosa_River_approching_Noosaville,_Queensland_01.jpg",
-        "Kgbo",
-        "CC BY-SA 4.0",
-        "Noosa Ferry crossing the Noosa River toward Noosaville.",
-        "Noosa Ferry crossing the Noosa River toward Noosaville, Queensland.",
-        4032,
-        3024,
-        "https://commons.wikimedia.org/wiki/File:Noosa_Ferry_on_Noosa_River_approching_Noosaville,_Queensland_01.jpg",
-      ),
+      get("noosa-noosaville-river-gympie-terrace-20261014"),
+      get("noosa-noosaville-river-gympie-terrace-bridge-20261014"),
+      get("noosa-noosaville-river-noosa-river-upstream-boathouse-20261014"),
+      get("noosa-where-to-stay-stay-islander-2024-02-20261014"),
     ],
   },
   "sunshine-beach": {
-    hero: svg(
-      "sunshine-beach",
-      "Sunshine Beach — the surf village south of the headland.",
-      "Illustration of Sunshine Beach, the surf village south of Noosa Heads, with the headland in the background.",
-    ),
+    hero: get("noosa-sunshine-beach-sunshine-slsc-20261014"),
     inline: [
-      svg(
-        "sunshine-beach",
-        "Sunshine Beach — the surf village south of the headland.",
-        "Illustration of Sunshine Beach, the surf village south of Noosa Heads.",
-      ),
+      get("noosa-sunshine-beach-sunshine-external-deck-20261014"),
+      get("noosa-sunshine-beach-sunshine-from-slsc-20261014"),
+      svg("sunshine-beach"),
     ],
   },
-  tewantin: {
-    hero: commons(
-      "Tewantin-royalmail.jpg",
-      "Zephyr103",
-      "public domain",
-      "Tewantin Royal Mail Hotel — the town's heritage pub landmark.",
-      "The Royal Mail Hotel in Tewantin, Queensland.",
-      2304,
-      1728,
-      "https://commons.wikimedia.org/wiki/File:Tewantin-royalmail.jpg",
-    ),
+  "tewantin": {
+    hero: get("noosa-tewantin-tewantin-mainstreet-20261014"),
     inline: [
-      commons(
-        "Noosa_River_at_Tewantin_1930s_01.jpg",
-        "John Robert McPherson",
-        "CC0 1.0",
-        "The Noosa River at Tewantin, 1930s — the river town in the timber-rafting era.",
-        "Historical photo of the Noosa River at Tewantin, ca. 1930s.",
-        1958,
-        1294,
-        "https://commons.wikimedia.org/wiki/File:Noosa_River_at_Tewantin_1930s_01.jpg",
-      ),
+      get("noosa-eat-drink-eat-royal-mail-20261014"),
+      svg("tewantin"),
     ],
   },
-  peregian: {
-    hero: commons(
-      "Peregian_Beach,_2012.jpg",
-      "Mountain/Ash",
-      "CC BY 2.0",
-      "Peregian Beach, Queensland, 2012 — the village south of Sunshine Beach.",
-      "Peregian Beach, Queensland, 2012.",
-      4000,
-      3000,
-      "https://commons.wikimedia.org/wiki/File:Peregian_Beach,_2012.jpg",
-    ),
+  "peregian": {
+    hero: get("noosa-peregian-beach-peregian-shops-20261014"),
     inline: [
-      commons(
-        "Peregian_Beach,_2012.jpg",
-        "Mountain/Ash",
-        "CC BY 2.0",
-        "Peregian Beach, Queensland, 2012 — the village beach, dog-friendly precinct.",
-        "Peregian Beach, Queensland, 2012.",
-        4000,
-        3000,
-        "https://commons.wikimedia.org/wiki/File:Peregian_Beach,_2012.jpg",
-      ),
+      get("noosa-peregian-beach-peregian-114059-20261014"),
+      svg("peregian"),
     ],
   },
   "pet-friendly": {
-    hero: svg(
-      "pet-friendly",
-      "Pet-friendly — a dog on the beach at the off-leash hours.",
-      "Illustration of a pet-friendly Noosa beach, with a person and a dog silhouette during the off-leash hours.",
-    ),
+    hero: get("noosa-cross-section-filters-xs-pet-dog-20261014"),
     inline: [
-      svg(
-        "pet-friendly",
-        "Pet-friendly — verify each operator's pet policy before booking.",
-        "Illustration of a pet-friendly Noosa beach.",
-      ),
+      svg("pet-friendly"),
     ],
   },
-  family: {
-    hero: svg(
-      "family",
-      "Family — a parent and child on the beach.",
-      "Illustration of a family-friendly Noosa beach, with a parent and child silhouette near the water.",
-    ),
+  "family": {
+    hero: get("noosa-cross-section-filters-xs-family-sandcastle-20261014"),
     inline: [
-      svg(
-        "family",
-        "Family — pools, fenced yards, near the river.",
-        "Illustration of a family-friendly Noosa beach.",
-      ),
+      svg("family"),
     ],
   },
-  accessible: {
-    hero: svg(
-      "accessible",
-      "Accessible — step-free path to a ground-floor unit.",
-      "Illustration of an accessible ground-floor unit with a step-free ramp, wide doorway, and wheelchair access.",
-    ),
+  "accessible": {
+    hero: get("noosa-cross-section-filters-xs-accessible-boardwalk-20261014"),
     inline: [
-      svg(
-        "accessible",
-        "Accessible — step-free, wheelchair-friendly accommodation.",
-        "Illustration of an accessible ground-floor unit.",
-      ),
+      svg("accessible"),
     ],
   },
-  hinterland: {
-    hero: commons(
-      "Noosa_Everglades_Australia._(12046547304).jpg",
-      "Ewen Bell",
-      "CC BY 2.0",
-      "Noosa Everglades — the upper-Noosa kayak-and-canoe day-trip water.",
-      "The Noosa Everglades, the upper reach of the Noosa River.",
-      2400,
-      1430,
-      "https://commons.wikimedia.org/wiki/File:Noosa_Everglades_Australia._(12046547304).jpg",
-    ),
+  "hinterland": {
+    hero: get("noosa-hinterland-pomona-cooran-cooroy-hinterland-mt-cooroora-20261014"),
     inline: [
-      commons(
-        "Lazing_about_on_the_Upper_Noosa_River,_2022.jpg",
-        "John Robert McPherson",
-        "CC BY-SA 4.0",
-        "Upper Noosa River — the calm-water reach.",
-        "The upper reach of the Noosa River, 2022.",
-        900,
-        425,
-        "https://commons.wikimedia.org/wiki/File:Lazing_about_on_the_Upper_Noosa_River,_2022.jpg",
-      ),
+      get("noosa-hinterland-pomona-cooran-cooroy-hinterland-majestic-20261014"),
+      get("noosa-hinterland-pomona-cooran-cooroy-hinterland-pomona-railway-20261014"),
+      get("noosa-hinterland-pomona-cooran-cooroy-hinterland-pomona-memorial-20261014"),
+      svg("hinterland"),
     ],
   },
 };
+
+/* ----------------------------------------------------------------------
+ * Re-exports for backwards compatibility — v6.1.1 callers.
+ * -------------------------------------------------------------------- */
+
+export const HOMEPAGE_GETTING_HERE = GETTING_HERE;
