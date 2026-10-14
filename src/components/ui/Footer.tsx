@@ -187,6 +187,9 @@ export function Footer({
           <p className="text-caption text-ink-600">
             Built honestly. Sources linked on every page.
           </p>
+          <p className="text-caption text-ink-600">
+            ABN: 00 000 000 000
+          </p>
         </div>
       </div>
     </footer>

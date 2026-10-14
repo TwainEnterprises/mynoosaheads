@@ -20,7 +20,7 @@
  *   - LiveDataWidget × kinds × states
  *   - Form primitives
  *   - NavBar + Footer
- *   - LogoCompare (the 3 candidates Albert reviews)
+ *   - LogoCompare (the 3 candidates reviewed)
  *   - Icons
  *   - Accessibility audit checklist
  */
@@ -117,7 +117,7 @@ export default function StyleGuidePage() {
         id="logo"
         eyebrow="Brand"
         title="Logo candidates"
-        subtitle="Three SVG mocks per Albert's brief. Albert picks the final — not Sally."
+        subtitle="Three SVG mocks per the design brief. Final pick by the team lead."
       >
         <LogoCompare />
         <p className="mt-6 text-body-sm text-ink-700 max-w-3xl">

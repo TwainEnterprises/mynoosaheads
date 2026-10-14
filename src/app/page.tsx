@@ -552,7 +552,7 @@ export default async function HomePage() {
             <p className="mt-3 lead max-w-2xl">
               Curated weekly — this weekend’s markets, current park and
               road alerts, the moon phase for evening fish, and the
-              school-holiday countdown. Updated by Sally every Friday.
+              school-holiday countdown. Updated every Friday.
             </p>
           </div>
           <Link
