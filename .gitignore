@@ -36,3 +36,5 @@ next-env.d.ts
 
 # evidence (lives outside repo at /Volumes/OpenClawLive/state/control/evidence/)
 evidence/
+# local design-reference captures (mission evidence, not shipped)
+.design-ref/
