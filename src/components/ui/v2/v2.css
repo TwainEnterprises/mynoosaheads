@@ -1122,7 +1122,14 @@
   width: 100%;
   overflow: hidden;
   border-radius: var(--v2-radius-panel);
-  background-color: var(--v2-navy-800);
+  /* MSN-3100 rework (F1): a not-yet-loaded figure now reads as a
+   * deliberate gradient panel rather than a flat navy hole. */
+  background-image: linear-gradient(
+    135deg,
+    var(--v2-navy-700) 0%,
+    var(--v2-navy-850) 55%,
+    var(--v2-navy-800) 100%
+  );
   box-shadow: var(--v2-shadow-3);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }

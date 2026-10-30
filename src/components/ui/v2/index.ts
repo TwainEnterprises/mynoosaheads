@@ -36,5 +36,8 @@ export type { V2SafetyCalloutProps } from "./V2SafetyCallout";
 export { V2Figure } from "./V2Figure";
 export type { V2FigureProps } from "./V2Figure";
 
+export { figureDimensions } from "./photoDimensions";
+export type { PhotoDimensions } from "./photoDimensions";
+
 export { V2SourceRail, V2RelatedCard } from "./V2SourceRail";
 export type { V2SourceRailProps } from "./V2SourceRail";

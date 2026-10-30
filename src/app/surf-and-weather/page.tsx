@@ -12,6 +12,7 @@ import {
   V2SafetyCallout,
   V2SourceRail,
   V2TrustRow,
+  figureDimensions,
 } from "@/components/ui/v2";
 import "../../components/ui/v2/v2.css";
 
@@ -119,6 +120,11 @@ const RELATED_LINKS = [
 
 export default async function SurfAndWeatherPage() {
   const live = await fetchLiveBundle();
+
+  // MSN-3100 rework (Victor QA round 1, F1): each figure is reserved with
+  // the photograph's MEASURED intrinsic size, so the box the browser lays
+  // out before the image arrives is identical to the box after it loads.
+  const inlineDims = PHOTOS.inline.map((p) => figureDimensions(p.url));
 
   const tileSpecs = [
     {
@@ -276,8 +282,12 @@ export default async function SurfAndWeatherPage() {
             <div className="v2-split__media">
               <V2Figure
                 src={PHOTOS.inline[0].url}
+                width={inlineDims[0].width}
+                height={inlineDims[0].height}
                 caption={PHOTOS.inline[0].caption}
                 credit={creditLine(PHOTOS.inline[0])}
+                eager
+                priority
               />
             </div>
           </div>
@@ -291,7 +301,7 @@ export default async function SurfAndWeatherPage() {
                   body: "works on south-east swell, ~1.4 m at the headland, period 9–12 s.",
                 },
                 {
-                  name: "National Park",
+                  name: "National Park (Lifeguard Beach)",
                   icon: <Icons.ParkGate size={20} />,
                   body: "south-east swell; respects the QPWS swimming enclosure boundary.",
                 },
@@ -341,8 +351,11 @@ export default async function SurfAndWeatherPage() {
             <div className="v2-split__media v2-split__media--lead">
               <V2Figure
                 src={PHOTOS.inline[1].url}
+                width={inlineDims[1].width}
+                height={inlineDims[1].height}
                 caption={PHOTOS.inline[1].caption}
                 credit={creditLine(PHOTOS.inline[1])}
+                eager
               />
             </div>
           </div>
@@ -386,8 +399,11 @@ export default async function SurfAndWeatherPage() {
             <div className="v2-split__media">
               <V2Figure
                 src={PHOTOS.inline[2].url}
+                width={inlineDims[2].width}
+                height={inlineDims[2].height}
                 caption={PHOTOS.inline[2].caption}
                 credit={creditLine(PHOTOS.inline[2])}
+                eager
               />
             </div>
           </div>
@@ -451,8 +467,11 @@ export default async function SurfAndWeatherPage() {
             <div className="v2-split__media">
               <V2Figure
                 src={PHOTOS.inline[3].url}
+                width={inlineDims[3].width}
+                height={inlineDims[3].height}
                 caption={PHOTOS.inline[3].caption}
                 credit={creditLine(PHOTOS.inline[3])}
+                eager
               />
             </div>
           </div>

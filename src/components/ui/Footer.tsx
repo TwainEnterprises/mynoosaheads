@@ -146,9 +146,21 @@ export function Footer({
                * needed a direct bump too. Lighthouse color-contrast
                * audit was failing on 5 of these headings. */}
               <h3 className="text-eyebrow text-eucalyptus-900">{col.heading}</h3>
+              {/* MSN-3100 rework (Victor QA round 1, F3): the two
+               * widest statute pills (Privacy Act 1988 (Cth) and
+               * Spam Act 2003) could not shrink, so at narrow
+               * viewports the document was 435 px wide against a
+               * 390 px viewport and a horizontal scrollbar appeared
+               * on every route. Below the lg breakpoint the row is
+               * allowed to wrap and the pill is allowed to shrink
+               * (its text wraps inside the pill); from lg up the
+               * original single-line behaviour is kept exactly. */}
               <ul className="mt-3 space-y-2">
                 {col.links.map((link) => (
-                  <li key={link.href} className="flex items-start gap-2">
+                  <li
+                    key={link.href}
+                    className="flex flex-wrap items-start gap-2 lg:flex-nowrap"
+                  >
                     <Link
                       href={link.href}
                       className="text-ink-700 hover:text-eucalyptus-700 hover:underline underline-offset-4"
@@ -160,7 +172,7 @@ export function Footer({
                     </Link>
                     {link.disclosure ? (
                       <span
-                        className="pill-disclosure shrink-0"
+                        className="pill-disclosure lg:shrink-0"
                         title={link.disclosure}
                       >
                         {link.disclosure}
