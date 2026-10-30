@@ -25,7 +25,7 @@ export function V2Figure({
   caption,
   credit,
   variant,
-  sizes = "(min-width: 1024px) 720px, 100vw",
+  sizes = "(min-width: 1024px) 560px, (min-width: 640px) 90vw, 100vw",
   priority = false,
 }: V2FigureProps) {
   const cls = variant ? "v2-figure v2-figure--" + variant : "v2-figure";

@@ -26,7 +26,7 @@ import "../../components/ui/v2/v2.css";
  * eyebrow, subtitle, flourish, all five body sections with their
  * paragraphs and all four bullets, the bar-crossing safety callout with
  * its MSQ link, all five primary source links, the three related links,
- * the editorial note and the photo captions + Wikimedia credits.
+ * the editorial note, and the photo captions + Wikimedia credits.
  *
  * LIVE DATA: the tiles consume the existing server-side bundle from
  * lib/live-data.ts. No new API calls, no mocks, no hardcoded numbers.
@@ -243,31 +243,46 @@ export default async function SurfAndWeatherPage() {
       {/* ── Surf ─────────────────────────────────────────────────────── */}
       <section className="v2-band v2-band--light" aria-labelledby="v2-surf-heading">
         <div className="v2-container">
-          <p className="v2-eyebrow-pill">
-            <span className="v2-dot" aria-hidden="true" />
-            The points
-          </p>
-          <h2 id="v2-surf-heading" className="v2-h2" style={{ marginTop: "1.25rem" }}>
-            Surf — what the points need
-          </h2>
-          <div className="v2-prose" style={{ marginTop: "1.5rem" }}>
-            <p>
-              Noosa’s points — First Bay, National Park, and Granite Bay —
-              like a south-east groundswell with a period over 9 seconds and a
-              wind under 15 km/h from the same direction. When the wind goes
-              north or north-west, the surface glass goes off and the points are
-              at their best.
-            </p>
-            <p>
-              Beginners and longboarders typically work the open beach at Main
-              Beach or the south end of Sunshine Beach, where the swell has
-              sorted itself out. The lifesavers patrol Main Beach every day
-              during school holidays and on weekends year-round (see Beachsafe
-              for the current flag).
-            </p>
+          <div className="v2-split v2-split--media">
+            <div>
+              <p className="v2-eyebrow-pill">
+                <span className="v2-dot" aria-hidden="true" />
+                The points
+              </p>
+              <h2
+                id="v2-surf-heading"
+                className="v2-h2"
+                style={{ marginTop: "1.25rem" }}
+              >
+                Surf — what the points need
+              </h2>
+              <div className="v2-prose" style={{ marginTop: "1.5rem" }}>
+                <p>
+                  Noosa’s points — First Bay, National Park, and Granite Bay —
+                  like a south-east groundswell with a period over 9 seconds and
+                  a wind under 15 km/h from the same direction. When the wind
+                  goes north or north-west, the surface glass goes off and the
+                  points are at their best.
+                </p>
+                <p>
+                  Beginners and longboarders typically work the open beach at
+                  Main Beach or the south end of Sunshine Beach, where the swell
+                  has sorted itself out. The lifesavers patrol Main Beach every
+                  day during school holidays and on weekends year-round (see
+                  Beachsafe for the current flag).
+                </p>
+              </div>
+            </div>
+            <div className="v2-split__media">
+              <V2Figure
+                src={PHOTOS.inline[0].url}
+                caption={PHOTOS.inline[0].caption}
+                credit={creditLine(PHOTOS.inline[0])}
+              />
+            </div>
           </div>
 
-          <div style={{ marginTop: "var(--v2-space-xl)" }}>
+          <div style={{ marginTop: "var(--v2-space-2xl)" }}>
             <V2PointCards
               points={[
                 {
@@ -293,45 +308,43 @@ export default async function SurfAndWeatherPage() {
               ]}
             />
           </div>
-
-          <div style={{ marginTop: "var(--v2-space-2xl)" }}>
-            <V2Figure
-              src={PHOTOS.inline[0].url}
-              caption={PHOTOS.inline[0].caption}
-              credit={creditLine(PHOTOS.inline[0])}
-              variant="inset"
-            />
-          </div>
         </div>
       </section>
 
       {/* ── Wind ─────────────────────────────────────────────────────── */}
       <section className="v2-band v2-band--dark" aria-labelledby="v2-wind-heading">
         <div className="v2-container">
-          <p className="v2-eyebrow-pill v2-eyebrow-pill--on-dark">
-            <span className="v2-dot" aria-hidden="true" />
-            The south-easterly
-          </p>
-          <h2 id="v2-wind-heading" className="v2-h2" style={{ marginTop: "1.25rem" }}>
-            Wind — the south-east is your friend
-          </h2>
-          <div className="v2-prose" style={{ marginTop: "1.5rem" }}>
-            <p>
-              A typical winter morning runs 10–20 km/h south-east, which holds
-              the surface together and lines the swell up against the points.
-              The wind tends to clock around to the north-east by mid-afternoon;
-              that’s when the south coast beaches come into their own. A
-              westerly is rare and usually means a frontal system; expect gusts
-              and a bumpy surface.
-            </p>
-          </div>
-          <div style={{ marginTop: "var(--v2-space-2xl)" }}>
-            <V2Figure
-              src={PHOTOS.inline[1].url}
-              caption={PHOTOS.inline[1].caption}
-              credit={creditLine(PHOTOS.inline[1])}
-              variant="offset"
-            />
+          <div className="v2-split v2-split--media">
+            <div>
+              <p className="v2-eyebrow-pill v2-eyebrow-pill--on-dark">
+                <span className="v2-dot" aria-hidden="true" />
+                The south-easterly
+              </p>
+              <h2
+                id="v2-wind-heading"
+                className="v2-h2"
+                style={{ marginTop: "1.25rem" }}
+              >
+                Wind — the south-east is your friend
+              </h2>
+              <div className="v2-prose" style={{ marginTop: "1.5rem" }}>
+                <p>
+                  A typical winter morning runs 10–20 km/h south-east, which
+                  holds the surface together and lines the swell up against the
+                  points. The wind tends to clock around to the north-east by
+                  mid-afternoon; that’s when the south coast beaches come into
+                  their own. A westerly is rare and usually means a frontal
+                  system; expect gusts and a bumpy surface.
+                </p>
+              </div>
+            </div>
+            <div className="v2-split__media v2-split__media--lead">
+              <V2Figure
+                src={PHOTOS.inline[1].url}
+                caption={PHOTOS.inline[1].caption}
+                credit={creditLine(PHOTOS.inline[1])}
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -339,36 +352,44 @@ export default async function SurfAndWeatherPage() {
       {/* ── Tide ─────────────────────────────────────────────────────── */}
       <section className="v2-band v2-band--light" aria-labelledby="v2-tide-heading">
         <div className="v2-container">
-          <p className="v2-eyebrow-pill">
-            <span className="v2-dot" aria-hidden="true" />
-            The bar
-          </p>
-          <h2 id="v2-tide-heading" className="v2-h2" style={{ marginTop: "1.25rem" }}>
-            Tide — and the bar
-          </h2>
-          <div className="v2-prose" style={{ marginTop: "1.5rem" }}>
-            <p>
-              Noosa River bar is shallow and shifts. The general rule is that
-              the bar is friendliest on the slack and on the outgoing tide with a
-              light south-east wind. Crossing on an incoming tide with a
-              southerly running is the combination Marine Safety Queensland
-              warns against most directly. If you’re not sure, don’t go out —
-              phone VMR Noosa (channel 16) for a local reading.
-            </p>
-            <p>
-              The tide tile on this page uses Open-Meteo’s sea-level figure as a
-              guide and points at the BOM Tewantin harmonic as the authoritative
-              reference. Always defer to the BOM harmonic for a planned
-              crossing.
-            </p>
-          </div>
-          <div style={{ marginTop: "var(--v2-space-2xl)" }}>
-            <V2Figure
-              src={PHOTOS.inline[2].url}
-              caption={PHOTOS.inline[2].caption}
-              credit={creditLine(PHOTOS.inline[2])}
-              variant="inset"
-            />
+          <div className="v2-split v2-split--media">
+            <div>
+              <p className="v2-eyebrow-pill">
+                <span className="v2-dot" aria-hidden="true" />
+                The bar
+              </p>
+              <h2
+                id="v2-tide-heading"
+                className="v2-h2"
+                style={{ marginTop: "1.25rem" }}
+              >
+                Tide — and the bar
+              </h2>
+              <div className="v2-prose" style={{ marginTop: "1.5rem" }}>
+                <p>
+                  Noosa River bar is shallow and shifts. The general rule is
+                  that the bar is friendliest on the slack and on the outgoing
+                  tide with a light south-east wind. Crossing on an incoming
+                  tide with a southerly running is the combination Marine
+                  Safety Queensland warns against most directly. If you’re not
+                  sure, don’t go out — phone VMR Noosa (channel 16) for a local
+                  reading.
+                </p>
+                <p>
+                  The tide tile on this page uses Open-Meteo’s sea-level figure
+                  as a guide and points at the BOM Tewantin harmonic as the
+                  authoritative reference. Always defer to the BOM harmonic for
+                  a planned crossing.
+                </p>
+              </div>
+            </div>
+            <div className="v2-split__media">
+              <V2Figure
+                src={PHOTOS.inline[2].url}
+                caption={PHOTOS.inline[2].caption}
+                credit={creditLine(PHOTOS.inline[2])}
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -404,44 +425,61 @@ export default async function SurfAndWeatherPage() {
       {/* ── UV ───────────────────────────────────────────────────────── */}
       <section className="v2-band v2-band--light" aria-labelledby="v2-uv-heading">
         <div className="v2-container">
-          <p className="v2-eyebrow-pill">
-            <span className="v2-dot" aria-hidden="true" />
-            Protection
-          </p>
-          <h2 id="v2-uv-heading" className="v2-h2" style={{ marginTop: "1.25rem" }}>
-            UV — slip on a shirt before 9
-          </h2>
-          <div className="v2-prose" style={{ marginTop: "1.5rem" }}>
-            <p>
-              The UV index on the Sunshine Coast reaches Extreme (&gt;11) on
-              clear summer days and rarely falls below Moderate (3–5) even in
-              winter. Cancer Council SunSmart recommends protection from any UV
-              ≥ 3, which in practice means a shirt, hat, sunscreen, and shade
-              between 10 am and 3 pm year-round.
-            </p>
-          </div>
-          <div style={{ marginTop: "var(--v2-space-2xl)" }}>
-            <V2Figure
-              src={PHOTOS.inline[3].url}
-              caption={PHOTOS.inline[3].caption}
-              credit={creditLine(PHOTOS.inline[3])}
-              variant="inset"
-            />
+          <div className="v2-split v2-split--media">
+            <div>
+              <p className="v2-eyebrow-pill">
+                <span className="v2-dot" aria-hidden="true" />
+                Protection
+              </p>
+              <h2
+                id="v2-uv-heading"
+                className="v2-h2"
+                style={{ marginTop: "1.25rem" }}
+              >
+                UV — slip on a shirt before 9
+              </h2>
+              <div className="v2-prose" style={{ marginTop: "1.5rem" }}>
+                <p>
+                  The UV index on the Sunshine Coast reaches Extreme (&gt;11) on
+                  clear summer days and rarely falls below Moderate (3–5) even
+                  in winter. Cancer Council SunSmart recommends protection from
+                  any UV ≥ 3, which in practice means a shirt, hat, sunscreen,
+                  and shade between 10 am and 3 pm year-round.
+                </p>
+              </div>
+            </div>
+            <div className="v2-split__media">
+              <V2Figure
+                src={PHOTOS.inline[3].url}
+                caption={PHOTOS.inline[3].caption}
+                credit={creditLine(PHOTOS.inline[3])}
+              />
+            </div>
           </div>
         </div>
       </section>
 
       {/* ── Related + editorial ──────────────────────────────────────── */}
-      <section className="v2-band v2-band--platinum" aria-labelledby="v2-related-heading">
+      <section
+        className="v2-band v2-band--platinum"
+        aria-labelledby="v2-related-heading"
+      >
         <div className="v2-container">
           <p className="v2-eyebrow-pill">
             <span className="v2-dot" aria-hidden="true" />
             Related
           </p>
-          <h2 id="v2-related-heading" className="v2-h2" style={{ marginTop: "1.25rem" }}>
+          <h2
+            id="v2-related-heading"
+            className="v2-h2"
+            style={{ marginTop: "1.25rem" }}
+          >
             Where to next
           </h2>
-          <div className="v2-grid v2-grid--3" style={{ marginTop: "var(--v2-space-xl)" }}>
+          <div
+            className="v2-grid v2-grid--3"
+            style={{ marginTop: "var(--v2-space-xl)" }}
+          >
             {RELATED_LINKS.map((link) => (
               <V2RelatedCard
                 key={link.href}
@@ -451,9 +489,15 @@ export default async function SurfAndWeatherPage() {
               />
             ))}
           </div>
-          <div className="v2-rail v2-rail--light" style={{ marginTop: "var(--v2-space-xl)" }}>
+          <div
+            className="v2-rail v2-rail--light"
+            style={{ marginTop: "var(--v2-space-xl)" }}
+          >
             <h3 className="v2-rail__title">Editorial</h3>
-            <p className="v2-rail__note" style={{ marginTop: 0, paddingTop: 0, borderTop: "none" }}>
+            <p
+              className="v2-rail__note"
+              style={{ marginTop: 0, paddingTop: 0, borderTop: "none" }}
+            >
               Live tiles refresh every 30 minutes from BOM and Open-Meteo.
               Editorial copy is reviewed monthly against current QPWS and
               council sources.

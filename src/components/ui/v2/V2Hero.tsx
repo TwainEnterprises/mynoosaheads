@@ -61,6 +61,7 @@ export function V2Hero({
         <h1 className="v2-hero__title">
           <span className="v2-hero__title-line">{titleLine}</span>
           <span className="v2-hero__title-line v2-hero__title-gold">
+            {" "}
             {titleLineAccent}
           </span>
         </h1>
